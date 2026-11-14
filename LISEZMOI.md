@@ -28,14 +28,14 @@ Application de terrain pour les formations PSE1 et PSE2. Elle fonctionne **enti�
 PSE2 : C1 → 1, C2 → 2, C3 → 3, C4 → 4, C5 → 5, C6 → 6, C7 → 7 (même numérotation sur les deux fiches).
 
 ## Lien à ouvrir sur les téléphones
-**https://forma-st.github.io/udps28-eval/**
+**https://forma-st.github.io/UDPS28-eval/**
 
 ## Installer sur Android
 Copier `Eval-PSE.apk` sur la tablette, l'ouvrir, puis autoriser « Installer des applis inconnues ». La version 2.0 remplace la 1.0.
 **Attention** : les données de la 1.0 (simple démonstration) ne sont pas reprises.
 
 ## iPhone / iPad
-Ouvrir **https://forma-st.github.io/udps28-eval/** dans Safari, puis « Ouvrir l'application » et Partager › « Sur l'écran d'accueil ».
+Ouvrir **https://forma-st.github.io/UDPS28-eval/** dans Safari, puis « Ouvrir l'application » et Partager › « Sur l'écran d'accueil ».
 
 ## Modifier l'application
 - Code : `src/app.html`. Logo et icônes : `brand/`.
