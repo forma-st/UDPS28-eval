@@ -1,4 +1,4 @@
-# Évaluations PSE · UDPS 28 (version 2.0)
+# Évaluations PSE · UDPS 28 (version 2.2)
 
 Application de terrain pour les formations PSE1 et PSE2. Elle fonctionne **entièrement sans réseau**.
 
@@ -27,6 +27,16 @@ Application de terrain pour les formations PSE1 et PSE2. Elle fonctionne **enti�
 - **C** : OUI quand le participant est pointé présent à toutes les journées (feuille de présence).
 - **D** : OUI à partir de 12/20 au questionnaire. Entre 10 et 11 : entretien de rattrapage avec le responsable pédagogique. Sous 10 : NON.
 - **Dossier** par participant, dans l'ordre du référentiel : technicité, fiches d'évaluation, certification.
+
+## Fin de formation (version 2.2)
+- **Procès-verbal de l'équipe pédagogique** : n° et date à saisir dans « Modifier la formation ». Il contient la liste des participants APTE / INAPTE et des cases de signature.
+- **Certificats de compétences** PSE1 / PSE2 (texte des annexes 7 et 8) : ils sont réservés aux participants APTE. Le bouton « Numéroter les certificats » attribue des numéros à la suite (Réglages › Organisme).
+- **Notification d'évaluation défavorable** pour les participants INAPTE. Le texte « formation initiale » a été corrigé, car le modèle des référentiels reprenait celui de la formation continue. Les deux textes sont modifiables dans Réglages.
+- **Formation continue** : type de session FI/FC. En FC, chaque fiche formative propose une auto-évaluation par apprenant, reportée dans la case Observations du PDF. Les APTE reçoivent une attestation de formation continue (annexe 9), les autres une notification FC (annexe 10).
+- **Questionnaire de satisfaction** (annexe 11) : la tablette passe en « mode stagiaire » anonyme, avec 8 critères notés de 1 à 4 et une justification obligatoire pour toute note ≤ 2. La synthèse PDF contient la cible, les moyennes et les commentaires.
+- **QCM** : les corrigés des référentiels PSE1 et PSE2 (40 questions) sont intégrés. On corrige question par question (Juste / Faux, ou en cochant les réponses du stagiaire), et la note /20 est reportée sur la ligne D. Le questionnaire corrigé s'ajoute au dossier.
+- **Habiletés complémentaires** (Réglages) : surveille la victime, utilise le matériel, tient sa place dans l'équipe, plusieurs victimes. Désactivées, les fiches restent strictement au format d'origine.
+- **État civil** (civilité, date et lieu de naissance) : à saisir sur la fiche du participant, pour les certificats.
 
 | Cas concret PSE1 | Compétence | Cas concret PSE2 | Compétence |
 |---|---|---|---|

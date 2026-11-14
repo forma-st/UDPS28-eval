@@ -701,12 +701,14 @@ const CERT_CHECKS=()=>[
 const FORM_HEADER=r=>({left:'EPN ANPS',center:'Conception des formations',title:'Evaluation formative',ref:'EVAL/ '+r,maj:'25.02.2023'});
 const g=(title,items)=>({id:slug(title).toLowerCase(),title,items:items.map(l=>({id:slug(title+'-'+l).toLowerCase().slice(0,50),label:l}))});
 function builtinTemplates(){return [
- {id:'pse1-formative',builtin:true,rev:2,cursus:'PSE1',kind:'formative',name:'PSE1 · Évaluation formative (cas concret)',learners:2,header:FORM_HEADER('PSE1'),
+ {id:'pse1-formative',builtin:true,rev:3,cursus:'PSE1',kind:'formative',name:'PSE1 · Évaluation formative (cas concret)',learners:2,header:FORM_HEADER('PSE1'),
   scale:FORMATIVE_SCALE(),situations:SITUATIONS_PSE1(),criteria:[
    {id:'c1',code:'C1',label:'Possède un comportement adapté à la situation',feeds:'1',children:[]},
    {id:'c2',code:'C2',label:'Assure ou participe à la sécurité de l’intervention',feeds:'2',children:[]},
    {id:'c3',code:'C3',label:'Réalise un bilan conforme',feeds:'3',subMode:'rated',children:[{id:'c3a',label:'1er REGARD'},{id:'c3b',label:'2ème REGARD'},{id:'c3c',label:'3ème REGARD'},{id:'c3d',label:'4ème REGARD'}]},
+   {id:'c8',code:'C3',label:'Surveille la victime',feeds:'3',optional:true,children:[]},
    {id:'c4',code:'C4',label:'Réalise des gestes de premiers secours efficaces',feeds:'4',children:[]},
+   {id:'c9',code:'C4',label:'Utilise correctement du matériel de premiers secours',feeds:'4',optional:true,children:[]},
    {id:'c5',code:'C5',label:'Rend compte au chef d’équipe',feeds:'5',children:[]},
    {id:'c6',code:'C6',label:'Respecte une conduite à tenir appropriée',feeds:'6',children:[]},
    {id:'c7',code:'C6',label:'Établit une communication au sein de l’équipe',feeds:'6',children:[]}]},
@@ -732,16 +734,19 @@ function builtinTemplates(){return [
    g('MALAISES ET AFFECTIONS SPÉCIFIQUES',['Positions d’attente et de transport','Aide à la prise de médicaments','Manœuvres physiques']),
    g('TRAUMATISMES',['Immobilisation d’un membre au moyen d’une attelle à dépression','Immobilisation d’un membre au moyen d’une attelle modulable','Immobilisation d’un membre supérieur au moyen d’écharpes','Maintien de la tête en position neutre','Pose d’un collier cervical','Retrait d’un casque de protection','Application de froid','Emballage au moyen d’un pansement stérile','Maintien d’un pansement','Pansement','Utilisation d’un lot membre arraché ou sectionné']),
    g('RELEVAGE ET BRANCARDAGE',['Préparation d’un dispositif de portage'])]},
- {id:'pse2-formative',builtin:true,rev:2,cursus:'PSE2',kind:'formative',name:'PSE2 · Évaluation formative (cas concret)',learners:3,header:FORM_HEADER('PSE2'),
+ {id:'pse2-formative',builtin:true,rev:3,cursus:'PSE2',kind:'formative',name:'PSE2 · Évaluation formative (cas concret)',learners:3,header:FORM_HEADER('PSE2'),
   scale:FORMATIVE_SCALE(),criteria:[
    {id:'d1',code:'C1',label:'Prend en charge une personne',feeds:'1',subMode:'check',children:[{id:'d1a',label:'Présentant une affection spécifique'},{id:'d1b',label:'Victime d’une atteinte circonstancielle'},{id:'d1c',label:'Présentant une souffrance psychique ou comportement inhabituel'}]},
    {id:'d2',code:'C2',label:'Assure au sein d’une équipe',feeds:'2',subMode:'check',children:[{id:'d2a',label:'L’immobilisation d’une victime traumatisée du squelette et pose correctement le matériel'},{id:'d2b',label:'Le relevage et le brancardage d’une victime'}]},
+   {id:'d9',code:'C2',label:'Utilise correctement du matériel de premiers secours',feeds:'2',optional:true,children:[]},
    {id:'d3',code:'C3',label:'Coordonne les actions de secours au sein d’une équipe',feeds:'3',children:[]},
+   {id:'d10',code:'C3',label:'Tient sa place au sein d’une équipe',feeds:'3',optional:true,children:[]},
    {id:'d4',code:'C4',label:'Respecte une conduite à tenir adaptée',feeds:'4',children:[]},
    {id:'d5',code:'C5',label:'Assure ou participe à la sécurité de l’intervention',feeds:'5',children:[]},
    {id:'d6',code:'C6',label:'Réalise un bilan complet et assure sa transmission',feeds:'6',children:[]},
    {id:'d7',code:'C6',label:'Rend compte au chef d’équipe',feeds:'6',children:[]},
-   {id:'d8',code:'C7',label:'Possède un comportement adapté à la situation',feeds:'7',children:[]}]},
+   {id:'d8',code:'C7',label:'Possède un comportement adapté à la situation',feeds:'7',children:[]},
+   {id:'d11',code:'C7',label:'Réagit de façon adaptée devant plusieurs victimes',feeds:'7',optional:true,children:[]}]},
  {id:'pse2-certif',builtin:true,rev:2,cursus:'PSE2',kind:'certificative',name:'PSE2 · Fiche de certification individuelle',
   header:{title:'FICHE DE CERTIFICATION INDIVIDUELLE « PSE 2 »',ref:''},
   theme:{band:'#c0504d',light:'#d99594'},passages:{min:3,max:6},scale:CERT_SCALE(),
@@ -773,9 +778,37 @@ function blankTemplate(kind,cursus){
    Stockage local (fonctionne sans réseau)
    ========================================================= */
 let DB;
-function emptyDB(){return {version:2,templates:builtinTemplates(),sessions:[],evals:[],settings:{trainers:[],useLogo:true}}}
+const ORG_DEFAULT=()=>({name:'UDPS 28',code:'UDPS28',ville:'Chartres',repQualite:'Le Président',repPrenom:'',repNom:'',habilitation:'',nextCert:1});
+const DOC_TEXTS=()=>({
+  notifFI:`Vous avez suivi une session de formation initiale relative à l’unité d’enseignement « {UE} » ({CURSUS}) organisée du {DEBUT} au {FIN}{LIEU}.
+
+L’équipe pédagogique désignée pour cette session a procédé à votre évaluation conformément aux dispositions réglementaires en vigueur.
+
+Celle-ci n’a pas permis de donner un avis favorable à la délivrance du certificat de compétences de {QUALITE} – {CURSUS}.
+
+Vous pouvez vous représenter à une nouvelle formation initiale dans l’organisme de formation de votre choix. Un suivi et un accompagnement sur une nouvelle session peuvent vous être proposés afin de vous amener à la réussite.`,
+  notifFC:`Vous avez suivi une session de formation continue relative à l’unité d’enseignement « {UE} » ({CURSUS}) organisée du {DEBUT} au {FIN}{LIEU}.
+
+L’équipe pédagogique désignée pour cette session a procédé à votre évaluation conformément aux dispositions réglementaires en vigueur.
+
+Celle-ci n’a pas permis de donner un avis favorable pour permettre la reconduction de vos fonctions à compter de ce jour jusqu’à une nouvelle évaluation favorable lors d’une formation continue.
+
+Cette décision entraîne une incapacité temporaire à exercer vos fonctions en qualité de {QUALITE}, dans les organismes habilités, associations agréées ou dans toute autre activité professionnelle lorsque cette/ces compétence(s) est (sont) exigée(s).
+
+Vous pouvez suivre une mise à niveau de vos connaissances avant de vous présenter à une nouvelle évaluation. Si l’évaluation est favorable, vous pourrez dès lors exercer vos fonctions.
+
+Enfin, il vous appartient de transmettre cette décision à l’ensemble de vos autorités d’emploi dont vous assurez des missions qui requièrent des compétences en matière de premiers secours.`});
+const UE={PSE1:{ue:'premiers secours en équipe de niveau 1',qualite:'secouriste',cert:'CERTIFICAT DE COMPÉTENCES DE SECOURISTE – PSE1',certTxt:'certificat de compétences de secouriste'},
+          PSE2:{ue:'premiers secours en équipe de niveau 2',qualite:'équipier secouriste',cert:'CERTIFICAT DE COMPÉTENCES D’ÉQUIPIER SECOURISTE – PSE2',certTxt:'certificat de compétences d’équipier secouriste'}};
+const ueOf=c=>UE[c]||{ue:c,qualite:'secouriste',cert:'CERTIFICAT DE COMPÉTENCES – '+c,certTxt:'certificat de compétences'};
+/* QCM certificatifs des référentiels ANPS 2025 (corrigés) */
+const QCM={"PSE1": [{"n": 1, "q": "Que signifie DPS ?", "o": [{"t": "Dispositif de Premiers Secours", "ok": false}, {"t": "Demande de Premiers Secours", "ok": false}, {"t": "Dispositif Prévisionnel de Secours", "ok": true}, {"t": "Demande Préalable de Secours", "ok": false}]}, {"n": 2, "q": "Dans quel cas doit-on commencer une RCP par 5 insufflations ?", "o": [{"t": "Prise d’alcool/drogue", "ok": false}, {"t": "Enfant/ Nourrisson", "ok": true}, {"t": "Noyade", "ok": true}, {"t": "Personne âgée", "ok": false}]}, {"n": 3, "q": "Quelle est la conduite à tenir face à une hémorragie externe sans corps étranger ?", "o": [{"t": "Appuyer / Allonger / Alerter", "ok": true}, {"t": "Alerter / Accompagner / Arrêter", "ok": false}, {"t": "Allonger / Alerter /Appuyer", "ok": false}, {"t": "Accepter / Appuyer / Alerter", "ok": false}]}, {"n": 4, "q": "À quoi correspond la lettre « B » du bilan du 3ème regard ?", "o": [{"t": "Breakfast", "ok": false}, {"t": "Breath", "ok": false}, {"t": "Breathing", "ok": true}, {"t": "Blood", "ok": false}]}, {"n": 5, "q": "Que signifie le « U » de l’échelle AVPU ?", "o": [{"t": "La victime à conscience de ce qui se passe autour d’elle", "ok": false}, {"t": "La victime réagit à la douleur", "ok": false}, {"t": "La victime ne réagit pas aux stimuli douloureux", "ok": true}, {"t": "La victime répond aux ordres verbales", "ok": false}]}, {"n": 6, "q": "Comment qualifie-t-on un pouls ?", "o": [{"t": "Ample", "ok": false}, {"t": "Bien frappé", "ok": true}, {"t": "Fuyant", "ok": false}, {"t": "Filant", "ok": true}]}, {"n": 7, "q": "Quelle est la conduite à tenir face à une victime retrouvée inanimée au sol à plat ventre ?", "o": [{"t": "La retourner", "ok": false}, {"t": "Tester sa respiration", "ok": false}, {"t": "Tester sa conscience", "ok": true}, {"t": "La laisse dans cette position et Alerter", "ok": false}]}, {"n": 8, "q": "Quand est-ce que le port des gants s’avère nécessaire ?", "o": [{"t": "Lors de toute intervention même mineure", "ok": true}, {"t": "Lorsque la victime est sale", "ok": false}, {"t": "Lorsque je ne me suis pas lavé les mains", "ok": false}, {"t": "Lorsque je suis personnellement malade", "ok": false}]}, {"n": 9, "q": "Que doit faire un secouriste en cas de coupure avec du matériel souillé lors d’une intervention ?", "o": [{"t": "Arrêter si possible, se faire relayer et mettre en œuvre la procédure AES", "ok": true}, {"t": "Continuer jusqu’à la fin de l’intervention puis aller voir son médecin traitant", "ok": false}, {"t": "Il n’y a pas de quoi s’inquiéter, je suis à jour de mes vaccins", "ok": false}, {"t": "Je pars de toute urgence à l’hôpital pour y faire des tests sanguins", "ok": false}]}, {"n": 10, "q": "Quelle posture adopter pour un secouriste face à la presse après une intervention grave ?", "o": [{"t": "Donner nom et état de la victime", "ok": false}, {"t": "Ne rien divulguer, devoir de réserve et de respect oblige", "ok": true}, {"t": "Demander l’accord de mon chef d’équipe pour communiquer", "ok": false}, {"t": "Donner des informations seulement si le journaliste a sa carte de presse", "ok": false}]}, {"n": 11, "q": "Que faire lorsque le SNA retentit ?", "o": [{"t": "Appeler ses proches pour s’assurer qu’ils soient en sécurité", "ok": false}, {"t": "Rentrer rapidement", "ok": false}, {"t": "Ne pas appeler pour ne pas saturer les lignes, sauf en cas d’urgence", "ok": true}, {"t": "Rester à l’endroit où on se trouve, se confiner et attendre des informations", "ok": true}]}, {"n": 12, "q": "Quelle est la profondeur des compressions thoraciques chez l’adulte lors d’une RCP pour être efficace ?", "o": [{"t": "3 à 4 cm", "ok": false}, {"t": "4 à 5 cm", "ok": false}, {"t": "5 à 6 cm", "ok": true}, {"t": "6 à 7 cm", "ok": false}]}, {"n": 13, "q": "Comment se caractérise une brûlure ?", "o": [{"t": "Son aspect", "ok": true}, {"t": "Sa localisation", "ok": true}, {"t": "Son étendue", "ok": true}, {"t": "Sa forme", "ok": false}]}, {"n": 14, "q": "Quel type d’écharpe est recommandé pour une luxation d’épaule ?", "o": [{"t": "Une contre écharpe", "ok": false}, {"t": "Une écharpe simple", "ok": false}, {"t": "Une écharpe oblique", "ok": true}, {"t": "Une écharpe simple et une contre écharpe", "ok": false}]}, {"n": 15, "q": "Que recherche-t-on chez une victime lors du 4ème regard ?", "o": [{"t": "Son nom et prénom", "ok": false}, {"t": "Ses antécédents médicaux", "ok": true}, {"t": "Son âge", "ok": false}, {"t": "Ses allergies", "ok": true}]}, {"n": 16, "q": "Quelle est la conduite à tenir face à une victime allongée à plat ventre se plaignant d’une douleur cervicale ?", "o": [{"t": "La retourner pour poser un collier cervical et réaliser un bilan complet", "ok": false}, {"t": "La laisser dans cette position en attendant du renfort, réaliser un maintien de tête si la victime est stressée et réaliser un bilan complet", "ok": true}, {"t": "La laisser dans cette position, poser un collier cervical et réaliser un bilan", "ok": false}, {"t": "Ne pas la toucher jusqu’à l’arrivée des renforts", "ok": false}]}, {"n": 17, "q": "Quels sont les signes d’une obstruction complète des voies aériennes ?", "o": [{"t": "La victime porte ses mains à la gorge", "ok": true}, {"t": "La victime crie à l’aide", "ok": false}, {"t": "La victime garde la bouche ouverte", "ok": true}, {"t": "La victime est agitée", "ok": true}]}, {"n": 18, "q": "Quelle est la conduite à tenir face à un motard inconscient à plat ventre qui a chuté lourdement ?", "o": [{"t": "Retirer son casque à 2 puis tester sa ventilation à 2", "ok": false}, {"t": "Le retourner seul, retirer le casque seul puis tester sa ventilation seul", "ok": false}, {"t": "Le retourner à 2, retirer son casque à 2 puis tester sa ventilation à 2", "ok": true}, {"t": "Le laisser à plat ventre dans l’attente d’un médecin SMUR", "ok": false}]}, {"n": 19, "q": "La (les)quelle(s) de ces affirmations, est(sont) inexactes(s) ?", "o": [{"t": "Lors d’une obstruction partielle des VA, on peut pratiquer des gestes de Désobstruction", "ok": true}, {"t": "Si un corps étranger est présent dans une plaie hémorragique, on peut le retirer pour faire une compression manuelle", "ok": true}, {"t": "Si la victime est inconsciente et respire, on peut la mettre en PLS", "ok": false}, {"t": "En appelant le 15, on tombe directement sur un médecin régulateur", "ok": true}]}, {"n": 20, "q": "Lors d’une SNV, quelle couleur permet de caractériser une victime prioritaire ?", "o": [{"t": "Vert", "ok": false}, {"t": "Noir", "ok": false}, {"t": "Jaune", "ok": false}, {"t": "Rouge", "ok": true}]}, {"n": 21, "q": "Quelle est la conduite à tenir face à un nourrisson en ACR ?", "o": [{"t": "Vérifier la présence ou non d’objet dans la bouche, débuter par 5 insufflations, Poser le défibrillateur et commencer la RCP de 15 compressions et 2 insufflations", "ok": true}, {"t": "Vérifier la présence ou non d’objet dans la bouche, débuter par 10 insufflations, Poser le défibrillateur et commencer la RCP de 15 compressions et 2 insufflations", "ok": false}, {"t": "Vérifier la présence ou non d’objet dans la bouche, débuter par 5 insufflations, Poser le défibrillateur et commencer la RCP de 30 compressions et 2 insufflations", "ok": false}, {"t": "Vérifier la présence ou non d’objet dans la bouche, débuter par 2 insufflations, Poser le défibrillateur et commencer la RCP de 15 compressions et 5 insufflations", "ok": false}]}, {"n": 22, "q": "Face à une obstruction complète des voies aériennes d’une personne obèse, quelle est la conduite à tenir après avoir réalisé 5 claques dans le dos ?", "o": [{"t": "Enchaîner avec 5 compressions abdominales au plus", "ok": false}, {"t": "Enchaîner aves 5 compressions thoraciques au plus", "ok": true}, {"t": "Reprendre 5 claques dans le dos", "ok": false}, {"t": "Allonger la victime et commencer à préparer une RCP", "ok": false}]}, {"n": 23, "q": "Comment réagir face à un enfant de 3 ans qui vient d’ingérer de la javel ?", "o": [{"t": "Le faire rapidement vomir pour que le produit ne brûle pas ses intestins", "ok": false}, {"t": "L’allonger sur le côté", "ok": true}, {"t": "Ne pas donner à boire", "ok": true}, {"t": "Lui donner à boire pour diluer le produit", "ok": false}]}, {"n": 24, "q": "En secourisme, lesquelles de ces propositions sont considérées comme une plaie ?", "o": [{"t": "La contusion", "ok": true}, {"t": "La plaie punctiforme", "ok": true}, {"t": "La lacération", "ok": true}, {"t": "La coupure", "ok": true}]}, {"n": 25, "q": "Comment réagir face à une hémorragie extériorisée du nez ?", "o": [{"t": "Allonger la victime", "ok": false}, {"t": "Faire moucher la victime", "ok": true}, {"t": "Faire compresser les narines pendant 10 minutes", "ok": true}, {"t": "Mettre la victime en PLS", "ok": false}]}, {"n": 26, "q": "Que faire face à un saignement abondant persistant malgré la pose d’un pansement compressif ?", "o": [{"t": "Retirer le pansement compressif et comprimer avec la main", "ok": false}, {"t": "Poser un 2ème pansement compressif", "ok": false}, {"t": "Poser un garrot", "ok": true}, {"t": "Alerter", "ok": true}]}, {"n": 27, "q": "Que signifie PQRST ?", "o": [{"t": "Plan Quinquennal de révision des secouristes de terrain", "ok": false}, {"t": "Provoqué par /qualité/région/sévérité/temps", "ok": true}, {"t": "Pâleur/quantité/restriction/souplesse/timing", "ok": false}, {"t": "Procédure qualité des renforts sauveteurs du Tarn", "ok": false}]}, {"n": 28, "q": "Que regarder lors de l’analyse de la fonction circulatoire lors du 4ème regard ?", "o": [{"t": "Regarder si la victime peut rentrer chez elle en voiture", "ok": false}, {"t": "Prendre un pouls chiffré avec une amplitude et une régularité", "ok": true}, {"t": "Prendre une tension", "ok": true}, {"t": "Demander à la victime ses antécédents médicaux", "ok": false}]}, {"n": 29, "q": "Que signifie DASRI ?", "o": [{"t": "Déchets d’activités de soins à risques infectieux", "ok": true}, {"t": "Déclaration d’activité de secours et rendu de l’infirmerie", "ok": false}, {"t": "Décision d’arrêter les soins si risques d’intoxication", "ok": false}, {"t": "Doctrine d’alerte et de santé pour le requérant infirme", "ok": false}]}, {"n": 30, "q": "Quel matériel retrouve-t-on dans le sac oxygénothérapie ?", "o": [{"t": "Insufflateur manuel", "ok": true}, {"t": "Ballon insufflateur", "ok": false}, {"t": "Insufflateur gonflable", "ok": false}, {"t": "Ballon soufflant", "ok": false}]}, {"n": 31, "q": "Quelle est la conduite à tenir face à une victime qui a une saturation en O2 de 96% ?", "o": [{"t": "La mettre sous O2 à 15L/min", "ok": false}, {"t": "La mettre sous O2 à 8L/min", "ok": false}, {"t": "Réaliser les bilans", "ok": true}, {"t": "La mettre sous O2 à 9L/min", "ok": false}]}, {"n": 32, "q": "Que faire face à une victime présentant une glycémie de 55 mg/Dl ?", "o": [{"t": "Lui donner à boire de l’eau plate (environ 1L)", "ok": false}, {"t": "Lui donner du sucre rapide", "ok": true}, {"t": "Contrôler de nouveau sa glycémie dans un moment", "ok": true}, {"t": "Lui demander si elle est diabétique", "ok": true}]}, {"n": 33, "q": "Quels sont les ordres d’une PLS à 2 secouristes ?", "o": [{"t": "Est-ce que tu es prêt ? attention nous allons tourner la victime. Tournons-la victime.", "ok": false}, {"t": "Prêt ? 1,2,3 tournez ! Attention on va tourner. Retournez !", "ok": false}, {"t": "Équipier êtes-vous prêt ? attention pour tourner. Tournez !", "ok": true}, {"t": "Peu importe", "ok": false}]}, {"n": 34, "q": "Quelles propositions sont des libérations des voies aériennes ?", "o": [{"t": "Desserrer les vêtements", "ok": false}, {"t": "Couper les vêtements", "ok": false}, {"t": "Bascule de la tête en arrière", "ok": true}, {"t": "Élévation du menton", "ok": true}]}, {"n": 35, "q": "Quelle méthode utilise-t-on pour le 2ème et 3ème regard ?", "o": [{"t": "ABCDE", "ok": false}, {"t": "PQRST", "ok": false}, {"t": "XABCDE", "ok": true}, {"t": "MHTA", "ok": false}]}, {"n": 36, "q": "Que signifie le « A » lors de la réalisation du 2ème regard ?", "o": [{"t": "Abordage", "ok": false}, {"t": "Arrimage", "ok": false}, {"t": "Airway", "ok": true}, {"t": "Aérienne", "ok": false}]}, {"n": 37, "q": "Quelles peuvent être les conséquences d’une hémorragie ?", "o": [{"t": "Détresse circulatoire", "ok": true}, {"t": "Mauvaise oxygénation du cerveau", "ok": true}, {"t": "Une sensation de soif", "ok": true}, {"t": "Une sensation de froid", "ok": true}]}, {"n": 38, "q": "Quand va-t-on utiliser un garrot tourniquet ?", "o": [{"t": "Pour tous types d’hémorragies", "ok": false}, {"t": "Lors d’une situation à nombreuses victimes", "ok": true}, {"t": "En présence d’un corps étranger dans une plaie hémorragique", "ok": true}, {"t": "Lorsque le saignement est trop important pour éviter que la victime n’ait plus de sang", "ok": false}]}, {"n": 39, "q": "Que permet d’immobiliser une écharpe simple ?", "o": [{"t": "Le coude", "ok": false}, {"t": "Le bras", "ok": false}, {"t": "La main", "ok": true}, {"t": "L’avant-bras", "ok": true}]}, {"n": 40, "q": "Combien de secouristes sont-ils nécessaires pour immobiliser la jambe de la victime grâce à l’attelle à dépression ?", "o": [{"t": "Minimum 2 secouristes", "ok": false}, {"t": "Minimum 3 secouristes", "ok": true}, {"t": "On ne peut pas sans la présence d’un médecin", "ok": false}, {"t": "On doit attendre du renfort, car il faut être 4 secouristes", "ok": false}]}], "PSE2": [{"n": 1, "q": "Que signifie PSE 2 ?", "o": [{"t": "Prévention et Secours en Équipe de niveau 2", "ok": false}, {"t": "Premiers Soins en Équipe de niveau 2", "ok": false}, {"t": "Premiers Secours en Équipe de niveau 2", "ok": true}, {"t": "Prévention et Soins en Équipe de niveau 2", "ok": false}]}, {"n": 2, "q": "Quel(s) matériel(s) permet d’immobiliser le bassin ? :", "o": [{"t": "L’attelle à dépression", "ok": false}, {"t": "L’attelle à traction", "ok": false}, {"t": "La ceinture pelvienne", "ok": true}, {"t": "Le matelas Immobilisateur à Dépression", "ok": true}]}, {"n": 3, "q": "Comment réagir face à une personne agressive ?", "o": [{"t": "Répondre à son agressivité par de l’agressivité", "ok": false}, {"t": "Rester calme et courtois", "ok": true}, {"t": "Se tenir à l’écart et rester vigilant", "ok": true}, {"t": "Aller à l’affrontement si la victime ne parvient pas à se calmer", "ok": false}]}, {"n": 4, "q": "Lors d’un DPS-GE, quel(s) moyen(s) utiliser pour déplacer une victime qui se sent faible jusqu’à l’infirmerie sur demande du médecin, située à 100 m ?", "o": [{"t": "Une alèse portoir", "ok": false}, {"t": "Un brancard compas", "ok": true}, {"t": "Une chaise de transport", "ok": true}, {"t": "Une ACT", "ok": false}]}, {"n": 5, "q": "Que veut dire ACT ?", "o": [{"t": "Attelle complète thoracique", "ok": false}, {"t": "Attelle corps et tête", "ok": false}, {"t": "Arrêt cardiaque totale", "ok": false}, {"t": "Attelle cervico thoracique", "ok": true}]}, {"n": 6, "q": "Combien de secouristes faut-il pour immobiliser une victime à plat ventre grâce au plan dur ?", "o": [{"t": "Minimum 2", "ok": false}, {"t": "Minimum 3", "ok": true}, {"t": "Minimum 4", "ok": false}, {"t": "Minimum 5", "ok": false}]}, {"n": 7, "q": "Quelle est la couleur de la plaque d’un transport de matière dangereuse ?", "o": [{"t": "Orange", "ok": true}, {"t": "Noir", "ok": false}, {"t": "Vert", "ok": false}, {"t": "Jaune", "ok": false}]}, {"n": 8, "q": "Quel est l’os de la cuisse ?", "o": [{"t": "Le cubitus", "ok": false}, {"t": "L’humérus", "ok": false}, {"t": "Le tibia", "ok": false}, {"t": "Le fémur", "ok": true}]}, {"n": 9, "q": "Dans quelle(s) situation(s) peut-on utiliser l’ACT ?", "o": [{"t": "Une victime allongée dans un véhicule inconsciente", "ok": false}, {"t": "Une victime allongée consciente", "ok": false}, {"t": "Une victime consciente, assise dans un véhicule", "ok": true}, {"t": "Une victime consciente, assise sur une chaise", "ok": true}]}, {"n": 10, "q": "Quelle(s) condition(s) sont nécessaire(s) afin que la victime puisse refuser les soins ?", "o": [{"t": "Être majeure", "ok": true}, {"t": "Être saine d’esprit", "ok": true}, {"t": "Être accompagnée d’un témoin", "ok": true}, {"t": "Être mineure", "ok": false}]}, {"n": 11, "q": "Combien de niveaux d’hypothermie existent-ils ?", "o": [{"t": "2 (légère et grave)", "ok": false}, {"t": "3 (légère, modérée et grave)", "ok": false}, {"t": "4 (légère, modérée, sévère et grave)", "ok": true}, {"t": "5 (légère, modérée, partielle, sévère et grave)", "ok": false}]}, {"n": 12, "q": "Comment se nomme le liquide transparent pouvant s’écouler de l’oreille de la victime lors d’un traumatisme crânien ?", "o": [{"t": "Liquide lymphatique", "ok": false}, {"t": "Liquide amniotique", "ok": false}, {"t": "Liquide plasmatique", "ok": false}, {"t": "Liquide céphalo-rachidien", "ok": true}]}, {"n": 13, "q": "Quel est le sens de fermeture et de serrage des sangles thoraciques de l’ACT ?", "o": [{"t": "Il n’y a pas de sens", "ok": false}, {"t": "Bas – Milieu – Haut", "ok": false}, {"t": "Milieu – Bas – Haut", "ok": true}, {"t": "Haut – Milieu – Bas", "ok": false}]}, {"n": 14, "q": "Dans quelles positions peut-on positionner la victime dans un MID ?", "o": [{"t": "En PLS", "ok": true}, {"t": "À plat dos", "ok": true}, {"t": "À plat ventre", "ok": false}, {"t": "En tailleur", "ok": false}]}, {"n": 15, "q": "Pour quelle plage de température parle-t-on d’hypothermie sévère ?", "o": [{"t": "35 à 32 °C", "ok": false}, {"t": "32 à 28 °C", "ok": false}, {"t": "28 à 24°C", "ok": true}, {"t": "24 à 20 °C", "ok": false}]}, {"n": 16, "q": "Quels relevages sont possibles lors d’une intervention ?", "o": [{"t": "En PLS", "ok": true}, {"t": "En position semi-assise", "ok": true}, {"t": "À plat dos, les jambes relevées", "ok": true}, {"t": "À plat ventre", "ok": false}]}, {"n": 17, "q": "Que faire face à une victime qui s’est pendue ?", "o": [{"t": "Défaire le nœud pour pouvoir libérer le cou", "ok": false}, {"t": "Déplacer au minimum les objets, si besoin de place", "ok": true}, {"t": "Prendre la température du corps", "ok": false}, {"t": "Desserrer le nœud et couper la corde pendant que le corps est soupesé", "ok": true}]}, {"n": 18, "q": "Quelle est la position d’attente pour une personne victime d’une plaie à l’abdomen ?", "o": [{"t": "Assise", "ok": false}, {"t": "Semi-assise", "ok": false}, {"t": "Allongée", "ok": false}, {"t": "Allongée jambes relevées", "ok": true}]}, {"n": 19, "q": "Quel matériel utiliser pour immobiliser une victime polytraumatisée à la demande du médecin SMUR ?", "o": [{"t": "Une ACT", "ok": false}, {"t": "Un MID", "ok": true}, {"t": "Un brancard souple (compas)", "ok": false}, {"t": "Un brancard cuillère", "ok": false}]}, {"n": 20, "q": "Parmi ces affirmations, laquelle est correcte ?", "o": [{"t": "Le brancardage se réalise toujours tête en avant", "ok": false}, {"t": "Le chef se met toujours à la tête", "ok": false}, {"t": "La victime n’est pas tout le temps arrimée", "ok": false}, {"t": "Le brancardage à 3 secouristes est possible", "ok": true}]}, {"n": 21, "q": "À quoi faut-il veiller pour la mise en place d’un brancard cuillère ?", "o": [{"t": "Fermer d’abord au niveau de la tête le brancard puis au niveau des pieds", "ok": true}, {"t": "Fermer au niveau des pieds puis à la tête le brancard", "ok": false}, {"t": "Soulager épaule/hanche pour glisser la cuillère", "ok": true}, {"t": "Soulager genoux/épaules pour glisser la cuillère", "ok": false}]}, {"n": 22, "q": "Quel(s) type(s) d’AVC existe(nt)-il(s) ?", "o": [{"t": "Hémorragique", "ok": true}, {"t": "Ischémique", "ok": true}, {"t": "Ischémique transitoire", "ok": true}, {"t": "Bariatrique", "ok": false}]}, {"n": 23, "q": "Où sont positionnés les équipiers lors d’un pont simple ?", "o": [{"t": "À la tête, aux épaules, au bassin, aux pieds", "ok": false}, {"t": "À la tête, au bassin, aux pieds", "ok": true}, {"t": "Aux épaules, au bassin, aux pieds", "ok": false}, {"t": "À la tête, aux épaules, au bassin", "ok": false}]}, {"n": 24, "q": "Parmi ces propositions, lesquelles existent en secourisme ?", "o": [{"t": "Le pont amélioré", "ok": true}, {"t": "Le pont islandais", "ok": false}, {"t": "Le pont néerlandais", "ok": true}, {"t": "Le pont danois", "ok": false}]}, {"n": 25, "q": "Quels moyens de relevage peut-on utiliser pour une personne suspectée d’un traumatisme du rachis cervical ?", "o": [{"t": "Le MID", "ok": false}, {"t": "Le brancard cuillère", "ok": true}, {"t": "L’alèse portoir", "ok": false}, {"t": "La chaise de transport", "ok": false}]}, {"n": 26, "q": "Comment réagir face à un homme qui insulte sa femme lors d’un poste de secours ?", "o": [{"t": "Laisser le mari sur place", "ok": false}, {"t": "Faire éloigner le mari", "ok": true}, {"t": "Garder son calme", "ok": true}, {"t": "Transmettre un bilan rapide afin d’obtenir du renfort", "ok": true}]}, {"n": 27, "q": "Pour quel type de traumatisme l’utilisation du plan dur est-elle préconisée ?", "o": [{"t": "Traumatisme du bassin", "ok": false}, {"t": "Traumatisme de la colonne vertébrale", "ok": true}, {"t": "Traumatisme de la cuisse", "ok": false}, {"t": "Traumatisme de la cheville", "ok": false}]}, {"n": 28, "q": "Quels peuvent-être les signes d’un AVC ?", "o": [{"t": "Asymétrie faciale", "ok": true}, {"t": "Incohérence des propos", "ok": true}, {"t": "Hypersalivation de la victime", "ok": false}, {"t": "Paralysie d’un membre", "ok": true}]}, {"n": 29, "q": "Qui peut donner les ordres lors d’un brancardage ?", "o": [{"t": "Le chef d’équipe positionné à la tête", "ok": false}, {"t": "Un équipier secouriste positionné à la tête", "ok": false}, {"t": "Un secouriste positionné aux pieds", "ok": false}, {"t": "Un équipier secouriste positionné aux pieds", "ok": true}]}, {"n": 30, "q": "Que faire face à un accident électrique ?", "o": [{"t": "Faire écarter les personnes présentes autour", "ok": true}, {"t": "S’assurer que la victime n’est pas en contact direct avec l’électricité", "ok": true}, {"t": "Réaliser immédiatement un dégagement d’urgence", "ok": false}, {"t": "S’équiper de gants spéciaux pour toucher la victime", "ok": false}]}, {"n": 31, "q": "Quels sont les signes d’une gelure ?", "o": [{"t": "Signes d’hypothermie", "ok": true}, {"t": "Sensation de piqûres d’aiguilles des extrémités", "ok": true}, {"t": "La victime présente une asymétrie faciale", "ok": false}, {"t": "La victime présente des maux de tête et de la température", "ok": false}]}, {"n": 32, "q": "Quels types de brancard peut-on être amener à utiliser en secourisme ?", "o": [{"t": "Brancard compas", "ok": true}, {"t": "Brancard Piguillem", "ok": true}, {"t": "Brancard norvégien", "ok": false}, {"t": "Brancard cuillère", "ok": true}]}, {"n": 33, "q": "Combien faut-il d’équipiers secouristes pour immobiliser une victime dans un MID ?", "o": [{"t": "Minimum 2", "ok": false}, {"t": "Minimum 3", "ok": true}, {"t": "Minimum 4", "ok": false}, {"t": "Peu importe", "ok": false}]}, {"n": 34, "q": "Que signifie VPSP ?", "o": [{"t": "Véhicule Prioritaire de Secours à Personnes", "ok": false}, {"t": "Véhicule de Prévention et Secours à Personnes", "ok": false}, {"t": "Véhicule de Premiers Secours à Personnes", "ok": true}, {"t": "Véhicule Prioritaire de Soins du Personnel", "ok": false}]}, {"n": 35, "q": "Quelle méthode utilise-t-on pour le deuxième et troisième regard ?", "o": [{"t": "ABCDE", "ok": false}, {"t": "PQRST", "ok": false}, {"t": "XABCDE", "ok": true}, {"t": "MHTA", "ok": false}]}, {"n": 36, "q": "Que signifie le « A » lors de la réalisation d’un deuxième regard ?", "o": [{"t": "Abordage", "ok": false}, {"t": "Arrimage", "ok": false}, {"t": "Airways", "ok": true}, {"t": "Aérienne", "ok": false}]}, {"n": 37, "q": "Quels sont les ordres pour effectuer un pont amélioré ?", "o": [{"t": "Équipiers, êtes-vous prêt ? Attention pour lever, levez !", "ok": true}, {"t": "Attention pour soulever, soulevez !", "ok": false}, {"t": "Équipiers en position, êtes-vous prêt ? Attention pour lever, levez !", "ok": false}, {"t": "Attention pour lever, levez, Halte, attention pour poser, posez !", "ok": false}]}, {"n": 38, "q": "Quelle est la particularité du premier maintien de tête pour une immobilisation avec plan dur d’une victime debout ?", "o": [{"t": "Il se fait par l’arrière", "ok": false}, {"t": "Il se fait de côté", "ok": false}, {"t": "Il se réalise de face", "ok": true}, {"t": "Il est décidé par le chef", "ok": false}]}, {"n": 39, "q": "Que veut dire le chiffre « 3 » sur un panneau TMD ?", "o": [{"t": "Gaz comprimé", "ok": false}, {"t": "Matière dangereuse", "ok": false}, {"t": "Liquide inflammable", "ok": true}, {"t": "Matière corrosive", "ok": false}]}, {"n": 40, "q": "Laquelle de ces propositions est correcte ?", "o": [{"t": "L’attelle à traction s’utilise malgré un traumatisme de la cheville", "ok": false}, {"t": "Il faut retirer l’ACT pour conditionner la victime dans le MID", "ok": true}, {"t": "La ceinture pelvienne peut se poser en position assise", "ok": false}, {"t": "L’alèse portoir peut être utilisée pour relever une personne traumatisée", "ok": false}]}]};
+const qcmFor=c=>(DB.qcm&&DB.qcm[c])||QCM[c]||null;
+const SAT_CRITERIA=['Durée de la session','Satisfaction globale vis-à-vis de la session','Clarté des objectifs exposés','Pertinence des méthodes pédagogiques','Organisation générale de la mise en place de la formation','Niveau d’acquisition des savoirs des apprenants','Intérêts manifestés des contenus','Niveau de la logistique'];
+const SAT_LABELS=['','Inadapté (ou nul)','Insuffisant','Bien','Très bien'];
+function emptyDB(){return {version:2,templates:builtinTemplates(),sessions:[],evals:[],settings:{trainers:[],useLogo:true,extraSkills:false,org:ORG_DEFAULT(),texts:DOC_TEXTS()}}}
 function load(){
-  try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);if(d&&Array.isArray(d.sessions)&&Array.isArray(d.evals)){d.settings=Object.assign({trainers:[],useLogo:true},d.settings||{});
+  try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);if(d&&Array.isArray(d.sessions)&&Array.isArray(d.evals)){d.settings=Object.assign({trainers:[],useLogo:true,extraSkills:false},d.settings||{});d.settings.org=Object.assign(ORG_DEFAULT(),d.settings.org||{});d.settings.texts=Object.assign(DOC_TEXTS(),d.settings.texts||{});
     builtinTemplates().forEach(b=>{const i=d.templates.findIndex(t=>t.id===b.id);
       if(i<0){if(!(d.removedBuiltins||[]).includes(b.id))d.templates.push(b)}
       else if(!d.templates[i].edited&&(d.templates[i].rev||1)<(b.rev||1))d.templates[i]=b});return d}}}catch(e){}
@@ -805,7 +838,8 @@ const scaleOf=(t,code)=>t.scale.find(s=>s.code===code);
 const resultOf=(t,code)=>{const s=scaleOf(t,code);return s?(s.result||'none'):''};
 const codeFor=(t,res)=>(t.scale.find(s=>s.result===res)||{}).code||'';
 const rated=c=>(c.children||[]).length&&c.subMode!=='check';
-function items(t){const out=[];t.criteria.forEach(c=>{out.push({id:c.id,code:c.code,label:c.label,feeds:c.feeds,sub:false,c});if(rated(c))c.children.forEach(ch=>out.push({id:ch.id,code:'',label:ch.label,sub:true}))});return out}
+const shown=c=>!c.optional||DB.settings.extraSkills;
+function items(t){const out=[];t.criteria.filter(shown).forEach(c=>{out.push({id:c.id,code:c.code,label:c.label,feeds:c.feeds,sub:false,c});if(rated(c))c.children.forEach(ch=>out.push({id:ch.id,code:'',label:ch.label,sub:true}))});return out}
 const sessFormatives=sid=>DB.evals.filter(e=>e.sessionId===sid&&e.kind==='formative').sort((a,b)=>(a.date||'').localeCompare(b.date||'')||a.createdAt-b.createdAt);
 const findEval=(sid,pid,kind)=>DB.evals.find(e=>e.sessionId===sid&&e.kind===kind&&e.pid===pid);
 const certOf=(sid,pid)=>findEval(sid,pid,'certificative');
@@ -830,7 +864,7 @@ function mapLevel(ft,code,ct){const s=scaleOf(ft,code);if(!s||(s.result||'none')
 /* niveau d'un passage pour une compétence = le plus faible des critères qui l'alimentent (NE ignoré) */
 function feedValue(pass,code,ct){
   const ft=pass.e.tpl;let worst='';
-  ft.criteria.filter(c=>String(c.feeds||'')===String(code)).forEach(c=>{[c,...(rated(c)?c.children:[])].forEach(x=>{const v=mapLevel(ft,pass.l.marks[x.id],ct);if(v&&(!worst||rankOf(ct,v)>rankOf(ct,worst)))worst=v})});
+  ft.criteria.filter(c=>shown(c)&&String(c.feeds||'')===String(code)).forEach(c=>{[c,...(rated(c)?c.children:[])].forEach(x=>{const v=mapLevel(ft,pass.l.marks[x.id],ct);if(v&&(!worst||rankOf(ct,v)>rankOf(ct,worst)))worst=v})});
   return worst;
 }
 /* « 3B » = 3 validations au niveau B ou mieux (tableau des niveaux d'acquisition du référentiel) */
@@ -884,6 +918,8 @@ function seedSamples(d){
   d.settings.trainers.push({id:'t-ex1',nom:'Exemple',prenom:'Formateur',sample:true},{id:'t-ex2',nom:'Démo',prenom:'Formatrice',sample:true});
   const s={id:'s-ex1',sample:true,cursus:'PSE1',title:'PSE1 · Session exemple',start:'2026-11-09',end:'2026-11-14',lieu:'Chartres',trainerIds:['t-ex1','t-ex2'],
     participants:[{id:'p1',nom:'Exemple',prenom:'Camille'},{id:'p2',nom:'Exemple',prenom:'Louis'},{id:'p3',nom:'Démo',prenom:'Inès'},{id:'p4',nom:'Démo',prenom:'Hugo'}],createdAt:Date.now(),updatedAt:Date.now()};
+  Object.assign(s.participants[0],{civ:'Madame',birthDate:'2001-04-12',birthPlace:'Chartres',birthDept:'28'});Object.assign(s,{pvNum:'2026-EX1',pvDate:'2026-11-14'});
+  s.surveys=[{id:'sv1',date:'2026-11-14',scores:[3,4,4,3,3,3,4,2],why:{7:'Salle trop petite pour les cas concrets.'},comment:'Formateurs très disponibles.'},{id:'sv2',date:'2026-11-14',scores:[4,4,3,4,4,3,4,3],why:{},comment:''}];
   s.presence={p1:{'2026-11-09':true,'2026-11-10':true,'2026-11-11':true,'2026-11-12':true,'2026-11-13':true,'2026-11-14':true},p2:{'2026-11-09':true,'2026-11-10':true}};
   d.sessions.push(s);
   const f=T.find(t=>t.id==='pse1-formative');
@@ -919,7 +955,7 @@ function go(view,opts={}){Object.assign(S,opts);S.view=view;render();window.scro
 function render(){
   renderTop();renderNav();
   const v=S.view,m=$('#main');
-  const views={sessions:viewSessions,session:viewSession,person:viewPerson,sessionEdit:viewSessionEdit,formative:viewFormative,cert:viewCert,tech:viewTech,tpls:viewTpls,tpl:viewTplEdit,settings:viewSettings};
+  const views={sessions:viewSessions,session:viewSession,person:viewPerson,sessionEdit:viewSessionEdit,formative:viewFormative,cert:viewCert,tech:viewTech,qcm:viewQcm,survey:viewSurvey,satis:viewSatis,tpls:viewTpls,tpl:viewTplEdit,settings:viewSettings};
   m.innerHTML=(views[v]||viewSessions)();
   $('#fabslot').innerHTML=v==='sessions'?`<button class="fab" data-act="new-session">${I.plus}Nouvelle formation</button>`:v==='tpls'?`<button class="fab" data-act="new-tpl">${I.plus}Nouvelle grille</button>`:'';
 }
@@ -938,6 +974,9 @@ function renderTop(){
   else if(v==='formative'){const e=curEval();left=back(S.pid?'person':'session');title=`Cas concret · ${esc(fmtDate(e.date))}<small>${esc(e.learners.map(l=>pName(s,l.pid)).join(' · '))}</small>`;right=pdfBtn('pdf-formative')}
   else if(v==='cert'){const c=curEval();left=back('person');title=`Certification · ${esc(pName(s,c.pid))}<small>${esc(c.tpl.name)}</small>`;right=pdfBtn('pdf-cert')}
   else if(v==='tech'){const x=curEval();left=back('person');title=`Technicité · ${esc(pName(s,x.pid))}<small>${esc(x.tpl.name)}</small>`;right=pdfBtn('pdf-tech')}
+  else if(v==='qcm'){const c=curEval();left=back('cert');const st=qcmState(c,s);title=`QCM ${esc(s.cursus)} · ${esc(pName(s,c.pid))}<small>${st.done}/${st.tot} corrigées · ${String(st.score).replace('.',',')}/20</small>`;right=pdfBtn('pdf-qcm')}
+  else if(v==='survey'){left=`<button class="ibtn" data-act="survey-exit" aria-label="Quitter le questionnaire">${I.x}</button>`;title=`Évaluation de la formation<small>${esc(s.title||s.cursus)}</small>`}
+  else if(v==='satis'){left=back('session');title=`Satisfaction · ${(s.surveys||[]).length} réponse${(s.surveys||[]).length>1?'s':''}<small>${esc(s.title||s.cursus)}</small>`;right=pdfBtn('pdf-satis')}
   else if(v==='tpl'){left=`<button class="ibtn" data-act="tpl-cancel" aria-label="Annuler">${I.x}</button>`;title=`${S.tdraftNew?'Nouvelle grille':'Modifier la grille'}<small>${{formative:'Évaluation formative',certificative:'Certification',technicite:'Technicité'}[S.tdraft.kind]}</small>`;right=`<button class="ibtn solid" data-act="tpl-save">Enregistrer</button>`}
   $('#top').innerHTML=`<div class="wrap">${left}<h1>${title}</h1>${right}</div>`;
 }
@@ -1008,6 +1047,16 @@ function viewSession(){
         <tr><th style="text-align:left;padding:8px 14px">Participant</th>${sessDays(s).map(d=>`<th style="padding:8px 4px" class="num">${esc(fmtDate(d).slice(0,5))}</th>`).join('')}</tr>
         ${parts.map(p=>{const pr=presenceOf(s,p.id);return `<tr style="border-top:1px solid var(--line)"><td style="padding:6px 14px;white-space:nowrap;font-weight:600">${esc(fullName(p))}</td>${sessDays(s).map(d=>`<td style="text-align:center;padding:4px"><button class="chip ${pr[d]?'on':''}" style="min-width:44px;justify-content:center" data-act="presence" data-pid="${p.id}" data-d="${d}" aria-label="${esc(fullName(p))} le ${esc(fmtDate(d))}" aria-pressed="${!!pr[d]}">${pr[d]?'✓':'·'}</button></td>`).join('')}</tr>`}).join('')}
       </table></div></details>`:''}
+    <section class="panel"><div class="hd"><h3>Fin de formation</h3><span class="small muted">${s.type==='FC'?'Formation continue':'Formation initiale'}${s.pvNum?' · PV n°'+esc(s.pvNum):''}</span></div><div class="bd stack" style="gap:10px">
+      ${(()=>{const R=parts.map(p=>resultOfPerson(s,p));const ap=R.filter(v=>v==='apte').length,ko=R.filter(v=>v==='inapte').length;
+        return `<div class="small"><b class="num">${ap}</b> ${s.type==='FC'?'favorable(s)':'apte(s)'} · <b class="num">${ko}</b> ${s.type==='FC'?'défavorable(s)':'inapte(s)'} · <b class="num">${parts.length-ap-ko}</b> en attente${s.pvNum?'':' · <span style="color:var(--t-orange)">n° de PV à saisir (« Modifier la formation »)</span>'}</div>
+        ${EMBED?'':`<div class="row">
+          <button class="btn sm" data-act="doc" data-v="pv">${I.pdf}Procès-verbal</button>
+          <button class="btn sm" data-act="doc" data-v="certs" ${ap?'':'disabled'}>${I.pdf}${s.type==='FC'?'Attestations FC':'Certificats'} (${ap})</button>
+          <button class="btn sm" data-act="doc" data-v="notifs" ${ko?'':'disabled'}>${I.pdf}Notifications défavorables (${ko})</button>
+          <button class="btn sm" data-act="number-certs" ${ap?'':'disabled'}>Numéroter les ${s.type==='FC'?'attestations':'certificats'}</button></div>`}`})()}
+      <div class="row"><span class="small grow">Questionnaire de satisfaction : <b class="num">${(s.surveys||[]).length}</b> réponse${(s.surveys||[]).length>1?'s':''}</span><button class="btn sm red" data-act="survey-start">Faire remplir</button><button class="btn sm" data-act="go" data-v="satis">Synthèse</button></div>
+    </div></section>
     <section class="panel"><div class="hd"><h3>Cas concrets (fiches formatives)</h3><span class="small muted num">${F.length}</span></div>
       <div class="lines">${flines||`<div class="empty" style="margin:14px">Aucun cas concret. Chaque fiche enregistrée alimente la certification des participants évalués.</div>`}</div></section>
   </div>`;
@@ -1038,6 +1087,17 @@ function viewPerson(){
     ${cs?`<section class="panel"><div class="hd"><h3>B · Compétences (référentiel)</h3><span class="small muted num">${cs.n}/${cs.tot}</span></div><div class="lines">${compRows}</div></section>`:''}
     ${sits.length?`<section class="panel"><div class="hd"><h3>Situations rencontrées</h3><span class="small muted num">${sits.filter(x=>seen(x.id)).length}/${sits.length}</span></div><div class="bd chips">${sits.map(x=>`<span class="chip ${seen(x.id)?'on':''}" style="cursor:default">${seen(x.id)?'✓ ':''}${esc(x.label)}</span>`).join('')}</div></section>`:''}
     ${days.length?`<section class="panel"><div class="hd"><h3>C · Présence</h3><span class="small muted num">${days.filter(d=>pr[d]).length}/${days.length} jours</span></div><div class="bd chips">${days.map(d=>`<button class="chip ${pr[d]?'on':''}" data-act="presence" data-pid="${p.id}" data-d="${d}" aria-pressed="${!!pr[d]}">${pr[d]?'✓ ':''}${esc(fmtDate(d).slice(0,5))}</button>`).join('')}</div></section>`:''}
+    <details class="panel" ${p.birthDate?'':'open'}><summary class="hd" style="cursor:pointer;list-style:none"><h3>État civil (certificat, notification)</h3><span class="small muted">${p.birthDate?esc(neLe(p)):'à compléter'}</span></summary><div class="bd fields">
+      <label class="f">Civilité<select id="pc-civ" ${bind('civ','part')}><option value="">—</option><option ${p.civ==='Madame'?'selected':''}>Madame</option><option ${p.civ==='Monsieur'?'selected':''}>Monsieur</option></select></label>
+      <label class="f">Date de naissance<input type="date" id="pc-bd" value="${esc(p.birthDate||'')}" ${bind('birthDate','part')}></label>
+      <label class="f">Lieu de naissance<input type="text" id="pc-bp" value="${esc(p.birthPlace||'')}" ${bind('birthPlace','part')}></label>
+      <label class="f">Département<input type="text" id="pc-dep" value="${esc(p.birthDept||'')}" placeholder="ex. 28" ${bind('birthDept','part')}></label>
+      <label class="f">N° de ${s.type==='FC'?'l’attestation':'certificat'}<input type="text" id="pc-num" value="${esc(p.certNo||'')}" placeholder="attribué au PV" ${bind('certNo','part')}></label></div></details>
+    ${EMBED||!c||!c.id?'':`<section class="panel"><div class="hd"><h3>Documents</h3></div><div class="bd row">
+      ${v==='apte'?`<button class="btn sm primary" data-act="pdoc" data-v="cert">${I.pdf}${s.type==='FC'?'Attestation de formation continue':'Certificat de compétences'}</button>`:''}
+      ${v==='inapte'?`<button class="btn sm danger" data-act="pdoc" data-v="notif">${I.pdf}Notification défavorable</button>`:''}
+      ${qcmFor(s.cursus)&&qcmState(c,s).done?`<button class="btn sm" data-act="pdoc" data-v="qcm">${I.pdf}Questionnaire corrigé</button>`:''}
+      ${v?'':'<span class="small muted">Le certificat ou la notification apparaît quand la validation finale est connue.</span>'}</div></section>`}
     <section class="panel"><div class="hd"><h3>Cas concrets</h3><span class="small muted num">${F.length}</span></div><div class="lines">
       ${F.map(e=>{const l=e.learners.find(l=>l.pid===p.id);return `<button class="line" data-act="open-formative" data-id="${e.id}"><span class="grow"><b>${esc(fmtDate(e.date))}</b> · ${esc(e.theme||'Thème non renseigné')}<span class="small muted" style="display:block">Cas n°${esc(l.caseNo||'—')}${evaluatorNames(e)?' · '+esc(evaluatorNames(e)):''}</span></span>${e.counts===false?'<span class="pill neutral">Hors certif.</span>':''}${I.chev}</button>`}).join('')||'<div class="empty" style="margin:14px">Aucun cas concret pour ce participant.</div>'}
     </div></section>
@@ -1059,7 +1119,16 @@ function viewSessionEdit(){
         <label class="f">Lieu<input type="text" id="sd-lieu" value="${esc(d.lieu)}" ${db('lieu')}></label>
         <label class="f">Début<input type="date" id="sd-start" value="${esc(d.start)}" ${db('start')}></label>
         <label class="f">Fin<input type="date" id="sd-end" value="${esc(d.end)}" ${db('end')}></label>
+        <label class="f">Type<select id="sd-type" ${db('type')}><option value="FI" ${d.type!=='FC'?'selected':''}>Formation initiale</option><option value="FC" ${d.type==='FC'?'selected':''}>Formation continue</option></select></label>
       </div>
+      <details ${d.pvNum||d.type==='FC'?'open':''}><summary class="small" style="font-weight:600;cursor:pointer;min-height:40px;display:flex;align-items:center">Procès-verbal et documents de fin de formation</summary>
+        <div class="fields" style="margin-top:8px">
+          <label class="f">N° du procès-verbal<input type="text" id="sd-pv" value="${esc(d.pvNum||'')}" placeholder="ex. 2026-014" ${db('pvNum')}></label>
+          <label class="f">Date du procès-verbal<input type="date" id="sd-pvdate" value="${esc(d.pvDate||'')}" ${db('pvDate')}></label>
+          <label class="f">Date des documents<input type="date" id="sd-docdate" value="${esc(d.docDate||'')}" ${db('docDate')}></label>
+          ${d.type==='FC'?`<label class="f">Programme de l’année<input type="text" id="sd-fcan" inputmode="numeric" value="${esc((d.fc||{}).annee||'')}" placeholder="${esc((d.start||today()).slice(0,4))}" ${db('fc.annee')}></label>
+          <label class="f">Date de la circulaire FC<input type="text" id="sd-fccirc" value="${esc((d.fc||{}).circulaire||'')}" placeholder="JJ/MM/AAAA" ${db('fc.circulaire')}></label>`:''}
+        </div></details>
       ${S.draftNew?'':'<p class="small muted" style="margin:0">Le type de formation ne peut plus être changé une fois la formation créée.</p>'}
     </div></section>
     <section class="panel"><div class="hd"><h3>Formateurs de la session</h3><button class="btn sm" data-act="goto-trainers">${I.gear}Gérer la liste</button></div><div class="bd">
@@ -1137,6 +1206,11 @@ function viewFormative(){
       </div></section>
     ${(t.situations||[]).length?`<section class="panel"><div class="hd"><h3>Situations travaillées dans ce cas</h3><span class="small muted">Compétence 4 du référentiel</span></div><div class="bd" style="display:grid;gap:2px;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))">
       ${t.situations.map(x=>`<label class="cb" style="font-weight:500"><input type="checkbox" data-act="case" data-c="${x.id}" ${(e.cases||{})[x.id]?'checked':''}>${esc(x.label)}</label>`).join('')}</div></section>`:''}
+    ${s.type==='FC'?`<section class="panel"><div class="hd"><h3>Auto-évaluation des apprenants</h3><span class="small muted">Formation continue : le référentiel favorise l’auto-évaluation</span></div>
+      ${n>1?`<div class="bd lt" style="padding-bottom:0">${e.learners.map((l,i)=>`<button class="${i===S.lt?'on':''}" data-act="lt" data-i="${i}">Apprenant ${i+1}<span>${esc(l.pid?pName(s,l.pid):'—')}</span></button>`).join('')}</div>`:''}
+      <div style="--n:${n};--colw:${colw}">${it.filter(x=>!x.sub).map(x=>`<div class="crit"><div class="cl">${x.code?`<span class="code">${esc(x.code)}</span>`:''}${esc(x.label)}</div>
+        ${e.learners.map((l,i)=>`<div class="mk ${i===S.lt?'':'off'}"><div class="seg">${t.scale.map(sc=>`<button class="lv t-${sc.tone} ${(l.self||{})[x.id]===sc.code?'on':''}" data-act="self" data-i="${i}" data-c="${x.id}" data-v="${esc(sc.code)}" aria-pressed="${(l.self||{})[x.id]===sc.code}">${esc(sc.code)}</button>`).join('')}</div></div>`).join('')}</div>`).join('')}</div>
+      <div class="bd small muted" style="padding-top:0">L’auto-évaluation est reprise dans la case Observations du PDF, sans modifier le format de la fiche.</div></section>`:''}
     <section class="panel"><div class="hd"><h3>Observations</h3></div><div class="bd stack">
       ${e.learners.map((l,i)=>`<label class="f">${esc(l.pid?pName(s,l.pid):'Apprenant '+(i+1))}<textarea id="f-obs-${i}" placeholder="Points forts, axes de progression…" ${bind('learners.'+i+'.obs')}>${esc(l.obs||'')}</textarea></label>`).join('')}
     </div></section>
@@ -1178,7 +1252,7 @@ function viewCert(){
     else if(ch.auto==='theory'){note2=note===null?'Saisissez la note du questionnaire (QCM/QROC) : 12/20 minimum':note>=12?'Note ≥ 12/20 : validé':note>=10?'Note de 10 ou 11 : entretien de rattrapage avec le responsable pédagogique':'Note < 10 : pas de rattrapage possible pendant la session';
       lock=note===null?'':'all';
       extra=`<div class="row" style="margin-top:6px"><label class="f" style="width:130px">Note /20<input type="text" inputmode="decimal" id="c-score" value="${esc(th.score??'')}" placeholder="ex. 14,5" ${bind('theory.score')}></label>
-        <label class="f" style="width:150px">ou bonnes réponses /40<input type="number" min="0" max="40" id="c-qcm" value="" placeholder="ex. 31" data-act-input="qcm"></label>
+        ${qcmFor(s.cursus)?`<button class="btn sm primary" data-act="open-qcm" style="align-self:end">Corriger le QCM question par question</button>`:`<label class="f" style="width:150px">ou bonnes réponses /40<input type="number" min="0" max="40" id="c-qcm" value="" placeholder="ex. 31" data-act-input="qcm"></label>`}
         ${note!==null&&note>=10&&note<12?`<label class="f" style="min-width:200px">Entretien de rattrapage<select id="c-retake" ${bind('theory.retake')}><option value="">— À faire —</option><option value="ok" ${th.retake==='ok'?'selected':''}>Connaissances suffisantes</option><option value="ko" ${th.retake==='ko'?'selected':''}>Insuffisantes</option></select></label>`:''}</div>`}
     else if(ch.auto){note2='Calculé : toutes les compétences validées';lock='all'}
     return `<div class="check"><span class="letter">${esc(ch.id)}</span><div><div style="font-weight:600">${esc(ch.label)}</div>${note2?`<div class="small muted">${esc(note2)}</div>`:''}${extra}</div>${yn('check',ch.id,v,lock)}</div>`}).join('');
@@ -1221,6 +1295,54 @@ function viewTech(){
     ${x.tpl.groups.map((gr,gi)=>{const n=gr.items.filter(i=>x.done[i.id]).length;return `<section class="panel tgroup ${pse2?'pse2':''}"><div class="hd"><h3>${esc(gr.title)}</h3><span class="small num">${n}/${gr.items.length}</span><button class="btn sm" data-act="tech-all" data-g="${gi}">${n===gr.items.length?'Tout décocher':'Tout cocher'}</button></div>
       <div>${gr.items.map(it=>`<label class="titem ${x.done[it.id]?'done':''}"><input type="checkbox" data-act="tech" data-i="${it.id}" ${x.done[it.id]?'checked':''}><span>${esc(it.label)}</span>${x.done[it.id]?`<small>Fait ${esc(fmtDate(x.done[it.id]).slice(0,5))}</small>`:''}</label>`).join('')}</div></section>`}).join('')}
     <div class="row">${EMBED?'':`<button class="btn primary grow" data-act="pdf-tech">${I.pdf}Exporter la fiche en PDF</button>`}</div>
+  </div>`;
+}
+
+/* =========================================================
+   Correction du QCM (corrigé du référentiel)
+   ========================================================= */
+function viewQcm(){
+  const c=curEval(),s=curSess();if(!c||!s)return viewSessions();const st=qcmState(c,s);const ans=(c.qcm||{}).ans||{};const show=S.qcmShow!==false;
+  return `<div class="stack">
+    <section class="panel"><div class="bd stack" style="gap:8px">
+      <div class="row"><b class="grow">${esc(pName(s,c.pid))}</b><span class="pill ${st.score>=12?'ok':st.score>=10?'wait':'ko'} num">${String(st.score).replace('.',',')} / 20</span></div>
+      <div class="bar"><i style="width:${Math.round(st.done/st.tot*100)}%"></i></div>
+      <div class="small muted">Deux façons de corriger : touchez <b>Juste</b> / <b>Faux</b> pour chaque question, ou cochez les réponses données par le stagiaire et l’appli compare avec le corrigé (une question est juste si toutes les bonnes réponses, et seulement elles, sont cochées). Note = bonnes questions × 20 / ${st.tot}.</div>
+      <div class="row"><label class="cb grow"><input type="checkbox" data-act="qcm-show" ${show?'checked':''}>Afficher le corrigé</label><button class="btn sm" data-act="qcm-rest">Les questions non corrigées sont justes</button><button class="btn sm danger" data-act="qcm-reset">Effacer</button></div>
+    </div></section>
+    ${st.Q.map((q,i)=>{const a=ans[q.n],r=st.res[i];return `<section class="panel" style="border-left:4px solid ${r==='ok'?'var(--t-vert)':r==='ko'?'var(--t-rouge)':'var(--line)'}"><div class="bd stack" style="gap:6px">
+      <div class="row" style="align-items:flex-start;flex-wrap:nowrap"><b class="grow">${q.n}. ${esc(q.q)}</b>
+        <div class="yn"><button class="y ${r==='ok'?'on':''}" data-act="qcm-mark" data-n="${q.n}" data-v="ok">Juste</button><button class="n ${r==='ko'?'on':''}" data-act="qcm-mark" data-n="${q.n}" data-v="ko">Faux</button></div></div>
+      ${q.o.map((o,k)=>`<label class="cb" style="font-weight:500;${show&&o.ok?'color:var(--t-vert)':''}"><input type="checkbox" data-act="qcm-ans" data-n="${q.n}" data-k="${k}" ${Array.isArray(a)&&a.includes(k)?'checked':''}>${esc(o.t)}${show&&o.ok?' <b>✓</b>':''}</label>`).join('')}
+    </div></section>`}).join('')}
+    <div class="row"><button class="btn primary grow" data-act="back" data-v="cert">Reporter la note sur la fiche de certification</button></div>
+  </div>`;
+}
+
+/* =========================================================
+   Questionnaire de satisfaction (annexe 11) : mode stagiaire
+   ========================================================= */
+function viewSurvey(){
+  const s=curSess();if(!s)return viewSessions();const d=S.surveyDraft;
+  if(!d)return `<div class="stack" style="text-align:center;padding-top:40px"><h2 style="font-size:1.4rem;color:var(--brand)">Merci pour votre participation !</h2>
+    <p class="muted">Votre questionnaire est enregistré. Rendez la tablette au formateur.</p><div class="row" style="justify-content:center"><button class="btn red" data-act="survey-new">Questionnaire suivant</button><button class="btn" data-act="survey-exit">Terminer</button></div></div>`;
+  return `<div class="stack">
+    <section class="panel"><div class="bd small">Madame, Monsieur, vous venez de suivre une formation. Pour nous permettre d’améliorer la qualité de cette formation, nous vous remercions d’accorder quelques instants afin de remplir ce questionnaire. <b>1 = Inadapté (ou nul) · 2 = Insuffisant · 3 = Bien · 4 = Très bien.</b> Pour toute note inférieure ou égale à 2, merci de justifier.</div></section>
+    ${SAT_CRITERIA.map((c,i)=>`<section class="panel"><div class="bd stack" style="gap:8px"><b>${esc(c)}</b>
+      <div class="seg">${[1,2,3,4].map(k=>`<button class="lv ${['','t-rouge','t-orange','t-vert','t-vertf'][k]} ${d.scores[i]===k?'on':''}" style="min-width:64px" data-act="sv" data-i="${i}" data-v="${k}" aria-pressed="${d.scores[i]===k}" title="${SAT_LABELS[k]}">${k}</button>`).join('')}<span class="small muted" style="align-self:center">${d.scores[i]?SAT_LABELS[d.scores[i]]:''}</span></div>
+      ${d.scores[i]&&d.scores[i]<=2?`<textarea id="sv-why-${i}" placeholder="Pourquoi cette note ?" data-sv-why="${i}">${esc(d.why[i]||'')}</textarea>`:''}</div></section>`).join('')}
+    <section class="panel"><div class="bd"><label class="f">Commentaire libre (facultatif)<textarea id="sv-comment" data-sv-comment="1">${esc(d.comment||'')}</textarea></label></div></section>
+    <button class="btn red" data-act="survey-send">Envoyer mon questionnaire</button>
+  </div>`;
+}
+function viewSatis(){
+  const s=curSess();if(!s)return viewSessions();const L=s.surveys||[],st=satStats(s);
+  return `<div class="stack">
+    <div class="row"><button class="btn red grow" data-act="survey-start">Faire remplir par un stagiaire</button>${EMBED?'':`<button class="btn" data-act="pdf-satis">${I.pdf}Synthèse PDF</button>`}</div>
+    <section class="panel"><div class="hd"><h3>Moyennes par critère</h3><span class="small muted">sur 4</span></div><div class="lines">
+      ${st.map(r=>`<div class="line" style="min-height:48px"><span class="grow small">${esc(r.c)}</span><div class="bar" style="width:30%"><i style="width:${r.avg/4*100}%;background:${r.avg>=3?'var(--t-vert)':r.avg>=2.5?'var(--t-orange)':'var(--t-rouge)'}"></i></div><b class="num" style="width:3em;text-align:right">${r.n?r.avg.toFixed(1).replace('.',','):'—'}</b></div>`).join('')}</div></section>
+    <section class="panel"><div class="hd"><h3>Réponses</h3><span class="small muted num">${L.length}</span></div><div class="lines">
+      ${L.map((x,i)=>`<div class="line"><span class="grow small">N°${i+1} · ${esc(fmtDate(x.date))} · ${x.scores.map(n=>n||'—').join(' ')}${x.comment?' · « '+esc(x.comment.slice(0,80))+' »':''}</span><button class="btn sm danger" data-act="sv-del" data-i="${i}" aria-label="Supprimer la réponse">${I.trash}</button></div>`).join('')||'<div class="empty" style="margin:14px">Aucune réponse. Touchez « Faire remplir par un stagiaire » et donnez-lui la tablette : les réponses sont anonymes.</div>'}</div></section>
   </div>`;
 }
 
@@ -1307,8 +1429,18 @@ function viewSettings(){
     <section class="panel"><div class="hd"><h3>Formateurs</h3><button class="btn sm" data-act="add-trainer">${I.plus}Ajouter</button></div><div class="bd stack">
       <p class="small muted" style="margin:0">Ces formateurs sont proposés dans les listes déroulantes des fiches et de chaque formation.</p>
       ${T||'<div class="empty">Aucun formateur. Touchez « Ajouter ».</div>'}</div></section>
-    <section class="panel"><div class="hd"><h3>Fiches PDF</h3></div><div class="bd">
-      <label class="cb"><input type="checkbox" id="set-logo" ${DB.settings.useLogo!==false?'checked':''} ${bind('useLogo','settings')}>Afficher le logo UDPS 28 sur les fiches formatives</label></div></section>
+    <section class="panel"><div class="hd"><h3>Fiches PDF</h3></div><div class="bd stack" style="gap:4px">
+      <label class="cb"><input type="checkbox" id="set-logo" ${DB.settings.useLogo!==false?'checked':''} ${bind('useLogo','settings')}>Afficher le logo UDPS 28 sur les fiches formatives</label>
+      <label class="cb"><input type="checkbox" id="set-extra" ${DB.settings.extraSkills?'checked':''} ${bind('extraSkills','settings')}>Habiletés complémentaires des référentiels (surveille la victime, utilise le matériel, tient sa place dans l’équipe, plusieurs victimes)</label>
+      <p class="small muted" style="margin:0 0 0 30px">Désactivé : fiches strictement au format d’origine. Activé : ces lignes s’ajoutent aux fiches formatives et au PDF, et comptent pour la certification.</p></div></section>
+    <section class="panel"><div class="hd"><h3>Organisme (certificats, attestations, notifications)</h3></div><div class="bd fields">
+      ${[['name','Nom de l’organisme habilité'],['code','Code organisme (n° de certificat)'],['ville','Ville (« <Ville>, le <date> »)'],['repQualite','Qualité du signataire'],['repPrenom','Prénom du signataire'],['repNom','Nom du signataire'],['habilitation','Date de l’arrêté d’habilitation'],['nextCert','Prochain n° de certificat']]
+        .map(([k,l])=>`<label class="f">${l}<input type="text" id="org-${k}" value="${esc(DB.settings.org[k]??'')}" ${bind('org.'+k,'settings')}></label>`).join('')}</div></section>
+    <details class="panel"><summary class="hd" style="cursor:pointer;list-style:none"><h3>Textes des notifications défavorables</h3><span class="small muted">modifiables</span></summary><div class="bd stack">
+      <p class="small muted" style="margin:0">Champs remplacés automatiquement : {UE} {CURSUS} {QUALITE} {DEBUT} {FIN} {LIEU}. Le texte « formation initiale » est une correction du modèle des référentiels, qui reprend par erreur le texte de la formation continue.</p>
+      <label class="f">Formation initiale<textarea id="txt-fi" style="min-height:180px" ${bind('texts.notifFI','settings')}>${esc(DB.settings.texts.notifFI)}</textarea></label>
+      <label class="f">Formation continue (annexe du référentiel)<textarea id="txt-fc" style="min-height:220px" ${bind('texts.notifFC','settings')}>${esc(DB.settings.texts.notifFC)}</textarea></label>
+      <div><button class="btn sm" data-act="texts-reset">Rétablir les textes d’origine</button></div></div></details>
     <section class="panel"><div class="hd"><h3>Sauvegarde et transfert</h3></div><div class="bd stack">
       <p class="small muted" style="margin:0">${nS} formation${nS>1?'s':''} et ${nE} fiche${nE>1?'s':''} enregistrées sur cet appareil, sans réseau. Envoyez une sauvegarde pour l’archiver ou pour passer les données sur une autre tablette (mail, Bluetooth, Quick Share, clé USB…), puis importez-la sur l’autre appareil.</p>
       <div class="row">
@@ -1328,7 +1460,7 @@ function viewSettings(){
       <button class="btn" data-act="restore">Restaurer les grilles PSE1 et PSE2 d’origine</button>
       <button class="btn" data-act="del-samples">Supprimer les exemples</button>
       <button class="btn danger" data-act="wipe">${I.trash}Tout effacer</button></div></section>
-    <p class="small muted" style="margin:0">Évaluations PSE · UDPS 28 · version 2.0 · données stockées uniquement sur cet appareil.</p>
+    <p class="small muted" style="margin:0">Évaluations PSE · UDPS 28 · version 2.2 · données stockées uniquement sur cet appareil.</p>
   </div>`;
 }
 
@@ -1346,7 +1478,7 @@ const head=t=>`<div class="row"><h3 class="grow">${t}</h3><button class="ibtn" d
 /* =========================================================
    PDF au format des fiches d'origine (jsPDF embarqué, hors ligne)
    ========================================================= */
-const PT=s=>String(s??'').replace(/[’‘ʼ]/g,"'").replace(/[“”]/g,'"').replace(/[–—]/g,'-').replace(/…/g,'...').replace(/[  ]/g,' ').replace(/œ/g,'oe').replace(/Œ/g,'OE').replace(/→/g,'->').replace(/[^\x20-\x7E -ÿ\n]/g,'');
+const PT=s=>String(s??'').replace(/[’‘ʼ]/g,"'").replace(/[“”]/g,'"').replace(/[–—]/g,'-').replace(/…/g,'...').replace(/[  ]/g,' ').replace(/œ/g,'oe').replace(/Œ/g,'OE').replace(/→/g,'->').replace(/[^\x20-\x7E -ÿ•\n]/g,'');
 const BLACK=[0,0,0],WHITE=[255,255,255],GREY=[90,90,90];
 const F_DARK=[68,84,106],F_PEACH=[251,228,214],F_BAND=[132,151,176],F_SHADE=[217,221,228];
 function pen(doc){
@@ -1405,7 +1537,7 @@ function drawFormative(doc,e,sess,chunk){
     t.scale.forEach((s,q)=>P.cell(s.code,x+q*cs,y+5.5,cs,5.5,{b:true,s:7.5,a:'center'}))}
   y+=11;
   const rows=[];
-  t.criteria.forEach(c=>{const lab=c.label+(c.code?` (${c.code})`:'')+((c.children||[]).length?' :':'');
+  t.criteria.filter(shown).forEach(c=>{const lab=c.label+(c.code?` (${c.code})`:'')+((c.children||[]).length?' :':'');
     if((c.children||[]).length&&c.subMode==='check')rows.push({id:c.id,lab,subs:c.children});
     else{rows.push({id:c.id,lab});if(rated(c))c.children.forEach(ch=>rows.push({id:ch.id,lab:ch.label,sub:true}))}});
   rows.forEach(r=>{let h,draw;
@@ -1421,7 +1553,8 @@ function drawFormative(doc,e,sess,chunk){
   const legendH=6+t.scale.length*4.6+4;
   P.cell('OBSERVATIONS',M,y,W,5.5,{b:true,s:8,a:'center',fill:F_BAND,c:WHITE});y+=5.5;
   const ow=W/2,avail=PH-12-legendH-y;
-  const obsL=[0,1].map(j=>chunk[j]!==undefined?P.lines(e.learners[chunk[j]].obs||'',ow-4,8):[]);
+  const selfTxt=l=>{const se=l.self||{};const ks=items(t).filter(x=>!x.sub&&se[x.id]);return ks.length?'\nAuto-évaluation : '+ks.map(x=>(x.code||'')+' '+se[x.id]).join(' · '):''};
+  const obsL=[0,1].map(j=>chunk[j]!==undefined?P.lines((e.learners[chunk[j]].obs||'')+selfTxt(e.learners[chunk[j]]),ow-4,8):[]);
   const oh=Math.max(22,Math.min(avail-2,Math.max(...obsL.map(l=>l.length))*3.6+8));const maxL=Math.floor((oh-6)/3.6);
   [0,1].forEach(j=>{P.rect(M+j*ow,y,ow,oh);if(chunk[j]!==undefined){P.text(pName(sess,e.learners[chunk[j]].pid),M+j*ow+2,y+3.2,{s:6.5,b:true,c:GREY});P.font(false,8);obsL[j].slice(0,maxL).forEach((ln,i)=>doc.text(ln,M+j*ow+2,y+7.5+i*3.6,{baseline:'middle'}))}});
   y+=oh+5;
@@ -1504,6 +1637,146 @@ function drawTech(doc,x,sess){
   if(overflow)P.text('(liste trop longue pour une page : réduisez le nombre de techniques)',M+W,PH-4.5,{s:6.5,a:'right',c:[180,20,30]});
 }
 
+/* =========================================================
+   Documents officiels (annexes des référentiels ANPS 2025)
+   ========================================================= */
+const ORG=()=>DB.settings.org;
+const civ=p=>p&&p.civ?p.civ:'';
+const nomComplet=p=>[civ(p),p&&p.prenom,((p&&p.nom)||'').toUpperCase()].filter(Boolean).join(' ');
+const neLe=p=>{if(!p||!p.birthDate)return '';const f=p.civ==='Madame'?'née':p.civ==='Monsieur'?'né':'né(e)';return `${f} le ${fmtDate(p.birthDate)}${p.birthPlace?' à '+p.birthPlace:''}${p.birthDept?' ('+p.birthDept+')':''}`};
+const docDate=s=>fmtDate(s.docDate||s.end||today());
+const yearOf=s=>(s.end||s.start||today()).slice(0,4);
+const certNum=(s,p)=>`${s.cursus}${s.type==='FC'?'':''} - ${ORG().code||'ORGA'} - n° ${yearOf(s)}/${p.certNo||'____'}`;
+function fillText(t,s,p){const u=ueOf(s.cursus);return t.replace(/\{UE\}/g,u.ue).replace(/\{CURSUS\}/g,s.cursus).replace(/\{QUALITE\}/g,u.qualite)
+  .replace(/\{DEBUT\}/g,fmtDate(s.start)||'…').replace(/\{FIN\}/g,fmtDate(s.end||s.start)||'…').replace(/\{LIEU\}/g,s.lieu?' à '+s.lieu:'').replace(/\{NOM\}/g,nomComplet(p))}
+function docHeader(doc,P,W,M){
+  if(LOGO.startsWith('data:')){try{doc.addImage(LOGO,'JPEG',M,10,44,44*297/480)}catch(e){}}
+  P.text(ORG().name||'',M+W,14,{s:9,b:true,a:'right',c:[0,43,107]});
+}
+function paragraphs(doc,P,txt,x,y,w,size,lh){P.font(false,size);txt.split(/\n\s*\n/).forEach(par=>{doc.splitTextToSize(PT(par.replace(/\s*\n\s*/g,' ')),w).forEach(ln=>{doc.text(ln,x,y);y+=lh});y+=lh*.6});return y}
+function signature(doc,P,x,y){const o=ORG();P.text('Attache de signature,',x,y,{s:10,a:'center'});P.text(o.repQualite||'',x,y+6,{s:10,a:'center',b:true});P.text([o.repPrenom,(o.repNom||'').toUpperCase()].filter(Boolean).join(' '),x,y+11.5,{s:10,a:'center'})}
+
+/* Notification d'évaluation défavorable (FI : texte corrigé ; FC : annexe 10) */
+function notifPages(s,pid){return [{orient:'p',draw:doc=>{
+  const P=pen(doc),M=20,W=170,p=participant(s,pid)||{};docHeader(doc,P,W,M);let y=52;
+  P.text('NOTIFICATION D’ÉVALUATION DÉFAVORABLE '+yearOf(s),M+W/2,y,{b:true,s:14,a:'center'});y+=6;
+  P.text(s.type==='FC'?'Formation continue':'Formation initiale',M+W/2,y,{s:10,a:'center',c:GREY});y+=14;
+  P.text(`${ORG().ville||''}, le ${docDate(s)}`,M+W,y,{s:10.5,a:'right'});y+=14;
+  P.text(nomComplet(p)+',',M,y,{s:11,b:true});y+=10;
+  y=paragraphs(doc,P,fillText(DB.settings.texts[s.type==='FC'?'notifFC':'notifFI'],s,p),M,y,W,10.5,5.2);
+  signature(doc,P,M+W*0.7,Math.max(y+12,200));
+  P.text(`${s.cursus} - ${ORG().code||''} - ${s.title||''}`,M,287,{s:7,c:GREY});}}]}
+
+/* Certificat de compétences (annexe 7 PSE1 / annexe 8 PSE2) */
+function certificatePages(s,pid){return [{orient:'l',draw:doc=>{
+  const P=pen(doc),M=18,W=261,p=participant(s,pid)||{},u=ueOf(s.cursus),o=ORG();docHeader(doc,P,W,M);
+  doc.setDrawColor(0,43,107);doc.setLineWidth(.8);doc.rect(8,8,281,194);doc.setLineWidth(.25);
+  let y=46;P.text(u.cert,M+W/2,y,{b:true,s:17,a:'center',c:[0,43,107]});y+=12;
+  P.text(`${o.ville||''}, le ${docDate(s)}`,M+W,y,{s:10,a:'right'});y+=10;
+  const vus=['Vu le code de la sécurité intérieure, notamment les articles R.726-1 et suivants ;',
+    'Vu l’arrêté du 15 juin 2024 relatif à la filière opérationnelle de sécurité civile dans le domaine de la formation aux premiers secours ;',
+    `Vu l’arrêté du ${o.habilitation||'…'} portant habilitation de ${o.name||'…'} pour les formations aux premiers secours ;`,
+    `Vu le procès-verbal de l’équipe pédagogique n° ${s.pvNum||'…'}, établi en date du ${fmtDate(s.pvDate)||'…'} ;`];
+  vus.forEach(v=>{P.font(false,9);doc.splitTextToSize(PT(v),W-8).forEach((ln,i)=>{doc.text((i?'   ':'•  ')+ln,M,y);y+=4.6})});y+=6;
+  P.text(`${o.repQualite||'Le représentant légal'} de ${o.name||'l’organisme habilité'}, déclarant que`,M+W/2,y,{s:10.5,a:'center'});y+=9;
+  P.text(nomComplet(p)+',',M+W/2,y,{s:15,b:true,a:'center',c:[0,43,107]});y+=7;
+  if(neLe(p)){P.text(neLe(p),M+W/2,y,{s:10.5,a:'center'})}y+=10;
+  P.font(false,10.5);doc.splitTextToSize(PT(`remplit les conditions exigées pour l’obtention du ${u.certTxt}, conformément aux dispositions de l’arrêté du 15 juin 2024 susvisé,`),W-30).forEach(ln=>{doc.text(ln,M+W/2,y,{align:'center'});y+=5.2});
+  P.text(`délivre à ${nomComplet(p)} le présent certificat de compétences.`,M+W/2,y+1,{s:10.5,a:'center'});
+  signature(doc,P,M+W*0.78,y+16);
+  P.text(certNum(s,p),M,196,{s:9,b:true});}}]}
+
+/* Attestation de formation continue (annexe 9 PSE1 / annexe 10 PSE2) */
+function attestationPages(s,pid){return [{orient:'l',draw:doc=>{
+  const P=pen(doc),M=18,W=261,p=participant(s,pid)||{},u=ueOf(s.cursus),o=ORG(),fc=s.fc||{};docHeader(doc,P,W,M);
+  doc.setDrawColor(0,43,107);doc.setLineWidth(.8);doc.rect(8,8,281,194);doc.setLineWidth(.25);
+  let y=42;P.text('ATTESTATION DE FORMATION CONTINUE',M+W/2,y,{b:true,s:16,a:'center',c:[0,43,107]});y+=7;
+  P.text(`${u.qualite.toUpperCase()} – ${s.cursus}`,M+W/2,y,{b:true,s:12,a:'center'});y+=6;P.text(`Programme ${fc.annee||yearOf(s)}`,M+W/2,y,{s:10,a:'center'});y+=9;
+  P.text(`${o.ville||''}, le ${docDate(s)}`,M+W,y,{s:10,a:'right'});y+=8;
+  ['Vu le code de la sécurité intérieure, notamment les articles R.726-1 et suivants ;','Vu l’arrêté du 21 décembre 2020 modifié portant organisation de la formation continue dans le domaine des premiers secours ;',
+   'Vu l’arrêté du 15 juin 2024 relatif à la filière opérationnelle de sécurité civile dans le domaine de la formation aux premiers secours ;',`Vu l’arrêté du ${o.habilitation||'…'} portant habilitation de ${o.name||'…'} pour les formations aux premiers secours ;`,
+   `Vu la circulaire du ${fc.circulaire||'…'} relative aux programmes ${fc.annee||yearOf(s)} pour les unités d’enseignements des premiers secours ;`,`Vu le procès-verbal de l’équipe pédagogique n° ${s.pvNum||'…'}, établi en date du ${fmtDate(s.pvDate)||'…'}.`]
+   .forEach(v=>{P.font(false,8.5);doc.splitTextToSize(PT(v),W-8).forEach((ln,i)=>{doc.text((i?'   ':'•  ')+ln,M,y);y+=4.2})});y+=4;
+  P.text(`${o.repQualite||'Le représentant légal'} de ${o.name||''}, atteste que`,M+W/2,y,{s:10,a:'center'});y+=7;
+  P.text(nomComplet(p)+',',M+W/2,y,{s:14,b:true,a:'center',c:[0,43,107]});y+=6;if(neLe(p))P.text(neLe(p),M+W/2,y,{s:10,a:'center'});y+=7;
+  const an=(+(fc.annee||yearOf(s)))+1;
+  y=paragraphs(doc,P,`a suivi une session de formation continue relative à l’unité d’enseignement « ${u.ue} » (${s.cursus}) qui s’est déroulée du ${fmtDate(s.start)} au ${fmtDate(s.end||s.start)}${s.lieu?', à '+s.lieu:''}.\n\nSes compétences de ${u.qualite} (${s.cursus}) peuvent s’exercer jusqu’à une prochaine formation continue ou au plus tard au 31 décembre inclus de l’année ${an}, sous l’égide d’un organisme habilité à la formation aux premiers secours conformément aux textes réglementaires en vigueur ou dans le cadre d’une activité professionnelle lorsque celles-ci sont exigées.\n\nEn foi de quoi, nous délivrons à l’intéressé(e) la présente attestation pour servir et valoir ce que de droit.`,M+10,y,W-20,9.5,4.6);
+  signature(doc,P,M+W*0.8,Math.min(y+2,178));
+  P.text(`FC ${s.cursus} - ${o.code||'ORGA'} - n° ${yearOf(s)}/${p.certNo||'____'}`,M,196,{s:9,b:true});}}]}
+
+/* Procès-verbal de l'équipe pédagogique */
+function resultOfPerson(s,p){const c=certOf(s.id,p.id);const v=c?verdict(c):'';return v}
+function pvPages(s){return [{orient:'p',draw:doc=>{
+  const P=pen(doc),M=15,W=180,o=ORG(),u=ueOf(s.cursus),parts=s.participants.filter(p=>!p.archived);docHeader(doc,P,W,M);let y=44;
+  P.text('PROCÈS-VERBAL DE L’ÉQUIPE PÉDAGOGIQUE',M+W/2,y,{b:true,s:14,a:'center',c:[0,43,107]});y+=6;
+  P.text(`n° ${s.pvNum||'…'} du ${fmtDate(s.pvDate)||'…'}`,M+W/2,y,{s:10,a:'center'});y+=9;
+  const info=[['Unité d’enseignement',`${u.ue} (${s.cursus})`],['Type de formation',s.type==='FC'?'Formation continue':'Formation initiale'],['Organisme',o.name||''],['Dates',`du ${fmtDate(s.start)} au ${fmtDate(s.end||s.start)}`],['Lieu',s.lieu||''],['Équipe pédagogique',sessTrainers(s)]];
+  info.forEach(([a,b])=>{P.cell(a,M,y,48,7,{s:8.5,b:true,fill:[227,234,245]});P.cell(b,M+48,y,W-48,7,{s:8.5});y+=7});y+=6;
+  const cols=[[10,'N°'],[42,'NOM'],[36,'Prénom'],[46,'Naissance'],[22,'Résultat'],[24,s.type==='FC'?'N° attestation':'N° certificat']];
+  let x=M;cols.forEach(([w,t])=>{P.cell(t,x,y,w,7,{b:true,s:8,a:'center',fill:[0,43,107],c:WHITE});x+=w});y+=7;
+  let apte=0,inapte=0,att=0;
+  parts.forEach((p,i)=>{const v=resultOfPerson(s,p);if(v==='apte')apte++;else if(v==='inapte')inapte++;else att++;
+    if(y>262){doc.addPage('a4','p');y=20}
+    const res=v==='apte'?(s.type==='FC'?'FAVORABLE':'APTE'):v==='inapte'?(s.type==='FC'?'DÉFAVORABLE':'INAPTE'):'EN ATTENTE';
+    const vals=[String(i+1),(p.nom||'').toUpperCase(),p.prenom||'',[fmtDate(p.birthDate),p.birthPlace].filter(Boolean).join(' à '),res,v==='apte'&&p.certNo?`${yearOf(s)}/${p.certNo}`:''];
+    x=M;cols.forEach(([w],j)=>{P.cell(vals[j],x,y,w,7,{s:8,a:j===0||j>=4?'center':'left',b:j===4,c:j===4&&v==='inapte'?[180,20,30]:BLACK});x+=w});y+=7});
+  y+=5;P.text(`Participants : ${parts.length} · ${s.type==='FC'?'favorables':'aptes'} : ${apte} · ${s.type==='FC'?'défavorables':'inaptes'} : ${inapte}${att?' · en attente : '+att:''}`,M,y,{s:9.5,b:true});y+=8;
+  P.font(false,9);doc.splitTextToSize(PT(`L’équipe pédagogique soussignée certifie que les participants ci-dessus ont été évalués conformément au référentiel interne de formation et de certification ${s.cursus} de l’ANPS et à l’arrêté du 15 juin 2024.`),W).forEach(ln=>{doc.text(ln,M,y);y+=4.4});y+=6;
+  if(y>245){doc.addPage('a4','p');y=20}
+  P.text('Signatures de l’équipe pédagogique',M,y,{s:9.5,b:true});y+=4;
+  const tr=(s.trainerIds||[]).map(tName).filter(Boolean);const bw=W/Math.max(2,Math.min(4,tr.length+1));
+  [...tr,'Responsable pédagogique'].forEach((t,i)=>{const bx=M+(i%4)*bw,by=y+Math.floor(i/4)*26;P.rect(bx,by,bw-3,24);P.text(t,bx+2,by+4,{s:8})});
+  P.text(stamp(),M,287,{s:6.5,c:GREY});}}]}
+
+/* ---- QCM : calcul et questionnaire corrigé ---- */
+function qcmState(c,s){const Q=qcmFor(s.cursus);if(!Q)return null;const st=c.qcm||{};const ans=st.ans||{},mark=st.mark||{};
+  const res=Q.map(q=>{const a=ans[q.n];if(Array.isArray(a)){const good=q.o.map((o,i)=>o.ok?i:-1).filter(i=>i>=0);return a.length===good.length&&good.every(i=>a.includes(i))?'ok':'ko'}return mark[q.n]||''});
+  const ok=res.filter(r=>r==='ok').length,done=res.filter(Boolean).length;return {Q,res,ok,done,tot:Q.length,score:Math.round(ok*20/Q.length*2)/2}}
+function qcmToScore(c){const s=curSess(),st=qcmState(c,s);c.theory=c.theory||{};if(st.done){c.theory.score=String(st.score).replace('.',',');c.theory.src='qcm'}else if(c.theory.src==='qcm'){delete c.theory.score;delete c.theory.src}touch(c)}
+function qcmPages(c,s){const st=qcmState(c,s);if(!st||!st.done)return [];const p=participant(s,c.pid)||{};const pages=[];
+  const draw=(doc,from)=>{const P=pen(doc),M=14,W=182;let y=12,i=from;
+    if(from===0){const lw=40,rw=32,cw=W-lw-rw;P.rect(M,y,lw,20);if(LOGO.startsWith('data:')){try{doc.addImage(LOGO,'JPEG',M+4,y+1.5,32,32*297/480)}catch(e){}}
+      P.cell('Conception des formations',M+lw,y,cw,10,{s:12,b:true,a:'center',fill:F_DARK,c:WHITE});P.cell('QCM '+s.cursus+' - CORRIGÉ',M+lw,y+10,cw,10,{s:12,b:true,a:'center',fill:F_PEACH});
+      P.cell('EVAL/ '+s.cursus,M+lw+cw,y,rw,6.7,{s:7,a:'center'});P.cell('Correction',M+lw+cw,y+6.7,rw,6.7,{s:7,a:'center'});P.cell('Note : '+String(st.score).replace('.',',')+' / 20',M+lw+cw,y+13.4,rw,6.6,{s:8,b:true,a:'center'});y+=25;
+      P.cell('NOM / PRÉNOM : '+fullName(p),M,y,W*.5,7,{s:9,b:true});P.cell('DATE DE LA FORMATION : '+fmtDate(s.start)+(s.end?' au '+fmtDate(s.end):''),M+W*.5,y,W*.5,7,{s:8});y+=10;
+      P.font(false,6.8,GREY);doc.splitTextToSize(PT(`${st.ok} bonne${st.ok>1?'s':''} réponse${st.ok>1?'s':''} sur ${st.tot} questions. Barème : une question est juste si toutes les bonnes réponses, et seulement elles, sont cochées. Case cochée = réponse du stagiaire ; (ok) = bonne réponse du corrigé.`),W).forEach(ln=>{doc.text(ln,M,y);y+=3});y+=2}
+    for(;i<st.Q.length;i++){const q=st.Q[i],a=((c.qcm||{}).ans||{})[q.n];const lines=P.lines(q.n+'. '+q.q,W-24,8.4,true);
+      const ols=q.o.map(o=>P.lines(o.t,W-30,7.8));const h=lines.length*3.6+ols.reduce((t,l)=>t+l.length*3.3+.7,0)+3;
+      if(y+h>287){return i}
+      P.font(true,8.4);lines.forEach((ln,j)=>doc.text(ln,M,y+3+j*3.6));
+      const r=st.res[i];P.text(r==='ok'?'JUSTE':r==='ko'?'FAUX':'—',M+W,y+3,{s:8,b:true,a:'right',c:r==='ok'?[30,120,50]:r==='ko'?[180,20,30]:GREY});
+      let yy=y+3+lines.length*3.6;
+      q.o.forEach((o,k)=>{const on=Array.isArray(a)&&a.includes(k);P.box(M+4,yy-1.6,2.8,on);P.font(o.ok,7.8,o.ok?[0,43,107]:BLACK);ols[k].forEach((ln,j)=>doc.text(ln,M+10,yy+.5+j*3.3));if(o.ok)P.text('(ok)',M+W,yy+.5,{s:7,a:'right',c:[30,120,50]});yy+=ols[k].length*3.3+.7});
+      y=yy+2;doc.setDrawColor(215);doc.line(M,y-1,M+W,y-1);doc.setDrawColor(0)}
+    return i};
+  // pagination : on mesure avec un document témoin
+  const J=window.jspdf.jsPDF;const probe=new J({unit:'mm',format:'a4'});let from=0,guard=0;const starts=[];
+  while(from<st.Q.length&&guard++<10){starts.push(from);const nx=draw(probe,from);probe.addPage();from=nx}
+  return starts.map(f=>({orient:'p',draw:doc=>draw(doc,f)}));
+}
+
+/* ---- Questionnaire de satisfaction (annexe 11) ---- */
+function satStats(s){const L=s.surveys||[];return SAT_CRITERIA.map((c,i)=>{const v=L.map(x=>x.scores[i]).filter(n=>n>=1);return {c,n:v.length,avg:v.length?v.reduce((a,b)=>a+b,0)/v.length:0,dist:[1,2,3,4].map(k=>v.filter(n=>n===k).length)}})}
+function satPages(s){return [{orient:'p',draw:doc=>{
+  const P=pen(doc),M=16,W=178,L=s.surveys||[],st=satStats(s);docHeader(doc,P,W,M);let y=44;
+  P.text('ÉVALUATION DE LA FORMATION - SYNTHÈSE',M+W/2,y,{b:true,s:14,a:'center',c:[0,43,107]});y+=8;
+  [['Intitulé de la formation',`${s.title||''} (${s.cursus}${s.type==='FC'?' - formation continue':''})`],['Lieu de la formation',s.lieu||''],['Date(s) de la formation',`du ${fmtDate(s.start)} au ${fmtDate(s.end||s.start)}`],['Questionnaires reçus',String(L.length)]]
+    .forEach(([a,b])=>{P.cell(a,M,y,52,6.5,{s:8.5,b:true,fill:[227,234,245]});P.cell(b,M+52,y,W-52,6.5,{s:8.5});y+=6.5});y+=6;
+  // cible (radar) comme sur le questionnaire papier
+  const cx=M+W/2,cy=y+44,R=40,n=SAT_CRITERIA.length;doc.setLineWidth(.2);
+  for(let k=1;k<=4;k++){doc.setDrawColor(190);const pts=[];for(let i=0;i<n;i++){const a=-Math.PI/2+i*2*Math.PI/n;pts.push([cx+R*k/4*Math.cos(a),cy+R*k/4*Math.sin(a)])}
+    pts.forEach((pt,i)=>{const q=pts[(i+1)%n];doc.line(pt[0],pt[1],q[0],q[1])});P.text(String(k),cx+1,cy-R*k/4+2,{s:6,c:GREY})}
+  for(let i=0;i<n;i++){const a=-Math.PI/2+i*2*Math.PI/n;doc.line(cx,cy,cx+R*Math.cos(a),cy+R*Math.sin(a));
+    const lx=cx+(R+6)*Math.cos(a),ly=cy+(R+6)*Math.sin(a);P.font(false,7);const ls=doc.splitTextToSize(PT(SAT_CRITERIA[i]),34);ls.forEach((ln,j)=>doc.text(ln,lx,ly+j*3-(ls.length-1)*1.5,{align:Math.abs(Math.cos(a))<.2?'center':Math.cos(a)>0?'left':'right',baseline:'middle'}))}
+  if(L.length){doc.setDrawColor(227,6,19);doc.setLineWidth(.8);const pts=st.map((x,i)=>{const a=-Math.PI/2+i*2*Math.PI/n;return [cx+R*x.avg/4*Math.cos(a),cy+R*x.avg/4*Math.sin(a)]});pts.forEach((pt,i)=>{const q=pts[(i+1)%n];doc.line(pt[0],pt[1],q[0],q[1])});doc.setLineWidth(.25);doc.setDrawColor(0)}
+  y=cy+R+14;
+  const cols=[[70,'Critère'],[18,'Moyenne'],[22,'1 Inadapté'],[22,'2 Insuffisant'],[22,'3 Bien'],[24,'4 Très bien']];
+  let x=M;cols.forEach(([w,t])=>{P.cell(t,x,y,w,6.5,{s:7.5,b:true,a:'center',fill:[0,43,107],c:WHITE});x+=w});y+=6.5;
+  st.forEach(r=>{x=M;[r.c,r.n?r.avg.toFixed(1).replace('.',','):'—',...r.dist.map(String)].forEach((v,j)=>{P.cell(v,x,y,cols[j][0],8,{s:7.5,a:j?'center':'left',b:j===1});x+=cols[j][0]});y+=8});
+  y+=6;const com=[];L.forEach(x=>{Object.entries(x.why||{}).forEach(([i,t])=>{if(t)com.push(`${SAT_CRITERIA[i]} (${x.scores[i]}) : ${t}`)});if(x.comment)com.push('Commentaire : '+x.comment)});
+  if(com.length){P.text('Justifications et commentaires',M,y,{b:true,s:9.5});y+=5;P.font(false,8);com.forEach(t=>{doc.splitTextToSize(PT('• '+t),W).forEach(ln=>{if(y>284){doc.addPage('a4','p');y=18}doc.text(ln,M,y);y+=3.8})})}
+  P.text('1 = Inadapté (ou nul) - 2 = Insuffisant - 3 = Bien - 4 = Très bien · '+stamp(),M,290,{s:6.5,c:GREY});}}]}
+
 function buildPdf(pages){
   const J=window.jspdf&&window.jspdf.jsPDF;if(!J)throw new Error('module PDF indisponible');
   const doc=new J({orientation:pages[0].orient==='l'?'landscape':'portrait',unit:'mm',format:'a4',compress:true});
@@ -1515,7 +1788,7 @@ const pslug=(s,pid)=>{const p=participant(s,pid)||{};return slug(p.nom)+'_'+slug
 function dossierPages(s,pid){
   const pages=[];const x=techOf(s.id,pid)||ensureTech(s,pid);if(x)pages.push(...techPages(x,s));
   pages.push(...sessFormatives(s.id).filter(e=>e.learners.some(l=>l.pid===pid)).flatMap(e=>formativePages(e,s,pid)));
-  const c=ensureCert(s,pid);if(c)pages.push(...certPages(c,s));return pages;
+  const c=ensureCert(s,pid);if(c){pages.push(...certPages(c,s));pages.push(...qcmPages(c,s))}return pages;
 }
 
 /* =========================================================
@@ -1563,7 +1836,7 @@ function pickExport(){
   modal(`${head('Exporter les fiches de '+esc(fullName(p)))}
     <p class="small muted" style="margin:0">Ordre du dossier selon le référentiel : technicité, fiches d’évaluation, certification individuelle.</p>
     <div class="row"><button class="btn sm" data-act="xp-all" data-v="1">Tout cocher</button><button class="btn sm" data-act="xp-all" data-v="0">Tout décocher</button></div>
-    <div style="display:grid">${tt?row('tech','Fiche de technicité',''):''}${F.map((e,i)=>row('f:'+e.id,'Cas concret n°'+(i+1)+' · '+esc(fmtDate(e.date)),esc(e.theme||''))).join('')}${ct?row('cert','Fiche de certification individuelle',''):''}</div>
+    <div style="display:grid">${tt?row('tech','Fiche de technicité',''):''}${F.map((e,i)=>row('f:'+e.id,'Cas concret n°'+(i+1)+' · '+esc(fmtDate(e.date)),esc(e.theme||''))).join('')}${ct?row('cert','Fiche de certification individuelle',''):''}${(()=>{const c=certOf(s.id,p.id);return c&&qcmFor(s.cursus)&&qcmState(c,s).done?row('qcm','Questionnaire corrigé (QCM)',''):''})()}</div>
     <label class="cb"><input type="checkbox" id="xp-sep">Un fichier PDF par fiche (sinon un seul PDF)</label>
     ${modeChips()}
     <button class="btn primary" data-act="xp-go">${S.expMode==='save'?I.pdf+'Enregistrer':I.share+'Envoyer'}</button>`);
@@ -1640,6 +1913,7 @@ function newFormative(s,tpl,pid){
 const A={
   tab:d=>{S.tab=d.v;go(d.v)},
   back:d=>go(d.v),
+  go:d=>go(d.v),
   cur:d=>{S.cur=d.v;render()},
   tplcur:d=>{S.tplCur=d.v;render()},
   'open-session':d=>go('session',{sid:d.id,pid:null}),
@@ -1697,6 +1971,41 @@ const A={
   'pdf-tech':()=>{const x=curEval(),s=curSess();runExport('Création du PDF…',()=>({files:[pdfFile(`${s.cursus}_technicite_${pslug(s,x.pid)}`,techPages(x,s))],title:'Fiche de technicité'}))},
   'pdf-dossier':()=>{const s=curSess();runExport('Création du dossier…',()=>({files:[pdfFile(`${s.cursus}_dossier_${pslug(s,S.pid)}`,dossierPages(s,S.pid))],title:'Dossier '+pName(s,S.pid)}))},
   'export-menu':()=>exportMenu(),
+  /* auto-évaluation (formation continue) */
+  self:d=>{const e=curEval(),l=e.learners[+d.i];l.self=l.self||{};if(l.self[d.c]===d.v)delete l.self[d.c];else l.self[d.c]=d.v;touch(e);render()},
+  /* QCM */
+  'open-qcm':()=>{if(!qcmFor(curSess().cursus)){toast('Pas de QCM pour cette formation');return}go('qcm')},
+  'qcm-show':(d,ev,el)=>{S.qcmShow=el.checked;render()},
+  'qcm-mark':d=>{const c=curEval();c.qcm=c.qcm||{};c.qcm.mark=c.qcm.mark||{};c.qcm.ans=c.qcm.ans||{};delete c.qcm.ans[d.n];if(c.qcm.mark[d.n]===d.v)delete c.qcm.mark[d.n];else c.qcm.mark[d.n]=d.v;qcmToScore(c);render()},
+  'qcm-ans':(d,ev,el)=>{const c=curEval();c.qcm=c.qcm||{};c.qcm.ans=c.qcm.ans||{};const a=Array.isArray(c.qcm.ans[d.n])?c.qcm.ans[d.n]:[];const k=+d.k;const i=a.indexOf(k);if(el.checked&&i<0)a.push(k);if(!el.checked&&i>=0)a.splice(i,1);c.qcm.ans[d.n]=a;qcmToScore(c);render()},
+  'qcm-rest':()=>{const c=curEval(),s=curSess(),st=qcmState(c,s);c.qcm=c.qcm||{};c.qcm.mark=c.qcm.mark||{};st.Q.forEach((q,i)=>{if(!st.res[i])c.qcm.mark[q.n]='ok'});qcmToScore(c);render();toast('Questions restantes marquées justes')},
+  'qcm-reset':()=>confirmBox('Effacer toute la correction du QCM ?','Effacer',()=>{const c=curEval();c.qcm={};if((c.theory||{}).src==='qcm')c.theory={};touch(c);render()}),
+  'pdf-qcm':()=>{const c=curEval(),s=curSess();runExport('Création du PDF…',()=>({files:[pdfFile(`${s.cursus}_${pslug(s,c.pid)}_qcm-corrige`,qcmPages(c,s))],title:'QCM corrigé'}))},
+  /* satisfaction */
+  'survey-start':()=>{S.surveyBack=S.view;S.surveyDraft={scores:Array(SAT_CRITERIA.length).fill(0),why:{},comment:''};go('survey')},
+  'survey-new':()=>{S.surveyDraft={scores:Array(SAT_CRITERIA.length).fill(0),why:{},comment:''};go('survey')},
+  'survey-exit':()=>{S.surveyDraft=null;go(S.surveyBack==='satis'?'satis':'session')},
+  sv:d=>{S.surveyDraft.scores[+d.i]=+d.v;render()},
+  'survey-send':()=>{const d=S.surveyDraft,s=curSess();const miss=d.scores.filter(n=>!n).length;if(miss){toast(`Il reste ${miss} critère${miss>1?'s':''} à noter`);return}
+    const noWhy=d.scores.findIndex((n,i)=>n<=2&&!(d.why[i]||'').trim());if(noWhy>=0){toast('Merci de justifier la note de « '+SAT_CRITERIA[noWhy]+' »');return}
+    (s.surveys=s.surveys||[]).push({id:uid(),date:today(),scores:d.scores.slice(),why:Object.fromEntries(Object.entries(d.why).filter(([i,t])=>d.scores[i]<=2&&t.trim())),comment:(d.comment||'').trim()});s.updatedAt=Date.now();save(true);S.surveyDraft=null;render();window.scrollTo(0,0)},
+  'sv-del':d=>confirmBox('Supprimer cette réponse au questionnaire ?','Supprimer',()=>{const s=curSess();s.surveys.splice(+d.i,1);save(true);render()}),
+  'pdf-satis':()=>{const s=curSess();runExport('Création du PDF…',()=>({files:[pdfFile(`${s.cursus}_${slug(s.title||'formation')}_satisfaction`,satPages(s))],title:'Satisfaction'}))},
+  /* documents de fin de formation */
+  doc:d=>{const s=curSess(),parts=s.participants.filter(p=>!p.archived);
+    runExport('Création des documents…',()=>{const base=`${s.cursus}_${slug(s.title||'formation')}`;
+      if(d.v==='pv')return {files:[pdfFile(base+'_proces-verbal',pvPages(s))],title:'Procès-verbal'};
+      const who=parts.filter(p=>resultOfPerson(s,p)===(d.v==='certs'?'apte':'inapte'));
+      const mk=p=>d.v==='certs'?(s.type==='FC'?attestationPages(s,p.id):certificatePages(s,p.id)):notifPages(s,p.id);
+      const kind=d.v==='certs'?(s.type==='FC'?'attestation-FC':'certificat'):'notification-defavorable';
+      return {files:who.map(p=>pdfFile(`${s.cursus}_${kind}_${pslug(s,p.id)}`,mk(p))),title:'Documents '+s.title}})},
+  pdoc:d=>{const s=curSess(),pid=S.pid,c=certOf(s.id,pid);
+    runExport('Création du PDF…',()=>{const pg=d.v==='cert'?(s.type==='FC'?attestationPages(s,pid):certificatePages(s,pid)):d.v==='notif'?notifPages(s,pid):qcmPages(c,s);
+      const n=d.v==='cert'?(s.type==='FC'?'attestation-FC':'certificat'):d.v==='notif'?'notification-defavorable':'qcm-corrige';return {files:[pdfFile(`${s.cursus}_${n}_${pslug(s,pid)}`,pg)],title:n}})},
+  'number-certs':()=>{const s=curSess(),o=DB.settings.org;let n=parseInt(o.nextCert,10)||1,k=0;
+    s.participants.filter(p=>!p.archived&&resultOfPerson(s,p)==='apte'&&!p.certNo).forEach(p=>{p.certNo=String(n++);k++});o.nextCert=String(n);save(true);render();
+    toast(k?`${k} numéro${k>1?'s':''} attribué${k>1?'s':''} (prochain : ${n})`:'Tous les participants aptes ont déjà un numéro')},
+  'texts-reset':()=>confirmBox('Rétablir les textes d’origine des notifications ?','Rétablir',()=>{DB.settings.texts=DOC_TEXTS();save(true);render()}),
   'pick-export':()=>pickExport(),
   expmode:d=>{S.expMode=d.v;try{localStorage.setItem('eval-pse-expmode',d.v)}catch(e){}const b=$('.box');if(b&&b.querySelector('.xp')){const sel=[...document.querySelectorAll('.xp')].map(x=>x.checked);const sep=$('#xp-sep').checked;pickExport();document.querySelectorAll('.xp').forEach((x,i)=>x.checked=sel[i]);$('#xp-sep').checked=sep}else exportMenu()},
   'xp-all':d=>document.querySelectorAll('.xp').forEach(x=>x.checked=d.v==='1'),
@@ -1705,6 +2014,7 @@ const A={
     runExport('Création des PDF…',()=>{const parts=ids.map(id=>{
         if(id==='tech'){const x=ensureTech(s,pid);return {n:'technicite',pages:techPages(x,s)}}
         if(id==='cert'){const c=ensureCert(s,pid);return {n:'certification',pages:certPages(c,s)}}
+        if(id==='qcm'){const c=ensureCert(s,pid);return {n:'qcm-corrige',pages:qcmPages(c,s)}}
         const e=evalById(id.slice(2));return {n:'cas-concret_'+e.date,pages:formativePages(e,s,pid)}});
       const base=`${s.cursus}_${pslug(s,pid)}`;
       const files=sep?parts.map((x,i)=>pdfFile(`${base}_${String(i+1).padStart(2,'0')}_${x.n}`,x.pages)):[pdfFile(ids.length===parts.length&&ids.includes('cert')&&ids.includes('tech')&&ids.length>2?`${base}_dossier`:`${base}_fiches`,parts.flatMap(x=>x.pages))];
@@ -1775,13 +2085,17 @@ document.addEventListener('click',ev=>{
 function applyBind(el){
   const p=el.dataset.bind,sc=el.dataset.scope;let v=el.type==='checkbox'?el.checked:el.value;
   if(sc==='ui'){S[p]=v;return 'ui'}
-  if(sc==='settings'){setPath(DB.settings,p,v);save();return}
-  if(sc==='sdraft'){setPath(S.draft,p,v);return}
+  if(sc==='settings'){setPath(DB.settings,p,v);save();if(p==='extraSkills')render();return}
+  if(sc==='sdraft'){if(p.startsWith('fc.'))S.draft.fc=S.draft.fc||{};setPath(S.draft,p,v);if(p==='type')render();return}
+  if(sc==='part'){const se=curSess(),pp=participant(se,S.pid);if(pp){setPath(pp,p,v);se.updatedAt=Date.now();save()}return}
+  if(sc==='sess'){const se=curSess();if(se){if(p.startsWith('fc.'))se.fc=se.fc||{};setPath(se,p,v);se.updatedAt=Date.now();save()}return}
   if(sc==='tdraft'){if(el.type==='number')v=v===''?'':Number(v);setPath(S.tdraft,p,v);return}
   const e=curEval();if(!e)return;if(p.startsWith('theory.'))e.theory=e.theory||{};setPath(e,p,v);touch(e);
 }
 document.addEventListener('input',ev=>{
-  const el=ev.target;if(!el.dataset||!el.dataset.bind||el.tagName==='SELECT'||el.type==='checkbox')return;
+  const el=ev.target;
+  if(el.dataset&&el.dataset.svWhy!==undefined&&S.surveyDraft){S.surveyDraft.why[el.dataset.svWhy]=el.value;return}
+  if(el.dataset&&el.dataset.svComment&&S.surveyDraft){S.surveyDraft.comment=el.value;return}if(!el.dataset||!el.dataset.bind||el.tagName==='SELECT'||el.type==='checkbox')return;
   if(applyBind(el)==='ui'){const pos=el.selectionStart;render();const n=$('#q');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}}}
 });
 document.addEventListener('change',ev=>{
@@ -1798,10 +2112,10 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)save(true)}
 /* Bouton retour Android */
 if(NATIVE&&window.Capacitor.Plugins.App){window.Capacitor.Plugins.App.addListener('backButton',()=>{
   if($('#overlay').innerHTML){closeModal();return}
-  const m={session:'sessions',person:'session',sessionEdit:S.draftNew?'sessions':'session',formative:S.pid?'person':'session',cert:'person',tech:'person',tpl:'tpls'};
+  const m={session:'sessions',person:'session',sessionEdit:S.draftNew?'sessions':'session',formative:S.pid?'person':'session',cert:'person',tech:'person',qcm:'cert',satis:'session',survey:'session',tpl:'tpls'};
   if(m[S.view])go(m[S.view]);else if(S.view!=='sessions'){S.tab='sessions';go('sessions')}else window.Capacitor.Plugins.App.exitApp();
 })}
-window.__app={DB:()=>DB,S,A,go,buildPdf,formativePages,certPages,techPages,dossierPages,sessionExport,certGrid};
+window.__app={DB:()=>DB,S,A,go,qcmState,pvPages,certificatePages,notifPages,attestationPages,satPages,qcmPages,buildPdf,formativePages,certPages,techPages,dossierPages,sessionExport,certGrid};
 render();
 })();
 </script>

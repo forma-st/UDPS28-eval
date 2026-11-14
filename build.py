@@ -11,7 +11,9 @@ src = open('src/app.html', encoding='utf-8').read()
 b64 = lambda p: base64.b64encode(open(p, 'rb').read()).decode()
 LOGO = 'data:image/jpeg;base64,' + b64('brand/logo-480.jpg')
 MARK = 'data:image/png;base64,' + b64('brand/symbole-96.png')
-src = src.replace('__LOGO__', LOGO).replace('__MARK__', MARK)
+import json
+QCM = json.dumps({'PSE1': json.load(open('data/qcm-pse1.json', encoding='utf-8')), 'PSE2': json.load(open('data/qcm-pse2.json', encoding='utf-8'))}, ensure_ascii=False)
+src = src.replace('__LOGO__', LOGO).replace('__MARK__', MARK).replace('const QCM=__QCM__;', 'const QCM=' + QCM + ';')
 
 WEIGHTS = (400, 500, 600, 700, 800)
 FONT_FILES = [f'montserrat-latin-{w}-normal.woff2' for w in WEIGHTS]
