@@ -888,8 +888,17 @@ function compStatus(c,G,k){
   st.auto=st.count>=req.n&&st.condOk?'oui':'';return st;
 }
 function validOf(c,k,G){const m=c.valid[k.id];if(m)return m;const s=sessById(c.sessionId);if(!s)return '';return compStatus(c,G||certGrid(c,s),k).auto}
-function sessDays(s){if(!s||!s.start)return [];const out=[];const d=new Date(s.start+'T12:00:00'),e=new Date((s.end||s.start)+'T12:00:00');
-  while(d<=e&&out.length<21){out.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1)}return out}
+const DUREE={PSE1:5,PSE2:4};
+function defaultDays(s){const n=s.type==='FC'?1:(DUREE[s.cursus]||1);const out=[];let d=s.start?new Date(s.start+'T12:00:00'):null;
+  for(let i=0;i<n;i++){let iso='';if(d){while(d.getDay()===0||d.getDay()===6)d.setDate(d.getDate()+1);iso=d.toISOString().slice(0,10);if(s.end&&iso>s.end)iso='';d.setDate(d.getDate()+1)}out.push({id:'J'+(i+1),date:iso,h:7})}return out}
+/* journées de formation : J1, J2… avec date et heures ; migration de l'ancienne présence par date */
+function ensureDays(s){if(!s)return [];if(!Array.isArray(s.days)||!s.days.length){s.days=defaultDays(s);
+    const pr=s.presence||{};Object.keys(pr).forEach(pid=>{const old=pr[pid],nw={};Object.keys(old).forEach(k=>{if(/^J\d+$/.test(k))nw[k]=old[k];else{const dy=s.days.find(x=>x.date===k);if(dy)nw[dy.id]=true}});pr[pid]=nw})}
+  return s.days}
+function sessDays(s){return ensureDays(s).map(d=>d.id)}
+const dayOf=(s,id)=>ensureDays(s).find(d=>d.id===id)||{id,h:7,date:''};
+const dayLabel=(s,id)=>{const d=dayOf(s,id);return d.date?`${id} · ${fmtDate(d.date).slice(0,5)}`:id};
+const hoursOf=(s,ids)=>ids.reduce((t,id)=>t+(+dayOf(s,id).h||0),0);
 const presenceOf=(s,pid)=>((s.presence||{})[pid])||{};
 const theoryNote=c=>{const n=parseFloat(String((c.theory||{}).score??'').replace(',','.'));return isNaN(n)?null:n};
 function certGrid(c,sess){
@@ -904,7 +913,7 @@ function certGrid(c,sess){
 function checkVal(c,ch){
   if(ch.auto==='presence'){const s=sessById(c.sessionId),days=sessDays(s);if(!days.length)return c.checks[ch.id]||'';
     const pr=presenceOf(s,c.pid);if(days.every(d=>pr[d]))return 'oui';return c.checks[ch.id]==='non'?'non':''}
-  if(ch.auto==='theory'){const n=theoryNote(c);if(n===null)return c.checks[ch.id]||'';if(n>=12)return 'oui';
+  if(ch.auto==='theory'){if(c.checks[ch.id])return c.checks[ch.id];const n=theoryNote(c);if(n===null)return '';if(n>=12)return 'oui';
     if(n>=10){const r=(c.theory||{}).retake;return r==='ok'?'oui':r==='ko'?'non':''}return 'non'}
   if(ch.auto==='tech'){const s=sessById(c.sessionId);const x=s&&techOf(s.id,c.pid);
     if(x&&techStat(x).ok)return 'oui';return c.checks[ch.id]==='non'?'non':(x?'':(c.checks[ch.id]||''))}
@@ -949,7 +958,7 @@ function seedSamples(d){
    État de l'interface
    ========================================================= */
 DB=load();
-const S={expMode:(()=>{try{return localStorage.getItem('eval-pse-expmode')||'save'}catch(e){return 'save'}})(),view:'sessions',tab:'sessions',sid:null,pid:null,eid:null,lt:0,q:'',cur:'all',draft:null,draftNew:false,tdraft:null,tdraftNew:false,tplCur:'all'};
+const S={open:{},expMode:(()=>{try{return localStorage.getItem('eval-pse-expmode')||'save'}catch(e){return 'save'}})(),view:'sessions',tab:'sessions',sid:null,pid:null,eid:null,lt:0,q:'',cur:'all',draft:null,draftNew:false,tdraft:null,tdraftNew:false,tplCur:'all'};
 const curSess=()=>sessById(S.sid);
 const curEval=()=>evalById(S.eid);
 function go(view,opts={}){Object.assign(S,opts);S.view=view;render();window.scrollTo(0,0)}
@@ -960,7 +969,7 @@ function go(view,opts={}){Object.assign(S,opts);S.view=view;render();window.scro
 function render(){
   renderTop();renderNav();
   const v=S.view,m=$('#main');
-  const views={sessions:viewSessions,session:viewSession,person:viewPerson,sessionEdit:viewSessionEdit,formative:viewFormative,cert:viewCert,tech:viewTech,qcm:viewQcm,survey:viewSurvey,satis:viewSatis,tpls:viewTpls,tpl:viewTplEdit,settings:viewSettings};
+  const views={sessions:viewSessions,session:viewSession,person:viewPerson,sessionEdit:viewSessionEdit,formative:viewFormative,cert:viewCert,tech:viewTech,techs:viewTechs,qcm:viewQcm,survey:viewSurvey,satis:viewSatis,tpls:viewTpls,tpl:viewTplEdit,settings:viewSettings};
   m.innerHTML=(views[v]||viewSessions)();
   $('#fabslot').innerHTML=v==='sessions'?`<button class="fab" data-act="new-session">${I.plus}Nouvelle formation</button>`:v==='tpls'?`<button class="fab" data-act="new-tpl">${I.plus}Nouvelle grille</button>`:'';
 }
@@ -979,6 +988,7 @@ function renderTop(){
   else if(v==='formative'){const e=curEval();left=back(S.pid?'person':'session');title=`Cas concret · ${esc(fmtDate(e.date))}<small>${esc(e.learners.map(l=>pName(s,l.pid)).join(' · '))}</small>`;right=pdfBtn('pdf-formative')}
   else if(v==='cert'){const c=curEval();left=back('person');title=`Certification · ${esc(pName(s,c.pid))}<small>${esc(c.tpl.name)}</small>`;right=pdfBtn('pdf-cert')}
   else if(v==='tech'){const x=curEval();left=back('person');title=`Technicité · ${esc(pName(s,x.pid))}<small>${esc(x.tpl.name)}</small>`;right=pdfBtn('pdf-tech')}
+  else if(v==='techs'){left=back('session');title=`Fiches de technicité<small>${esc(s.title||s.cursus)}</small>`}
   else if(v==='qcm'){const c=curEval();left=back('cert');const st=qcmState(c,s);title=`QCM ${esc(s.cursus)} · ${esc(pName(s,c.pid))}<small>${st.done}/${st.tot} corrigées · ${String(st.score).replace('.',',')}/20</small>`;right=pdfBtn('pdf-qcm')}
   else if(v==='survey'){left=`<button class="ibtn" data-act="survey-exit" aria-label="Quitter le questionnaire">${I.x}</button>`;title=`Évaluation de la formation<small>${esc(s.title||s.cursus)}</small>`}
   else if(v==='satis'){left=back('session');title=`Satisfaction · ${(s.surveys||[]).length} réponse${(s.surveys||[]).length>1?'s':''}<small>${esc(s.title||s.cursus)}</small>`;right=pdfBtn('pdf-satis')}
@@ -1044,14 +1054,18 @@ function viewSession(){
       <div class="row">${badge(s.cursus)}<span class="small muted grow">${esc(fmtDate(s.start))}${s.end?' → '+esc(fmtDate(s.end)):''}${s.lieu?' · '+esc(s.lieu):''}</span></div>
       <div class="small"><span class="muted">Formateurs :</span> <b>${esc(sessTrainers(s)||'—')}</b></div>
     </div></div>
-    <div class="row"><button class="btn red grow" data-act="new-formative">${I.plus}Nouveau cas concret</button><button class="btn" data-act="export-menu">${I.share}Exporter / envoyer</button></div>
+    <div class="row"><button class="btn red grow" data-act="new-formative">${I.plus}Nouveau cas concret</button>${techTpl(s.cursus)?`<button class="btn" data-act="go" data-v="techs">Fiches de technicité</button>`:''}<button class="btn" data-act="export-menu">${I.share}Exporter / envoyer</button></div>
     <section class="panel"><div class="hd"><h3>Participants</h3><button class="btn sm" data-act="edit-session">${I.edit}Gérer</button></div>
       <div class="lines">${plines||`<div class="empty" style="margin:14px">Aucun participant. Touchez « Gérer » pour saisir la liste.</div>`}</div></section>
-    ${sessDays(s).length&&parts.length?`<details class="panel"><summary class="hd" style="cursor:pointer;list-style:none"><h3>Feuille de présence</h3><span class="small muted">${sessDays(s).length} jour${sessDays(s).length>1?'s':''} · touchez pour pointer</span></summary>
+    ${sessDays(s).length&&parts.length?`<details class="panel" data-panel="pres" ${S.open.pres?'open':''}><summary class="hd" style="cursor:pointer;list-style:none"><h3>Feuille de présence</h3><span class="small muted">${sessDays(s).length} jour${sessDays(s).length>1?'s':''} · ${hoursOf(s,sessDays(s))} h · touchez pour pointer</span></summary>
       <div style="overflow-x:auto"><table style="border-collapse:collapse;min-width:100%;font-size:.85rem">
-        <tr><th style="text-align:left;padding:8px 14px">Participant</th>${sessDays(s).map(d=>`<th style="padding:8px 4px" class="num">${esc(fmtDate(d).slice(0,5))}</th>`).join('')}</tr>
-        ${parts.map(p=>{const pr=presenceOf(s,p.id);return `<tr style="border-top:1px solid var(--line)"><td style="padding:6px 14px;white-space:nowrap;font-weight:600">${esc(fullName(p))}</td>${sessDays(s).map(d=>`<td style="text-align:center;padding:4px"><button class="chip ${pr[d]?'on':''}" style="min-width:44px;justify-content:center" data-act="presence" data-pid="${p.id}" data-d="${d}" aria-label="${esc(fullName(p))} le ${esc(fmtDate(d))}" aria-pressed="${!!pr[d]}">${pr[d]?'✓':'·'}</button></td>`).join('')}</tr>`}).join('')}
+        <tr><th style="text-align:left;padding:8px 14px">Participant</th>${sessDays(s).map(d=>`<th style="padding:8px 4px;line-height:1.15" class="num">${esc(d)}<span class="small muted" style="display:block;font-weight:500">${esc(fmtDate(dayOf(s,d).date).slice(0,5))} ${dayOf(s,d).h} h</span></th>`).join('')}<th style="padding:8px">Heures</th></tr>
+        ${parts.map(p=>{const pr=presenceOf(s,p.id);return `<tr style="border-top:1px solid var(--line)"><td style="padding:6px 14px;white-space:nowrap;font-weight:600">${esc(fullName(p))}</td>${sessDays(s).map(d=>`<td style="text-align:center;padding:4px"><button class="chip ${pr[d]?'on':''}" style="min-width:44px;justify-content:center" data-act="presence" data-pid="${p.id}" data-d="${d}" aria-label="${esc(fullName(p))} ${esc(d)}" aria-pressed="${!!pr[d]}">${pr[d]?'✓':'·'}</button></td>`).join('')}<td class="num small" style="text-align:center;font-weight:700">${hoursOf(s,sessDays(s).filter(d=>pr[d]))}/${hoursOf(s,sessDays(s))} h</td></tr>`}).join('')}
       </table></div></details>`:''}
+    ${parts.length&&certTpl(s.cursus)?`<details class="panel" data-panel="theo" ${S.open.theo?'open':''}><summary class="hd" style="cursor:pointer;list-style:none"><h3>Évaluation théorique (D)</h3><span class="small muted">note /20 · 12 minimum · rattrapage 10-11</span></summary>
+      <div class="lines">${parts.map(p=>{const c=certFor(s,p.id),n=c?theoryNote(c):null,ch=c?c.tpl.checks.find(x=>x.auto==='theory'):null,v=c&&c.id&&ch?checkVal(c,ch):(n===null?'':n>=12?'oui':n<10?'non':'');
+        return `<div class="line" style="min-height:52px"><span class="grow"><b>${esc(fullName(p))}</b></span><input type="text" inputmode="decimal" style="width:84px;min-height:40px" id="th-${p.id}" value="${esc((c&&c.theory||{}).score??'')}" placeholder="/20" aria-label="Note de ${esc(fullName(p))}" data-bind="score" data-scope="theory" data-pid="${p.id}">
+          ${v==='oui'?'<span class="pill ok">D : OUI</span>':v==='non'?'<span class="pill ko">D : NON</span>':n!==null&&n>=10?'<span class="pill wait">Rattrapage</span>':'<span class="pill neutral">À saisir</span>'}</div>`}).join('')}</div></details>`:''}
     <section class="panel"><div class="hd"><h3>Fin de formation</h3><span class="small muted">${s.type==='FC'?'Formation continue':'Formation initiale'}${s.pvNum?' · PV n°'+esc(s.pvNum):''}</span></div><div class="bd stack" style="gap:10px">
       ${(()=>{const R=parts.map(p=>resultOfPerson(s,p));const ap=R.filter(v=>v==='apte').length,ko=R.filter(v=>v==='inapte').length;
         return `<div class="small"><b class="num">${ap}</b> ${s.type==='FC'?'favorable(s)':'apte(s)'} · <b class="num">${ko}</b> ${s.type==='FC'?'défavorable(s)':'inapte(s)'} · <b class="num">${parts.length-ap-ko}</b> en attente${s.pvNum?'':' · <span style="color:var(--t-orange)">n° de PV à saisir (« Modifier la formation »)</span>'}</div>
@@ -1091,7 +1105,11 @@ function viewPerson(){
     <div class="row"><button class="btn red grow" data-act="new-formative" data-pid="${p.id}">${I.plus}Nouveau cas concret avec ${esc(p.prenom||fullName(p))}</button>${EMBED?'':`<button class="btn primary" data-act="pick-export">${I.pdf}Exporter des fiches</button>`}</div>
     ${cs?`<section class="panel"><div class="hd"><h3>B · Compétences (référentiel)</h3><span class="small muted num">${cs.n}/${cs.tot}</span></div><div class="lines">${compRows}</div></section>`:''}
     ${sits.length?`<section class="panel"><div class="hd"><h3>Situations rencontrées</h3><span class="small muted num">${sits.filter(x=>seen(x.id)).length}/${sits.length}</span></div><div class="bd chips">${sits.map(x=>`<span class="chip ${seen(x.id)?'on':''}" style="cursor:default">${seen(x.id)?'✓ ':''}${esc(x.label)}</span>`).join('')}</div></section>`:''}
-    ${days.length?`<section class="panel"><div class="hd"><h3>C · Présence</h3><span class="small muted num">${days.filter(d=>pr[d]).length}/${days.length} jours</span></div><div class="bd chips">${days.map(d=>`<button class="chip ${pr[d]?'on':''}" data-act="presence" data-pid="${p.id}" data-d="${d}" aria-pressed="${!!pr[d]}">${pr[d]?'✓ ':''}${esc(fmtDate(d).slice(0,5))}</button>`).join('')}</div></section>`:''}
+    ${ct?(()=>{const n=c?theoryNote(c):null;const ch=ct.checks.find(x=>x.auto==='theory');const dv=c&&c.id&&ch?checkVal(c,ch):'';return `<section class="panel"><div class="hd"><h3>D · Évaluation théorique</h3><span class="small muted">12/20 minimum</span></div><div class="bd row">
+      <label class="f" style="width:120px">Note /20<input type="text" inputmode="decimal" id="pth-${p.id}" value="${esc((c&&c.theory||{}).score??'')}" placeholder="ex. 14,5" data-bind="score" data-scope="theory" data-pid="${p.id}"></label>
+      <span class="grow small">${dv==='oui'?'<b style="color:var(--t-vert)">Validée (OUI)</b>':dv==='non'?'<b style="color:var(--t-rouge)">Non validée (NON)</b>':n!==null&&n>=10&&n<12?'<b style="color:var(--t-orange)">Entretien de rattrapage à faire</b>':'<span class="muted">OUI / NON modifiable sur la fiche de certification</span>'}</span>
+      ${qcmFor(s.cursus)?`<button class="btn sm" data-act="person-qcm">Corriger le QCM</button>`:''}</div></section>`})():''}
+    ${days.length?`<section class="panel"><div class="hd"><h3>C · Présence</h3><span class="small muted num">${days.filter(d=>pr[d]).length}/${days.length} jours · ${hoursOf(s,days.filter(d=>pr[d]))}/${hoursOf(s,days)} h</span></div><div class="bd chips">${days.map(d=>`<button class="chip ${pr[d]?'on':''}" data-act="presence" data-pid="${p.id}" data-d="${d}" aria-pressed="${!!pr[d]}">${pr[d]?'✓ ':''}${esc(dayLabel(s,d))}</button>`).join('')}</div></section>`:''}
     <details class="panel" ${p.birthDate?'':'open'}><summary class="hd" style="cursor:pointer;list-style:none"><h3>État civil (certificat, notification)</h3><span class="small muted">${p.birthDate?esc(neLe(p)):'à compléter'}</span></summary><div class="bd fields">
       <label class="f">Civilité<select id="pc-civ" ${bind('civ','part')}><option value="">—</option><option ${p.civ==='Madame'?'selected':''}>Madame</option><option ${p.civ==='Monsieur'?'selected':''}>Monsieur</option></select></label>
       <label class="f">Date de naissance<input type="date" id="pc-bd" value="${esc(p.birthDate||'')}" ${bind('birthDate','part')}></label>
@@ -1136,6 +1154,11 @@ function viewSessionEdit(){
           <label class="f">Date de la circulaire FC<input type="text" id="sd-fccirc" value="${esc((d.fc||{}).circulaire||'')}" placeholder="JJ/MM/AAAA" ${db('fc.circulaire')}></label>`:''}
         </div></details>
       ${S.draftNew?'':'<p class="small muted" style="margin:0">Le type de formation ne peut plus être changé une fois la formation créée.</p>'}
+    </div></section>
+    <section class="panel"><div class="hd"><h3>Journées de formation</h3><span class="small muted num">${(d.days||[]).length} jour${(d.days||[]).length>1?'s':''} · ${(d.days||[]).reduce((t,x)=>t+(+x.h||0),0)} h</span></div><div class="bd stack" style="gap:8px">
+      ${(d.days||[]).map((x,i)=>`<div class="row" style="flex-wrap:nowrap"><b style="width:34px">${esc(x.id)}</b><input type="date" id="dy-${i}" value="${esc(x.date||'')}" aria-label="Date ${esc(x.id)}" ${db('days.'+i+'.date')}><input type="number" id="dh-${i}" min="0" max="12" step="0.5" style="width:84px" value="${esc(x.h)}" aria-label="Heures ${esc(x.id)}" ${db('days.'+i+'.h')}><span class="small muted">h</span></div>`).join('')}
+      <div class="row"><button class="btn sm" data-act="day-add">${I.plus}Journée</button><button class="btn sm" data-act="day-rm" ${(d.days||[]).length>1?'':'disabled'}>Retirer la dernière</button><button class="btn sm" data-act="day-reset">Durée réglementaire (PSE1 35 h, PSE2 28 h, FC 7 h)</button></div>
+      <p class="small muted" style="margin:0">Les journées peuvent être réparties sur plusieurs semaines : la présence se pointe par journée (J1, J2…).</p>
     </div></section>
     <section class="panel"><div class="hd"><h3>Formateurs de la session</h3><button class="btn sm" data-act="goto-trainers">${I.gear}Gérer la liste</button></div><div class="bd">
       ${tr.length?`<div class="chips">${tr.map(t=>`<button class="chip ${d.trainerIds.includes(t.id)?'on':''}" data-act="toggle-trainer" data-id="${t.id}" aria-pressed="${d.trainerIds.includes(t.id)}">${esc(tName(t.id))}</button>`).join('')}</div>`:'<p class="muted small" style="margin:0">Aucun formateur enregistré. Ajoutez-les dans Réglages : ils seront proposés dans les listes déroulantes des fiches.</p>'}
@@ -1252,11 +1275,11 @@ function viewCert(){
   const days=sessDays(s),pr=presenceOf(s,c.pid),th=c.theory||{},note=theoryNote(c);
   const checks=t.checks.map(ch=>{const v=checkVal(c,ch);let note2='',lock='',extra='';
     if(ch.auto==='tech'){const st=x?techStat(x):null;note2=st?`Fiche de technicité : ${st.n}/${st.tot} techniques faites${st.ok?'':' — OUI automatique quand tout est coché'}`:'Fiche de technicité non commencée';lock=st&&st.ok?'all':'oui';if(!x)lock=''}
-    else if(ch.auto==='presence'){if(days.length){const n=days.filter(d=>pr[d]).length;note2=`Présence : ${n}/${days.length} jour${days.length>1?'s':''} — OUI automatique quand toutes les journées sont pointées`;lock=n===days.length?'all':'oui';
-        extra=`<div class="chips" style="margin-top:6px">${days.map(d=>`<button class="chip ${pr[d]?'on':''}" data-act="presence" data-pid="${c.pid}" data-d="${d}" aria-pressed="${!!pr[d]}">${esc(fmtDate(d).slice(0,5))}</button>`).join('')}</div>`}
+    else if(ch.auto==='presence'){if(days.length){const n=days.filter(d=>pr[d]).length;note2=`Présence : ${n}/${days.length} jour${days.length>1?'s':''} (${hoursOf(s,days.filter(d=>pr[d]))}/${hoursOf(s,days)} h) — OUI automatique quand toutes les journées sont pointées`;lock=n===days.length?'all':'oui';
+        extra=`<div class="chips" style="margin-top:6px">${days.map(d=>`<button class="chip ${pr[d]?'on':''}" data-act="presence" data-pid="${c.pid}" data-d="${d}" aria-pressed="${!!pr[d]}">${esc(dayLabel(s,d))}</button>`).join('')}</div>`}
       else note2='Renseignez les dates de la formation pour pointer la présence'}
     else if(ch.auto==='theory'){note2=note===null?'Saisissez la note du questionnaire (QCM/QROC) : 12/20 minimum':note>=12?'Note ≥ 12/20 : validé':note>=10?'Note de 10 ou 11 : entretien de rattrapage avec le responsable pédagogique':'Note < 10 : pas de rattrapage possible pendant la session';
-      lock=note===null?'':'all';
+      if(c.checks[ch.id])note2+=' — décision saisie par le formateur (touchez à nouveau pour revenir au calcul)';lock='';
       extra=`<div class="row" style="margin-top:6px"><label class="f" style="width:130px">Note /20<input type="text" inputmode="decimal" id="c-score" value="${esc(th.score??'')}" placeholder="ex. 14,5" ${bind('theory.score')}></label>
         ${qcmFor(s.cursus)?`<button class="btn sm primary" data-act="open-qcm" style="align-self:end">Corriger le QCM question par question</button>`:`<label class="f" style="width:150px">ou bonnes réponses /40<input type="number" min="0" max="40" id="c-qcm" value="" placeholder="ex. 31" data-act-input="qcm"></label>`}
         ${note!==null&&note>=10&&note<12?`<label class="f" style="min-width:200px">Entretien de rattrapage<select id="c-retake" ${bind('theory.retake')}><option value="">— À faire —</option><option value="ok" ${th.retake==='ok'?'selected':''}>Connaissances suffisantes</option><option value="ko" ${th.retake==='ko'?'selected':''}>Insuffisantes</option></select></label>`:''}</div>`}
@@ -1288,6 +1311,23 @@ function viewCert(){
 /* =========================================================
    Fiche de technicité (cases « Fait »)
    ========================================================= */
+function techChecklist(x,pse2){return x.tpl.groups.map((gr,gi)=>{const n=gr.items.filter(i=>x.done[i.id]).length;return `<section class="panel tgroup ${pse2?'pse2':''}"><div class="hd"><h3>${esc(gr.title)}</h3><span class="small num">${n}/${gr.items.length}</span><button class="btn sm" data-act="tech-all" data-g="${gi}">${n===gr.items.length?'Tout décocher':'Tout cocher'}</button></div>
+      <div>${gr.items.map(it=>`<label class="titem ${x.done[it.id]?'done':''}"><input type="checkbox" data-act="tech" data-i="${it.id}" ${x.done[it.id]?'checked':''}><span>${esc(it.label)}</span>${x.done[it.id]?`<small>Fait ${esc(fmtDate(x.done[it.id]).slice(0,5))}</small>`:''}</label>`).join('')}</div></section>`}).join('')}
+function viewTechs(){
+  const s=curSess();if(!s)return viewSessions();const tt=techTpl(s.cursus);if(!tt)return '<div class="empty">Aucune fiche de technicité pour cette formation.</div>';
+  const parts=s.participants.filter(p=>!p.archived),pse2=/2/.test(s.cursus),sel=S.techPid||'all';
+  const X=parts.map(p=>ensureTech(s,p.id)).filter(Boolean);
+  const head=`<section class="panel"><div class="bd stack" style="gap:8px">
+      <label class="f">Participant<select id="tp-sel" data-bind="techPid" data-scope="ui"><option value="all" ${sel==='all'?'selected':''}>Tous les participants (cocher pour le groupe)</option>${parts.map(p=>{const x=techOf(s.id,p.id),st=x?techStat(x):{n:0,tot:0};return `<option value="${p.id}" ${sel===p.id?'selected':''}>${esc(fullName(p))} · ${st.n}/${st.tot}</option>`}).join('')}</select></label>
+      ${sel==='all'?`<div class="small muted">Cocher une technique la valide pour <b>tous</b> les participants (date du jour) ; la décocher la retire à tous. Le compteur indique combien l’ont déjà faite.</div>`:''}</div></section>`;
+  if(sel!=='all'){const x=ensureTech(s,sel);if(!x){S.techPid='all';return viewTechs()}S.eid=x.id;const st=techStat(x);
+    return `<div class="stack">${head}<section class="panel"><div class="bd row"><b class="grow">${esc(pName(s,sel))}</b><span class="pill ${st.ok?'ok':'wait'} num">${st.n}/${st.tot}</span>${EMBED?'':`<button class="btn sm" data-act="pdf-tech">${I.pdf}PDF</button>`}</div></section>${techChecklist(x,pse2)}</div>`}
+  const cnt=id=>X.filter(x=>x.done[id]).length;
+  return `<div class="stack">${head}
+    ${tt.groups.map((gr,gi)=>{const full=gr.items.every(it=>cnt(it.id)===X.length);return `<section class="panel tgroup ${pse2?'pse2':''}"><div class="hd"><h3>${esc(gr.title)}</h3><button class="btn sm" data-act="techg-all" data-g="${gi}">${full?'Tout décocher pour tous':'Tout cocher pour tous'}</button></div>
+      <div>${gr.items.map(it=>{const n=cnt(it.id);return `<label class="titem ${n===X.length?'done':''}"><input type="checkbox" data-act="techg" data-i="${it.id}" ${n===X.length&&X.length?'checked':''}><span>${esc(it.label)}</span><small style="color:${n===X.length?'var(--t-vert)':n?'var(--t-orange)':'var(--muted)'}">${n}/${X.length}</small></label>`}).join('')}</div></section>`}).join('')}
+  </div>`;
+}
 function viewTech(){
   const x=curEval(),s=curSess();if(!x||!s)return viewSessions();
   const st=techStat(x),pse2=/2/.test(s.cursus);
@@ -1298,8 +1338,7 @@ function viewTech(){
       <div class="fields"><label class="f">Du<input type="date" id="x-start" value="${esc(x.start)}" ${bind('start')}></label><label class="f">Au<input type="date" id="x-end" value="${esc(x.end)}" ${bind('end')}></label></div>
       <div class="small muted">Validation A : ${st.ok?'<b style="color:var(--t-vert)">OUI</b> — reportée automatiquement sur la fiche de certification.':'l’ensemble des techniques doit être coché « Fait » pour valider la ligne A de la fiche de certification.'}</div>
     </div></section>
-    ${x.tpl.groups.map((gr,gi)=>{const n=gr.items.filter(i=>x.done[i.id]).length;return `<section class="panel tgroup ${pse2?'pse2':''}"><div class="hd"><h3>${esc(gr.title)}</h3><span class="small num">${n}/${gr.items.length}</span><button class="btn sm" data-act="tech-all" data-g="${gi}">${n===gr.items.length?'Tout décocher':'Tout cocher'}</button></div>
-      <div>${gr.items.map(it=>`<label class="titem ${x.done[it.id]?'done':''}"><input type="checkbox" data-act="tech" data-i="${it.id}" ${x.done[it.id]?'checked':''}><span>${esc(it.label)}</span>${x.done[it.id]?`<small>Fait ${esc(fmtDate(x.done[it.id]).slice(0,5))}</small>`:''}</label>`).join('')}</div></section>`}).join('')}
+    ${techChecklist(x,pse2)}
     <div class="row">${EMBED?'':`<button class="btn primary grow" data-act="pdf-tech">${I.pdf}Exporter la fiche en PDF</button>`}</div>
   </div>`;
 }
@@ -1466,7 +1505,7 @@ function viewSettings(){
       <button class="btn" data-act="restore">Restaurer les grilles PSE1 et PSE2 d’origine</button>
       <button class="btn" data-act="del-samples">Supprimer les exemples</button>
       <button class="btn danger" data-act="wipe">${I.trash}Tout effacer</button></div></section>
-    <p class="small muted" style="margin:0">Évaluations PSE · UDPS 28 · version 2.3 · données stockées uniquement sur cet appareil.</p>
+    <p class="small muted" style="margin:0">Évaluations PSE · UDPS 28 · version 2.4 · données stockées uniquement sur cet appareil.</p>
   </div>`;
 }
 
@@ -2041,12 +2080,16 @@ const A={
   'open-session':d=>go('session',{sid:d.id,pid:null}),
   'open-person':d=>go('person',{pid:d.pid}),
   'new-session':()=>{const c=cursusList();if(!c.length){toast('Aucune grille : restaurez les grilles dans Réglages');return}
-    const at=activeTrainers();S.draft={id:uid(),cursus:S.cur!=='all'&&c.includes(S.cur)?S.cur:c[0],title:'',start:today(),end:'',lieu:'',trainerIds:at.length===1?[at[0].id]:[],participants:[],createdAt:Date.now(),updatedAt:Date.now()};S.draftNew=true;go('sessionEdit')},
-  'edit-session':()=>{S.draft=clone(curSess());S.draftNew=false;go('sessionEdit')},
+    const at=activeTrainers();S.draft={days:null,id:uid(),cursus:S.cur!=='all'&&c.includes(S.cur)?S.cur:c[0],title:'',start:today(),end:'',lieu:'',trainerIds:at.length===1?[at[0].id]:[],participants:[],createdAt:Date.now(),updatedAt:Date.now()};S.draftNew=true;go('sessionEdit')},
+  'edit-session':()=>{const s=curSess();ensureDays(s);S.draft=clone(s);S.draft.daysTouched=true;S.draftNew=false;go('sessionEdit')},
+  'day-add':()=>{const L=S.draft.days=S.draft.days||[];L.push({id:'J'+(L.length+1),date:'',h:7});S.draft.daysTouched=true;render()},
+  'day-rm':()=>{S.draft.days.pop();S.draft.daysTouched=true;render()},
+  'day-reset':()=>{S.draft.days=defaultDays(S.draft);S.draft.daysTouched=false;render()},
   'session-cancel':()=>{const n=S.draftNew;S.draft=null;go(n?'sessions':'session')},
   'session-save':()=>{const d=S.draft;
     d.participants=d.participants.filter(p=>p.archived||(p.nom||'').trim()||(p.prenom||'').trim());
     if(!d.title.trim())d.title=`${d.cursus} · ${fmtDate(d.start)||'session'}`;
+    if(!d.days||!d.days.length)d.days=defaultDays(d);delete d.daysTouched;
     const i=DB.sessions.findIndex(s=>s.id===d.id);d.updatedAt=Date.now();if(i>=0)DB.sessions[i]=d;else DB.sessions.push(d);
     save(true);S.draft=null;toast('Formation enregistrée');go('session',{sid:d.id,pid:null})},
   'del-session':()=>{const d=S.draft;const n=DB.evals.filter(e=>e.sessionId===d.id).length;
@@ -2087,6 +2130,9 @@ const A={
   check:d=>{const c=curEval();c.checks[d.k]=c.checks[d.k]===d.v?'':d.v;touch(c);render()},
   'reset-cert':()=>confirmBox('Effacer les corrections manuelles, validations et conditions de cette fiche ? Les passages issus des cas concrets restent.','Réinitialiser',()=>{const c=curEval();Object.assign(c,{overrides:{},extra:0,valid:{},checks:{},condOk:{}});touch(c);render()}),
   tech:(d,ev,el)=>{const x=curEval();if(el.checked)x.done[d.i]=today();else delete x.done[d.i];touch(x);render()},
+  techg:(d,ev,el)=>{const s=curSess();const X=s.participants.filter(p=>!p.archived).map(p=>ensureTech(s,p.id)).filter(Boolean);X.forEach(x=>{if(el.checked){if(!x.done[d.i])x.done[d.i]=today()}else delete x.done[d.i];touch(x)});render()},
+  'techg-all':d=>{const s=curSess();const X=s.participants.filter(p=>!p.archived).map(p=>ensureTech(s,p.id)).filter(Boolean);const gr=techTpl(s.cursus).groups[+d.g];
+    const full=gr.items.every(it=>X.every(x=>x.done[it.id]));X.forEach(x=>{gr.items.forEach(it=>{if(full)delete x.done[it.id];else if(!x.done[it.id])x.done[it.id]=today()});touch(x)});render();toast(full?'Rubrique décochée pour tous':'Rubrique cochée pour tous')},
   'tech-all':d=>{const x=curEval(),gr=x.tpl.groups[+d.g];const all=gr.items.every(i=>x.done[i.id]);gr.items.forEach(i=>{if(all)delete x.done[i.id];else if(!x.done[i.id])x.done[i.id]=today()});touch(x);render()},
   'pdf-formative':()=>{const e=curEval(),s=curSess();runExport('Création du PDF…',()=>({files:[pdfFile(`${s.cursus}_cas-concret_${e.date}_${slug(e.learners.map(l=>(participant(s,l.pid)||{}).nom||'').join('-'))}`,formativePages(e,s))],title:'Fiche formative'}))},
   'pdf-cert':()=>{const c=curEval(),s=curSess();runExport('Création du PDF…',()=>({files:[pdfFile(`${s.cursus}_certification_${pslug(s,c.pid)}`,certPages(c,s))],title:'Fiche de certification'}))},
@@ -2096,6 +2142,7 @@ const A={
   /* auto-évaluation (formation continue) */
   self:d=>{const e=curEval(),l=e.learners[+d.i];l.self=l.self||{};if(l.self[d.c]===d.v)delete l.self[d.c];else l.self[d.c]=d.v;touch(e);render()},
   /* QCM */
+  'person-qcm':()=>{const s=curSess();const c=ensureCert(s,S.pid);if(!c)return;S.eid=c.id;go('qcm')},
   'open-qcm':()=>{if(!qcmFor(curSess().cursus)){toast('Pas de QCM pour cette formation');return}go('qcm')},
   'qcm-show':(d,ev,el)=>{S.qcmShow=el.checked;render()},
   'qcm-mark':d=>{const c=curEval();c.qcm=c.qcm||{};c.qcm.mark=c.qcm.mark||{};c.qcm.ans=c.qcm.ans||{};delete c.qcm.ans[d.n];if(c.qcm.mark[d.n]===d.v)delete c.qcm.mark[d.n];else c.qcm.mark[d.n]=d.v;qcmToScore(c);render()},
@@ -2208,7 +2255,9 @@ function applyBind(el){
   const p=el.dataset.bind,sc=el.dataset.scope;let v=el.type==='checkbox'?el.checked:el.value;
   if(sc==='ui'){S[p]=v;return 'ui'}
   if(sc==='settings'){setPath(DB.settings,p,v);save();if(p==='extraSkills')render();return}
-  if(sc==='sdraft'){if(p.startsWith('fc.'))S.draft.fc=S.draft.fc||{};setPath(S.draft,p,v);if(p==='type')render();return}
+  if(sc==='sdraft'){if(p.startsWith('fc.'))S.draft.fc=S.draft.fc||{};if(/^days\.\d+\.h$/.test(p))v=v===''?'':Number(v);setPath(S.draft,p,v);
+    if(p==='type'||p==='cursus'||p==='start'){if(!S.draft.daysTouched){S.draft.days=defaultDays(S.draft)}render()}else if(p.startsWith('days.')){S.draft.daysTouched=true}return}
+  if(sc==='theory'){const se=curSess(),c=ensureCert(se,el.dataset.pid);if(c){c.theory=c.theory||{};c.theory.score=v;if(c.theory.src==='qcm')delete c.theory.src;touch(c)}return 'theory'}
   if(sc==='part'){const se=curSess(),pp=participant(se,S.pid);if(pp){setPath(pp,p,v);se.updatedAt=Date.now();save()}return}
   if(sc==='sess'){const se=curSess();if(se){if(p.startsWith('fc.'))se.fc=se.fc||{};setPath(se,p,v);se.updatedAt=Date.now();save()}return}
   if(sc==='tdraft'){if(el.type==='number')v=v===''?'':Number(v);setPath(S.tdraft,p,v);return}
@@ -2225,16 +2274,17 @@ document.addEventListener('change',ev=>{
   if(el.dataset.actInput==='qcm'){const n=parseInt(el.value,10);if(!isNaN(n)){const c=curEval();c.theory=c.theory||{};c.theory.score=String(Math.max(0,Math.min(40,n))/2).replace('.',',');touch(c);render();toast(`${n}/40 bonnes réponses = ${c.theory.score}/20`)}return}
   if(el.dataset.act&&el.type==='checkbox'){const f=A[el.dataset.act];if(f)f(el.dataset,ev,el);return}
   if(!el.dataset.bind)return;
-  if(el.id==='c-score'){render();return}
-  if(el.tagName==='SELECT'||el.type==='checkbox'){applyBind(el);if(el.dataset.scope==='eval'||(el.dataset.scope==='tdraft'&&/subMode|auto/.test(el.dataset.bind)))render()}
+  if(el.id==='c-score'||el.dataset.scope==='theory'){render();return}
+  if(el.tagName==='SELECT'||el.type==='checkbox'){applyBind(el);if(el.dataset.scope==='eval'||el.dataset.scope==='ui'||(el.dataset.scope==='tdraft'&&/subMode|auto/.test(el.dataset.bind)))render()}
   else if(el.dataset.scope==='tdraft'&&el.dataset.bind==='cursus')render();
 });
+document.addEventListener('toggle',ev=>{const el=ev.target;if(el.dataset&&el.dataset.panel)S.open[el.dataset.panel]=el.open},true);
 window.addEventListener('pagehide',()=>save(true));
 document.addEventListener('visibilitychange',()=>{if(document.hidden)save(true)});
 /* Bouton retour Android */
 if(NATIVE&&window.Capacitor.Plugins.App){window.Capacitor.Plugins.App.addListener('backButton',()=>{
   if($('#overlay').innerHTML){closeModal();return}
-  const m={session:'sessions',person:'session',sessionEdit:S.draftNew?'sessions':'session',formative:S.pid?'person':'session',cert:'person',tech:'person',qcm:'cert',satis:'session',survey:'session',tpl:'tpls'};
+  const m={session:'sessions',person:'session',sessionEdit:S.draftNew?'sessions':'session',formative:S.pid?'person':'session',cert:'person',tech:'person',techs:'session',qcm:'cert',satis:'session',survey:'session',tpl:'tpls'};
   if(m[S.view])go(m[S.view]);else if(S.view!=='sessions'){S.tab='sessions';go('sessions')}else window.Capacitor.Plugins.App.exitApp();
 })}
 window.__loadForms=loadForms;
