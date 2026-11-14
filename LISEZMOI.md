@@ -1,6 +1,6 @@
-# Évaluations PSE · UDPS 28 (version 2.4)
+# Eval · UDPS 28 (version 2.5)
 
-Application de terrain pour les formations PSE1 et PSE2. Elle fonctionne **entièrement sans réseau**.
+Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d'équipe (CE). Elle fonctionne **entièrement sans réseau**.
 
 ## Fonctionnement
 1. **Formations** (1er onglet) : choisir ou créer une formation (PSE1, PSE2…), les formateurs de la session et les participants (saisie un par un ou liste collée).
@@ -27,6 +27,14 @@ Application de terrain pour les formations PSE1 et PSE2. Elle fonctionne **enti�
 - **C** : OUI quand le participant est pointé présent à toutes les journées (feuille de présence).
 - **D** : OUI à partir de 12/20 au questionnaire. Entre 10 et 11 : entretien de rattrapage avec le responsable pédagogique. Sous 10 : NON.
 - **Dossier** par participant, dans l'ordre du référentiel : technicité, fiches d'évaluation, certification.
+
+## Version 2.5 : PIC F, PAE FPSE, Chef d'équipe
+- L'application s'appelle désormais **Eval** (l'APK devient `Eval.apk` ; la mise à jour s'installe par-dessus la 2.4 et garde les données).
+- **PIC F** (4 jours, 28 h) : les 11 fiches d'évaluation du référentiel (étude de cas, travail de groupe…), cotées A / B, sur le fond d'origine. La **fiche de suivi** se remplit seule : pour chaque jour, la note la plus fréquente des fiches du jour (en cas d'égalité, la moins favorable). Chaque case peut être modifiée d'une touche. La capacité est validée dès qu'elle a été évaluée au moins une fois. Page 2 : points forts et axes d'amélioration par journée, puis observations.
+- **PAE FPSE** (6 jours, 49 h) : les fiches d'évaluation du référentiel cotées A / B / C / NO, la fiche de suivi sur 6 jours, la note finale et l'**avis final de l'équipe pédagogique** (évaluateurs, validations OUI/NON, aptitude, lieu et date). Les compétences 1 à 4.2 demandent A ou B, et 5.1 à 6.2 demandent A. Une case « titulaire du PAE FPSC » valide d'office 1, 2.1, 2.2, 5.1 et 5.2. Le NON reste une décision du jury : l'application ne l'impose jamais d'elle-même.
+- **Chef d'équipe** (3 jours) : fiche d'évaluation formative (C1, C2, C4, C7, C8 avec les 4 types de bilan) et fiche de certification individuelle (2 passages minimum, niveaux 2B / 2B / 1A / 2B / 2B, QCM sur 40 avec 24 minimum, sans rattrapage).
+- **Procès-verbaux** de formation PIC F, PAE FPSE (formation initiale et continue) et Chef d'équipe, sur le fond d'origine.
+- Tous ces documents se trouvent dans le dossier du participant, dans l'export à la carte et dans l'export de session.
 
 ## Version 2.4
 - **Journées de formation** J1… avec date et heures : PSE1 5 × 7 h = 35 h, PSE2 4 × 7 h = 28 h, formation continue 1 × 7 h. Elles peuvent être réparties sur plusieurs semaines (Modifier la formation › Journées). La présence se pointe par journée, avec le total d'heures ; la feuille de présence reste ouverte pendant le pointage. La ligne « Tous les participants » (et le bouton « Présence du jour » quand une journée tombe aujourd’hui) pointe (ou retire) une journée pour tout le groupe en un geste.
@@ -68,7 +76,7 @@ La fiche de certification PSE2 reste redessinée : seul un exemplaire à 96 dpi,
 **https://forma-st.github.io/UDPS28-eval/**
 
 ## Installer sur Android
-Copier `Eval-PSE.apk` sur la tablette, l'ouvrir, puis autoriser « Installer des applis inconnues ». La version 2.0 remplace la 1.0.
+Copier `Eval.apk` sur la tablette, l'ouvrir, puis autoriser « Installer des applis inconnues ». La version 2.0 remplace la 1.0.
 **Attention** : les données de la 1.0 (simple démonstration) ne sont pas reprises.
 
 ## iPhone / iPad
@@ -77,5 +85,5 @@ Ouvrir **https://forma-st.github.io/UDPS28-eval/** dans Safari, puis « Ouvrir l
 ## Modifier l'application
 - Code : `src/app.html`. Logo et icônes : `brand/`.
 - `python3 build.py` régénère `docs/app/` (site GitHub Pages, publié à chaque push sur `main`) et `fichier-unique.html`.
-- Après une nouvelle compilation, copier l'APK dans `docs/Eval-PSE.apk`.
+- Après une nouvelle compilation, copier l'APK dans `docs/Eval.apk`.
 - APK : `cd mobile && npx cap sync android && cd android && ./gradlew assembleDebug` (SDK Android requis). La clé de signature (`debug.keystore`, envoyée à part et volontairement absente du dépôt public) se place dans `~/.android/` : la garder pour que les mises à jour s'installent par-dessus.

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Éval PSE</string>
-    <string name="title_activity_main">Éval PSE</string>
+    <string name="app_name">Eval</string>
+    <string name="title_activity_main">Eval</string>
     <string name="package_name">fr.evaluations.pse</string>
     <string name="custom_url_scheme">fr.evaluations.pse</string>
 </resources>

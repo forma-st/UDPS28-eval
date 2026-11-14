@@ -1,6 +1,6 @@
 {
   "appId": "fr.evaluations.pse",
-  "appName": "Éval PSE",
+  "appName": "Eval",
   "webDir": "../docs/app",
   "android": { "allowMixedContent": false },
   "plugins": {}

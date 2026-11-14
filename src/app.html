@@ -1,4 +1,4 @@
-<title>Évaluations PSE</title>
+<title>Eval</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#002b6b">
 <!--FONTS-->
@@ -236,7 +236,7 @@ input[type=color]{width:52px;height:40px;border:1px solid var(--line);border-rad
    Constantes et utilitaires
    ========================================================= */
 const KEY='evaluations-pse-v2';
-const APP_VERSION='2.4.2';
+const APP_VERSION='2.5.0';
 const LOGO='__LOGO__', MARK='__MARK__';
 const EMBED=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -290,6 +290,17 @@ const CERT_CHECKS=()=>[
   {id:'D',label:'Avoir validé l’évaluation théorique.',auto:'theory'}];
 const FORM_HEADER=r=>({left:'EPN ANPS',center:'Conception des formations',title:'Evaluation formative',ref:'EVAL/ '+r,maj:'25.02.2023'});
 const g=(title,items)=>({id:slug(title).toLowerCase(),title,items:items.map((l,i)=>({id:slug(title).toLowerCase().slice(0,14)+'-'+(i+1),label:l}))});
+/* Fiches d'évaluation des techniques pédagogiques (PIC F, PAE FPSE) extraites des référentiels (tools/fiches.py) */
+const FICHES=__FICHES__;
+const SC_AB=()=>[{code:'A',label:'Acquis',desc:'Correspond à une maîtrise particulièrement affirmée des compétences qui permet de valider.',tone:'vert',result:'ok'},{code:'B',label:'En cours d’acquisition',desc:'Correspond à des savoirs ou des compétences qui doivent encore être étayés mais qui permet de valider.',tone:'orange',result:'ok'}];
+const SC_ABC=()=>[{code:'A',label:'Maîtrisé',desc:'Connaissances et compétences attendues pleinement maîtrisées.',tone:'vertf',result:'ok'},{code:'B',label:'Acquis',desc:'Connaissances et compétences acquises, mobilisation perfectible.',tone:'vert',result:'ok'},{code:'C',label:'En cours d’acquisition',desc:'Acquis partiels ou instables.',tone:'orange',result:'ko'},{code:'NO',label:'Non observable',desc:'',tone:'gris',result:'none'}];
+function ficheTemplates(cur){const F=FICHES[cur]||[];return F.map(f=>({id:f.id,builtin:true,rev:1,cursus:cur,kind:'formative',fiche:true,learners:1,
+  name:`${cur==='PICF'?'PIC F':'PAE FPSE'} · Fiche n°${f.num} · ${f.title.charAt(0)+f.title.slice(1).toLowerCase()}`,title:f.title,ref:f.ref,
+  header:{left:'EPN ANPS',center:'CONCEPTION DES FORMATIONS',title:'Fiche d’Évaluation n°'+f.num+' '+f.title,ref:f.ref,maj:cur==='PICF'?'18.02.2022':'22.07.2025'},
+  scale:cur==='PICF'?SC_AB():SC_ABC(),
+  criteria:f.rows.map((r,i)=>r.sec?{id:'s'+i,sec:true,label:r.sec,code:'',children:[]}:{id:'r'+i,code:(r.comp||[]).join(' · '),label:r.label,feeds:r.comp||[],ne:!!r.ne,children:[]})}))}
+const PICF_COMPS=[['1','Est capable d’évaluer le niveau de connaissances acquises et celles restant à acquérir'],['2.1','Est capable d’utiliser avec efficacité un support pédagogique'],['2.2','Est capable de s’appuyer sur les acquis des apprenants dans la progression pédagogique'],['2.3','Est capable de démontrer, diriger, expliquer et justifier'],['3','Est capable d’organiser l’apprentissage des apprenants par groupe'],['4','Est capable de placer les apprenants dans une situation proche de la réalité lors d’une simulation et utiliser une évaluation formative'],['5','Est capable de placer l’apprenant dans une situation de travail de groupe'],['6','Est capable de suivre un RIF et adapter si nécessaire les activités'],['7','Est capable d’évaluer l’apprenant'],['8','Est capable de s’auto évaluer dans son rôle de formateur'],['9','Est capable d’établir une communication dans le cadre de la formation'],['10','Est capable d’adapter sa posture, en maîtrisant le cadre juridique et celui de son autorité d’emploi'],['11','Est capable de gérer la mise en place d’une formation : aspects logistique, administratifs…'],['12','Est capable de faciliter l’acquisition des savoirs en positionnant le groupe dans une situation respectant les conditions d’apprentissage chez l’adulte'],['13','Est capable de gérer les comportements et les attitudes au sein du groupe'],['14','Est capable d’utiliser les outils de communication et créer les supports pédagogiques adaptés']];
+const PAE_COMPS=[['1','Dispenser les enseignements pratiques et théoriques de la sensibilisation aux « gestes qui sauvent »','AB'],['2.1','Dispenser les enseignements pratiques et théoriques de l’unité d’enseignement « Premiers Secours Citoyen »','AB'],['2.2','Évaluer les enseignements pratiques et théoriques de l’unité d’enseignement « Premiers Secours Citoyen »','AB'],['3.1','Dispenser les enseignements pratiques et théoriques de l’unité d’enseignement « Premiers Secours en Équipe de niveau 1 »','AB'],['3.2','Évaluer les enseignements pratiques et théoriques de l’unité d’enseignement « Premiers Secours en Équipe de niveau 1 »','AB'],['4.1','Dispenser les enseignements pratiques et théoriques de l’unité d’enseignement « Premiers Secours en Équipe de niveau 2 »','AB'],['4.2','Évaluer les enseignements pratiques et théoriques de l’unité d’enseignement « Premiers Secours en Équipe de niveau 2 »','AB'],['5.1','Maîtriser les techniques des recommandations « Citoyen Sauveteur »','A'],['5.2','Maîtriser les procédures des recommandations « Citoyen Sauveteur »','A'],['6.1','Maîtriser les techniques des recommandations « Premiers Secours en Équipe »','A'],['6.2','Maîtriser les procédures des recommandations « Premiers Secours en Équipe »','A']];
 function builtinTemplates(){return [
  {id:'pse1-formative',builtin:true,rev:4,cursus:'PSE1',kind:'formative',name:'PSE1 · Évaluation formative (cas concret)',learners:2,header:FORM_HEADER('PSE1'),
   scale:FORMATIVE_SCALE(),situations:SITUATIONS_PSE1(),criteria:[
@@ -355,6 +366,22 @@ function builtinTemplates(){return [
    g('TRAUMATISMES',['Contention pelvienne','Immobilisation d’un membre inférieur au moyen d’une attelle à traction','Immobilisation générale sur un plan dur (3 possibilités)','Immobilisation générale sur un matelas à dépression','Pose de l’attelle cervico-thoracique','Réalignement de membre']),
    g('RELEVAGE',['Relevage à l’aide d’un brancard cuillère','Pont néerlandais à 4 secouristes','Pont amélioré','Relevage d’une victime en position latérale de sécurité','Pont néerlandais à 3 secouristes','Pont simple','Transfert d’une victime du lit au brancard à 3 secouristes','Relevage d’une victime en position genoux fléchies','Relevage d’une victime en position demi-assise','Transfert d’une victime sur une chaise de transport','Transfert d’une victime à l’aide d’une alèse portoir']),
    g('BRANCARDAGE',['Préparer un brancard','Arrimage d’une victime','Aide à la marche','Brancardage d’une victime à 3 secouristes en terrain plat','Brancardage d’une victime à 4 secouristes en terrain plat','Brancardage d’une victime à l’aide d’un chariot brancard (VPSP)','Franchissement d’un obstacle à 3 secouristes','Franchissement d’un obstacle à 4 secouristes','Brancardage d’une victime au travers d’un passage étroit','Brancardage d’une victime dans une pente ou un escalier à 3 secouristes','Brancardage d’une victime dans une pente ou un escalier à 4 secouristes','Installation d’une victime dans un véhicule de premiers secours à personne','Déplacement d’une victime sur une chaise de transport en terrain plat','Déplacement d’une victime sur une chaise de transport dans des escaliers'])]}
+  ,...ficheTemplates('PICF'),
+ {id:'picf-suivi',builtin:true,rev:1,cursus:'PICF',kind:'suivi',name:'PIC F · Fiche de suivi de l’apprenant',days:4,rule:'any',scale:[{code:'A',label:'Acquis',tone:'vert',result:'ok'},{code:'B',label:'En cours d’acquisition',tone:'orange',result:'ok'},{code:'NE',label:'Non évalué',tone:'gris',result:'none'}],
+  comps:PICF_COMPS.map(([code,label])=>({code,label,req:'AB'}))},
+  ...ficheTemplates('PAEFPSE'),
+ {id:'paefpse-suivi',builtin:true,rev:1,cursus:'PAEFPSE',kind:'suivi',name:'PAE FPSE · Fiche de suivi et avis final',days:6,rule:'final',avis:true,scale:SC_ABC().slice(0,3),
+  comps:PAE_COMPS.map(([code,label,req])=>({code,label,req})),fpsc:['1','2.1','2.2','5.1','5.2'],groups:[{label:'Compétences du formateur (n°1 /2.1/2.2/3.1/3.2/4.1/4.2)',codes:['1','2.1','2.2','3.1','3.2','4.1','4.2']},{label:'Maitrise des procédures et des gestes techniques (Compétences n°5.1/5.2/6.1/6.2)',codes:['5.1','5.2','6.1','6.2']}]},
+ {id:'ce-formative',builtin:true,rev:1,cursus:'CE',kind:'formative',name:'CE · Fiche d’évaluation formative (cas concret)',learners:1,
+  header:{left:'EPN A.N.P.S',center:'Association Nationale des Premiers Secours',title:'FICHE D’EVALUATION FORMATIVE',ref:'FE/FI CE',maj:'20.04.2022'},
+  scale:[{code:'A',label:'Très bonne maîtrise',desc:'Correspond à une maîtrise particulièrement affirmée de la compétence.',tone:'vertf',result:'ok'},{code:'B',label:'Maîtrise satisfaisante',desc:'Niveau attendu en fin de cycle. L’objectif est atteint.',tone:'vert',result:'ok'},{code:'C',label:'Maîtrise fragile',desc:'Correspond à des savoirs ou des compétences qui doivent encore être étayés.',tone:'orange',result:'ko'},{code:'NE',label:'Non évalué',desc:'',tone:'gris',result:'none'}],
+  criteria:[{id:'e1',code:'C1',label:'Possède un comportement adapté à la situation',feeds:'1',children:[]},{id:'e2',code:'C2',label:'Coordonne l’action de son équipe par des décisions précises et un fil conducteur clair de l’intervention',feeds:'2',children:[]},
+   {id:'e4',code:'C4',label:'Transmettre et recevoir un bilan par radio',feeds:'4',children:[]},{id:'e7',code:'C7',label:'Gère les différentes étapes d’un DPS par un management adapté',feeds:'7',children:[]},
+   {id:'e8',code:'C8',label:'Dirige et réalise un bilan conforme',feeds:'8',subMode:'check',children:[{id:'e8a',label:'Circonstanciel'},{id:'e8b',label:'Urgence vitale'},{id:'e8c',label:'Complémentaire'},{id:'e8d',label:'Surveillance'}]}]},
+ {id:'ce-certif',builtin:true,rev:1,cursus:'CE',kind:'certificative',name:'CE · Fiche de certification individuelle',header:{title:'FICHE DE CERTIFICATION INDIVIDUELLE « Chef d’équipe »',ref:''},
+  theme:{band:'#e46c0a',light:'#f6b98c'},passages:{min:2,max:6},scale:CERT_SCALE(),theory:{max:40,pass:24},
+  criteria:[{id:'q1',code:'1',label:'Évoluer dans le cadre juridique applicable à son action.',expected:'2B'},{id:'q2',code:'2',label:'Coordonner l’action de son équipe de secours',expected:'2B'},{id:'q4',code:'4',label:'Assurer la transmission d’un bilan par radio',expected:'1A'},{id:'q7',code:'7',label:'Assurer le management de son équipe de secours tout au long d’un DPS',expected:'2B'},{id:'q8',code:'8',label:'Diriger et retranscrire les phases d’un bilan',expected:'2B'}],
+  checks:[{id:'A',label:'Avoir suivi l’entièreté du volume de formation',auto:'presence'},{id:'B',label:'Avoir acquis les connaissances via l’évaluation théorique (Compétences 3 / 5 / 6) – Note de 24/40',auto:'theory'},{id:'C',label:'Avoir acquis ou maîtrisé l’ensemble des attitudes et habiletés',auto:true}]}
 ]}
 function blankTemplate(kind,cursus){
   const c=cursus||'';
@@ -433,10 +460,41 @@ const resultOf=(t,code)=>{const s=scaleOf(t,code);return s?(s.result||'none'):''
 const codeFor=(t,res)=>(t.scale.find(s=>s.result===res)||{}).code||'';
 const rated=c=>(c.children||[]).length&&c.subMode!=='check';
 const shown=c=>!c.optional||DB.settings.extraSkills;
-function items(t){const out=[];t.criteria.filter(shown).forEach(c=>{out.push({id:c.id,code:c.code,label:c.label,feeds:c.feeds,sub:false,c});if(rated(c))c.children.forEach(ch=>out.push({id:ch.id,code:'',label:ch.label,sub:true}))});return out}
+const feedsOf=c=>Array.isArray(c.feeds)?c.feeds.map(String):(c.feeds?[String(c.feeds)]:[]);
+function items(t){const out=[];t.criteria.filter(shown).filter(c=>!c.sec&&!c.ne).forEach(c=>{out.push({id:c.id,code:c.code,label:c.label,feeds:c.feeds,sub:false,c});if(rated(c))c.children.forEach(ch=>out.push({id:ch.id,code:'',label:ch.label,sub:true}))});return out}
 const sessFormatives=sid=>DB.evals.filter(e=>e.sessionId===sid&&e.kind==='formative').sort((a,b)=>(a.date||'').localeCompare(b.date||'')||a.createdAt-b.createdAt);
 const findEval=(sid,pid,kind)=>DB.evals.find(e=>e.sessionId===sid&&e.kind===kind&&e.pid===pid);
 const certOf=(sid,pid)=>findEval(sid,pid,'certificative');
+const suiviOf=(sid,pid)=>findEval(sid,pid,'suivi');
+const suiviTpl=c=>DB.templates.find(t=>t.kind==='suivi'&&t.cursus===c);
+function ensureSuivi(sess,pid){let x=suiviOf(sess.id,pid);if(x)return x;const t=suiviTpl(sess.cursus);if(!t)return null;
+  x={id:uid(),sessionId:sess.id,kind:'suivi',pid,tpl:clone(t),overrides:{},notes:{},observations:'',final:{},checks:{},createdAt:Date.now(),updatedAt:Date.now()};DB.evals.push(x);save();return x}
+/* journée d'un cas concret / d'une fiche : journée dont la date correspond, sinon la précédente */
+function dayIdOf(s,date){const D=ensureDays(s);const d=D.find(x=>x.date===date);if(d)return d.id;const past=D.filter(x=>x.date&&date&&x.date<=date);return past.length?past[past.length-1].id:(D[0]||{}).id}
+/* « 2 » sur une fiche PIC F = capacités 2.1, 2.2 et 2.3 */
+const expandComps=(codes,t)=>codes.flatMap(c=>t.comps.some(k=>k.code===c)?[c]:t.comps.filter(k=>k.code.startsWith(c+'.')).map(k=>k.code));
+/* critère le plus représenté de la journée (à égalité : le moins favorable) */
+function majority(vals,t){if(!vals||!vals.length)return '';const n={};vals.forEach(v=>n[v]=(n[v]||0)+1);const max=Math.max(...Object.values(n));
+  return Object.keys(n).filter(k=>n[k]===max).sort((a,b)=>rankOf(t,b)-rankOf(t,a))[0]}
+function suiviGrid(x,s){
+  const t=x.tpl,days=sessDays(s).slice(0,Math.max(t.days||0,sessDays(s).length));const auto={},src={};t.comps.forEach(k=>{auto[k.code]={};src[k.code]={}});
+  sessFormatives(s.id).filter(e=>e.counts!==false).forEach(e=>{const l=e.learners.find(l=>l.pid===x.pid);if(!l)return;const dj=dayIdOf(s,e.date);
+    items(e.tpl).forEach(it=>{if(it.sub||!it.c)return;const sc=scaleOf(e.tpl,l.marks[it.id]);if(!sc||(sc.result||'none')==='none')return;
+      expandComps(feedsOf(it.c),t).forEach(code=>{if(!auto[code])return;(auto[code][dj]=auto[code][dj]||[]).push(sc.code);(src[code][dj]=src[code][dj]||new Set()).add(e.id)})})});
+  const cells={},manual={},fin={},ok={};const fp=(participant(s,x.pid)||{}).fpsc&&t.fpsc?t.fpsc:[];
+  t.comps.forEach(k=>{cells[k.code]={};manual[k.code]={};let last='';
+    days.forEach(d=>{const a=majority(auto[k.code][d],t);const o=(x.overrides[k.code]||{})[d];const v=o!==undefined?o:a;cells[k.code][d]=v;manual[k.code][d]=o!==undefined&&o!==a;if(v&&v!=='NE')last=v});
+    fin[k.code]=fp.includes(k.code)?'A':(x.final[k.code]||last);
+    const seen=days.some(d=>cells[k.code][d]&&cells[k.code][d]!=='NE');
+    ok[k.code]=fp.includes(k.code)||(t.rule==='any'?seen:(k.req==='A'?fin[k.code]==='A':['A','B'].includes(fin[k.code])))});
+  return {days,cells,manual,fin,ok,fpsc:fp,src};
+}
+function suiviChecks(x,s,G){G=G||suiviGrid(x,s);const t=x.tpl,days=sessDays(s),pr=presenceOf(s,x.pid),pres=days.length?days.every(d=>pr[d]):null;
+  const groups=t.groups||[{label:'Capacités',codes:t.comps.map(k=>k.code)}];
+  const g=groups.map(gr=>{const m=(x.checks||{})[gr.label];return m||(gr.codes.every(c=>G.ok[c])?'oui':'')});
+  return {pres,groups:g}}
+function suiviVerdict(x,s){const G=suiviGrid(x,s),C=suiviChecks(x,s,G);const m=(x.checks||{}).APT;if(m)return m==='oui'?'apte':'inapte';
+  if(C.groups.some(v=>v==='non'))return 'inapte';if(C.groups.every(v=>v==='oui')&&C.pres!==false)return 'apte';return ''}
 const techOf=(sid,pid)=>findEval(sid,pid,'technicite');
 function ensureCert(sess,pid){
   let c=certOf(sess.id,pid);if(c)return c;const t=certTpl(sess.cursus);if(!t)return null;
@@ -458,7 +516,7 @@ function mapLevel(ft,code,ct){const s=scaleOf(ft,code);if(!s||(s.result||'none')
 /* niveau d'un passage pour une compétence = le plus faible des critères qui l'alimentent (NE ignoré) */
 function feedValue(pass,code,ct){
   const ft=pass.e.tpl;let worst='';
-  ft.criteria.filter(c=>shown(c)&&String(c.feeds||'')===String(code)).forEach(c=>{[c,...(rated(c)?c.children:[])].forEach(x=>{const v=mapLevel(ft,pass.l.marks[x.id],ct);if(v&&(!worst||rankOf(ct,v)>rankOf(ct,worst)))worst=v})});
+  ft.criteria.filter(c=>shown(c)&&feedsOf(c).includes(String(code))).forEach(c=>{[c,...(rated(c)?c.children:[])].forEach(x=>{const v=mapLevel(ft,pass.l.marks[x.id],ct);if(v&&(!worst||rankOf(ct,v)>rankOf(ct,worst)))worst=v})});
   return worst;
 }
 /* « 3B » = 3 validations au niveau B ou mieux (tableau des niveaux d'acquisition du référentiel) */
@@ -478,9 +536,9 @@ function compStatus(c,G,k){
   st.auto=st.count>=req.n&&st.condOk?'oui':'';return st;
 }
 function validOf(c,k,G){const m=c.valid[k.id];if(m)return m;const s=sessById(c.sessionId);if(!s)return '';return compStatus(c,G||certGrid(c,s),k).auto}
-const DUREE={PSE1:5,PSE2:4};
+const DUREE={PSE1:5,PSE2:4,PICF:4,PAEFPSE:6,CE:3};const HEURES={PAEFPSE:[8,8,8,8,8.5,8.5]};
 function defaultDays(s){const n=s.type==='FC'?1:(DUREE[s.cursus]||1);const out=[];let d=s.start?new Date(s.start+'T12:00:00'):null;
-  for(let i=0;i<n;i++){let iso='';if(d){while(d.getDay()===0||d.getDay()===6)d.setDate(d.getDate()+1);iso=d.toISOString().slice(0,10);if(s.end&&iso>s.end)iso='';d.setDate(d.getDate()+1)}out.push({id:'J'+(i+1),date:iso,h:7})}return out}
+  for(let i=0;i<n;i++){let iso='';if(d){while(d.getDay()===0||d.getDay()===6)d.setDate(d.getDate()+1);iso=d.toISOString().slice(0,10);if(s.end&&iso>s.end)iso='';d.setDate(d.getDate()+1)}out.push({id:'J'+(i+1),date:iso,h:(HEURES[s.cursus]||[])[i]||7})}return out}
 /* journées de formation : J1, J2… avec date et heures ; migration de l'ancienne présence par date */
 function ensureDays(s){if(!s)return [];if(!Array.isArray(s.days)||!s.days.length){s.days=defaultDays(s);
     const pr=s.presence||{};Object.keys(pr).forEach(pid=>{const old=pr[pid],nw={};Object.keys(old).forEach(k=>{if(/^J\d+$/.test(k))nw[k]=old[k];else{const dy=s.days.find(x=>x.date===k);if(dy)nw[dy.id]=true}});pr[pid]=nw})}
@@ -490,6 +548,7 @@ const dayOf=(s,id)=>ensureDays(s).find(d=>d.id===id)||{id,h:7,date:''};
 const dayLabel=(s,id)=>{const d=dayOf(s,id);return d.date?`${id} · ${fmtDate(d.date).slice(0,5)}`:id};
 const hoursOf=(s,ids)=>ids.reduce((t,id)=>t+(+dayOf(s,id).h||0),0);
 const presenceOf=(s,pid)=>((s.presence||{})[pid])||{};
+const thOf=c=>{const t=c&&c.tpl&&c.tpl.theory;return t?{max:t.max||20,pass:t.pass||12,retake:t.retake??null}:{max:20,pass:12,retake:10}};
 const theoryNote=c=>{const n=parseFloat(String((c.theory||{}).score??'').replace(',','.'));return isNaN(n)?null:n};
 function certGrid(c,sess){
   const t=c.tpl;let auto=passagesFor(sess,c.pid);const over=Math.max(0,auto.length-t.passages.max);if(over)auto=auto.slice(over);
@@ -503,8 +562,8 @@ function certGrid(c,sess){
 function checkVal(c,ch){
   if(ch.auto==='presence'){const s=sessById(c.sessionId),days=sessDays(s);if(!days.length)return c.checks[ch.id]||'';
     const pr=presenceOf(s,c.pid);if(days.every(d=>pr[d]))return 'oui';return c.checks[ch.id]==='non'?'non':''}
-  if(ch.auto==='theory'){if(c.checks[ch.id])return c.checks[ch.id];const n=theoryNote(c);if(n===null)return '';if(n>=12)return 'oui';
-    if(n>=10){const r=(c.theory||{}).retake;return r==='ok'?'oui':r==='ko'?'non':''}return 'non'}
+  if(ch.auto==='theory'){if(c.checks[ch.id])return c.checks[ch.id];const n=theoryNote(c);if(n===null)return '';const th=thOf(c);if(n>=th.pass)return 'oui';
+    if(th.retake!=null&&n>=th.retake){const r=(c.theory||{}).retake;return r==='ok'?'oui':r==='ko'?'non':''}return 'non'}
   if(ch.auto==='tech'){const s=sessById(c.sessionId);const x=s&&techOf(s.id,c.pid);
     if(x&&techStat(x).ok)return 'oui';return c.checks[ch.id]==='non'?'non':(x?'':(c.checks[ch.id]||''))}
   if(ch.auto){const s=sessById(c.sessionId),G=s?certGrid(c,s):null;const v=c.tpl.criteria.map(k=>G?validOf(c,k,G):c.valid[k.id]);if(v.some(x=>x==='non'))return 'non';if(v.length&&v.every(x=>x==='oui'))return 'oui';return ''}
@@ -559,7 +618,7 @@ function go(view,opts={}){Object.assign(S,opts);S.view=view;render();window.scro
 function render(){
   renderTop();renderNav();
   const v=S.view,m=$('#main');
-  const views={sessions:viewSessions,session:viewSession,person:viewPerson,sessionEdit:viewSessionEdit,formative:viewFormative,cert:viewCert,tech:viewTech,techs:viewTechs,qcm:viewQcm,survey:viewSurvey,satis:viewSatis,tpls:viewTpls,tpl:viewTplEdit,settings:viewSettings};
+  const views={sessions:viewSessions,session:viewSession,person:viewPerson,sessionEdit:viewSessionEdit,formative:viewFormative,cert:viewCert,tech:viewTech,techs:viewTechs,suivi:viewSuivi,qcm:viewQcm,survey:viewSurvey,satis:viewSatis,tpls:viewTpls,tpl:viewTplEdit,settings:viewSettings};
   m.innerHTML=(views[v]||viewSessions)();
   $('#fabslot').innerHTML=v==='sessions'?`<button class="fab" data-act="new-session">${I.plus}Nouvelle formation</button>`:v==='tpls'?`<button class="fab" data-act="new-tpl">${I.plus}Nouvelle grille</button>`:'';
 }
@@ -568,16 +627,17 @@ function renderTop(){
   const v=S.view;let left='',title='',right='';
   const back=to=>`<button class="ibtn" data-act="back" data-v="${to}" aria-label="Retour">${I.back}</button>`;
   const s=curSess();
-  if(v==='sessions'){left=markImg();title=`Évaluations PSE<small>UDPS 28 · version ${APP_VERSION}</small>`}
+  if(v==='sessions'){left=markImg();title=`Eval<small>UDPS 28 · version ${APP_VERSION}</small>`}
   else if(v==='tpls'){left=markImg();title='Grilles<small>PSE1, PSE2 et grilles ajoutées</small>'}
   else if(v==='settings'){left=markImg();title='Réglages<small>Formateurs, sauvegarde, transfert</small>'}
   else if(v==='session'){left=back('sessions');title=`${esc(s.title||s.cursus)}<small>${esc(s.cursus)} · ${s.participants.filter(p=>!p.archived).length} participants</small>`;
     right=`<button class="ibtn" data-act="export-menu" aria-label="Exporter et envoyer">${I.share}<span class="lbl small">Envoyer</span></button><button class="ibtn" data-act="edit-session" aria-label="Modifier la formation">${I.edit}</button>`}
   else if(v==='person'){left=back('session');title=`${esc(pName(s,S.pid))}<small>${esc(s.title||s.cursus)}</small>`;right=pdfBtn('pick-export','Exporter')}
   else if(v==='sessionEdit'){left=`<button class="ibtn" data-act="session-cancel" aria-label="Annuler">${I.x}</button>`;title=`${S.draftNew?'Nouvelle formation':'Modifier la formation'}<small>Participants et formateurs</small>`;right=`<button class="ibtn solid" data-act="session-save">Enregistrer</button>`}
-  else if(v==='formative'){const e=curEval();left=back(S.pid?'person':'session');title=`Cas concret · ${esc(fmtDate(e.date))}<small>${esc(e.learners.map(l=>pName(s,l.pid)).join(' · '))}</small>`;right=pdfBtn('pdf-formative')}
+  else if(v==='formative'){const e=curEval();left=back(S.pid?'person':'session');title=`${e.tpl.fiche?esc(e.tpl.ref.replace(/^FE\/(PICF|PAE FPSE)\//,'Fiche n°')):'Cas concret'} · ${esc(fmtDate(e.date))}<small>${esc(e.learners.map(l=>pName(s,l.pid)).join(' · '))}</small>`;right=pdfBtn('pdf-formative')}
   else if(v==='cert'){const c=curEval();left=back('person');title=`Certification · ${esc(pName(s,c.pid))}<small>${esc(c.tpl.name)}</small>`;right=pdfBtn('pdf-cert')}
   else if(v==='tech'){const x=curEval();left=back('person');title=`Technicité · ${esc(pName(s,x.pid))}<small>${esc(x.tpl.name)}</small>`;right=pdfBtn('pdf-tech')}
+  else if(v==='suivi'){const x=curEval();left=back('person');title=`Suivi · ${esc(pName(s,x.pid))}<small>${esc(x.tpl.name)}</small>`;right=pdfBtn('pdf-suivi')}
   else if(v==='techs'){left=back('session');title=`Fiches de technicité<small>${esc(s.title||s.cursus)}</small>`}
   else if(v==='qcm'){const c=curEval();left=back('cert');const st=qcmState(c,s);title=`QCM ${esc(s.cursus)} · ${esc(pName(s,c.pid))}<small>${st.done}/${st.tot} corrigées · ${String(st.score).replace('.',',')}/20</small>`;right=pdfBtn('pdf-qcm')}
   else if(v==='survey'){left=`<button class="ibtn" data-act="survey-exit" aria-label="Quitter le questionnaire">${I.x}</button>`;title=`Évaluation de la formation<small>${esc(s.title||s.cursus)}</small>`}
@@ -593,6 +653,9 @@ function renderNav(){
 }
 const bind=(path,scope='eval')=>`data-bind="${path}" data-scope="${scope}"`;
 const chip=(act,k,cur,l)=>`<button class="chip ${cur===k?'on':''}" data-act="${act}" data-v="${esc(k)}">${l}</button>`;
+const isFicheCursus=c=>formTpls(c).some(t=>t.fiche);
+const evalWord=s=>isFicheCursus(s.cursus)?'fiche d’évaluation':'cas concret';
+const evalWords=s=>isFicheCursus(s.cursus)?'fiches d’évaluation':'cas concrets';
 const badge=c=>`<span class="badge ${/2/.test(c)?'pse2':''}">${esc(c)}</span>`;
 
 /* =========================================================
@@ -613,7 +676,7 @@ function viewSessions(){
       <div class="row small"><span class="num"><b>${P.length}</b> participants</span><span class="num"><b>${nF}</b> cas concrets</span><span class="num"><b>${apte}</b> apte${apte>1?'s':''}</span></div>
     </button>`}).join('');
   return `<div class="stack">
-    ${LOGO.startsWith('data:')?`<div class="brandband"><img src="${LOGO}" alt="UDPS 28"><div class="t">Évaluations des formations PSE<span>Fiches formatives, technicité et certification, sans réseau</span></div></div>`:''}
+    ${LOGO.startsWith('data:')?`<div class="brandband"><img src="${LOGO}" alt="UDPS 28"><div class="t">Eval · évaluations des formations<span>PSE1, PSE2, PIC F, PAE FPSE, chef d’équipe — sans réseau</span></div></div>`:''}
     <input type="search" id="q" placeholder="Rechercher une formation, un participant…" value="${esc(S.q)}" data-bind="q" data-scope="ui" aria-label="Rechercher">
     <div class="chips">${chip('cur','all',S.cur,'Toutes')}${cursusList().map(c=>chip('cur',c,S.cur,esc(c))).join('')}</div>
     ${L.length?`<div class="cards">${cards}</div>`:`<div class="empty">${DB.sessions.length?'Aucune formation ne correspond.':'Aucune formation. Touchez « Nouvelle formation » pour choisir PSE1 ou PSE2, les formateurs et saisir les participants.'}</div>`}
@@ -625,7 +688,7 @@ function viewSessions(){
    ========================================================= */
 function personStatus(s,p){
   const c=certOf(s.id,p.id),x=techOf(s.id,p.id),n=passagesFor(s,p.id).length,v=c?verdict(c):'';
-  const pill=v==='apte'?'<span class="pill ok">Apte</span>':v==='inapte'?'<span class="pill ko">Inapte</span>':'<span class="pill wait">En cours</span>';
+  const v2=v||resultOfPerson(s,p);const pill=v2==='apte'?'<span class="pill ok">Apte</span>':v2==='inapte'?'<span class="pill ko">Inapte</span>':'<span class="pill wait">En cours</span>';
   const ts=x?techStat(x):null;return {n,pill,ts};
 }
 function viewSession(){
@@ -633,7 +696,7 @@ function viewSession(){
   const parts=s.participants.filter(p=>!p.archived),ct=certTpl(s.cursus),tt=techTpl(s.cursus);
   const plines=parts.map(p=>{const st=personStatus(s,p);
     return `<button class="line" data-act="open-person" data-pid="${p.id}"><span class="av">${esc(initials(p).toUpperCase())}</span><span class="grow"><b>${esc(fullName(p))}</b>
-      <span class="small muted num" style="display:block">${st.n} cas concret${st.n>1?'s':''}${ct?` / ${ct.passages.min} min. · compétences ${(compSummary(s,p.id)||{}).n||0}/${ct.criteria.length}`:''}${tt?` · technicité ${st.ts?st.ts.n:0}/${st.ts?st.ts.tot:techTpl(s.cursus).groups.flatMap(g=>g.items).length}`:''}</span></span>${st.pill}${I.chev}</button>`}).join('');
+      <span class="small muted num" style="display:block">${st.n} ${st.n>1?evalWords(s):evalWord(s)}${ct?` / ${ct.passages.min} min. · compétences ${(compSummary(s,p.id)||{}).n||0}/${ct.criteria.length}`:''}${tt?` · technicité ${st.ts?st.ts.n:0}/${st.ts?st.ts.tot:techTpl(s.cursus).groups.flatMap(g=>g.items).length}`:''}</span></span>${st.pill}${I.chev}</button>`}).join('');
   const F=sessFormatives(s.id);
   const flines=F.slice().reverse().map(e=>{const p=Math.round(formProgress(e)*100);
     return `<button class="line" data-act="open-formative" data-id="${e.id}"><span class="grow"><b>${esc(fmtDate(e.date))}</b> · ${esc(e.theme||'Thème non renseigné')}
@@ -644,7 +707,7 @@ function viewSession(){
       <div class="row">${badge(s.cursus)}<span class="small muted grow">${esc(fmtDate(s.start))}${s.end?' → '+esc(fmtDate(s.end)):''}${s.lieu?' · '+esc(s.lieu):''}</span></div>
       <div class="small"><span class="muted">Formateurs :</span> <b>${esc(sessTrainers(s)||'—')}</b></div>
     </div></div>
-    <div class="row"><button class="btn red grow" data-act="new-formative">${I.plus}Nouveau cas concret</button>${techTpl(s.cursus)?`<button class="btn" data-act="go" data-v="techs">Fiches de technicité</button>`:''}<button class="btn" data-act="export-menu">${I.share}Exporter / envoyer</button></div>
+    <div class="row"><button class="btn red grow" data-act="new-formative">${I.plus}${isFicheCursus(s.cursus)?'Nouvelle fiche d’évaluation':'Nouveau cas concret'}</button>${techTpl(s.cursus)?`<button class="btn" data-act="go" data-v="techs">Fiches de technicité</button>`:''}<button class="btn" data-act="export-menu">${I.share}Exporter / envoyer</button></div>
     ${(()=>{const dj=ensureDays(s).find(x=>x.date===today());if(!dj||!parts.length)return '';const all=parts.every(p=>presenceOf(s,p.id)[dj.id]);
       return `<div class="panel"><div class="bd row"><span class="grow"><b>Présence du jour · ${esc(dj.id)}</b> <span class="small muted">${esc(fmtDate(dj.date))} · ${parts.filter(p=>presenceOf(s,p.id)[dj.id]).length}/${parts.length} présents</span></span><button class="btn ${all?'primary':'red'}" data-act="presence-all" data-d="${dj.id}">${all?'✓ Tous présents (annuler)':'Pointer tout le groupe présent'}</button></div></div>`})()}
     <section class="panel"><div class="hd"><h3>Participants</h3><button class="btn sm" data-act="edit-session">${I.edit}Gérer</button></div>
@@ -695,7 +758,9 @@ function viewPerson(){
       ${tt?`<button class="tile" data-act="open-tech"><span class="eyebrow">A · Fiche de technicité</span><span class="big">${ts.n}/${ts.tot}</span><span class="small muted">${ts.ok?'Toutes les techniques sont faites : ligne A validée':'techniques faites'}</span><div class="bar"><i style="width:${ts.tot?Math.round(ts.n/ts.tot*100):0}%"></i></div></button>`:''}
       ${ct?`<button class="tile" data-act="open-cert"><span class="eyebrow">Certification individuelle</span><span class="big" style="color:${v==='apte'?'var(--t-vert)':v==='inapte'?'var(--t-rouge)':'var(--brand)'}">${v==='apte'?'APTE':v==='inapte'?'INAPTE':'En cours'}</span><span class="small muted num">${cs.n}/${cs.tot} compétences validées · ${Math.min(pass.length,ct.passages.max)} passage${pass.length>1?'s':''} (${ct.passages.min} à ${ct.passages.max})</span></button>`:''}
     </div>
-    <div class="row"><button class="btn red grow" data-act="new-formative" data-pid="${p.id}">${I.plus}Nouveau cas concret avec ${esc(p.prenom||fullName(p))}</button>${EMBED?'':`<button class="btn primary" data-act="pick-export">${I.pdf}Exporter des fiches</button>`}</div>
+    <div class="row"><button class="btn red grow" data-act="new-formative" data-pid="${p.id}">${I.plus}${isFicheCursus(s.cursus)?'Nouvelle fiche d’évaluation pour':'Nouveau cas concret avec'} ${esc(p.prenom||fullName(p))}</button>${EMBED?'':`<button class="btn primary" data-act="pick-export">${I.pdf}Exporter des fiches</button>`}</div>
+    ${suiviTpl(s.cursus)?(()=>{const x=suiviOf(s.id,p.id)||{tpl:suiviTpl(s.cursus),pid:p.id,overrides:{},final:{},checks:{},notes:{}};const G=suiviGrid(x,s),n=x.tpl.comps.filter(k=>G.ok[k.code]).length,vv=suiviVerdict(x,s);
+      return `<button class="tile" data-act="open-suivi"><span class="eyebrow">Fiche de suivi${x.tpl.avis?' et avis final':''}</span><span class="big" style="color:${vv==='apte'?'var(--t-vert)':vv==='inapte'?'var(--t-rouge)':'var(--brand)'}">${vv==='apte'?(x.tpl.avis?'APTE':'VALIDÉE'):vv==='inapte'?(x.tpl.avis?'INAPTE':'NON VALIDÉE'):'En cours'}</span><span class="small muted num">${n}/${x.tpl.comps.length} ${x.tpl.rule==='any'?'capacités visées':'compétences atteintes'} · ${sessFormatives(s.id).filter(e=>e.learners.some(l=>l.pid===p.id)).length} fiche(s) d’évaluation</span></button>`})():''}
     ${cs?`<section class="panel"><div class="hd"><h3>B · Compétences (référentiel)</h3><span class="small muted num">${cs.n}/${cs.tot}</span></div><div class="lines">${compRows}</div></section>`:''}
     ${sits.length?`<section class="panel"><div class="hd"><h3>Situations rencontrées</h3><span class="small muted num">${sits.filter(x=>seen(x.id)).length}/${sits.length}</span></div><div class="bd chips">${sits.map(x=>`<span class="chip ${seen(x.id)?'on':''}" style="cursor:default">${seen(x.id)?'✓ ':''}${esc(x.label)}</span>`).join('')}</div></section>`:''}
     ${ct?(()=>{const n=c?theoryNote(c):null;const ch=ct.checks.find(x=>x.auto==='theory');const dv=c&&c.id&&ch?checkVal(c,ch):'';return `<section class="panel"><div class="hd"><h3>D · Évaluation théorique</h3><span class="small muted">12/20 minimum</span></div><div class="bd row">
@@ -797,29 +862,34 @@ function viewFormative(){
   const used=e.learners.map(l=>l.pid);
   const slots=e.learners.map((l,i)=>{const opts=s.participants.filter(p=>!p.archived||p.id===l.pid);
     return `<div class="slot"><div class="r"><label class="f">Apprenant n°${i+1}<select id="fl-${i}" ${bind('learners.'+i+'.pid')}><option value="">— Choisir un participant —</option>${opts.map(p=>`<option value="${p.id}" ${l.pid===p.id?'selected':''} ${used.includes(p.id)&&l.pid!==p.id?'disabled':''}>${esc(fullName(p))}</option>`).join('')}</select></label>
-      <label class="f">Cas n°<input type="text" inputmode="numeric" id="fc-${i}" value="${esc(l.caseNo)}" ${bind('learners.'+i+'.caseNo')}></label>
+      ${t.fiche?'<span></span>':`<label class="f">Cas n°<input type="text" inputmode="numeric" id="fc-${i}" value="${esc(l.caseNo)}" ${bind('learners.'+i+'.caseNo')}></label>`}
       ${n>1?`<button class="btn danger" data-act="rm-learner" data-i="${i}" aria-label="Retirer l’apprenant ${i+1}">${I.trash}</button>`:'<span></span>'}</div></div>`}).join('');
   const feedsLabel=code=>{if(!ct||!code)return '';const k=ct.criteria.find(k=>String(k.code)===String(code));return k?`Alimente la compétence ${esc(k.code)} de la certification`:''};
-  const rows=it.map(x=>{const c=x.c;const sits=c&&c.subMode==='check'&&(c.children||[]).length?`<div class="sits">${c.children.map(ch=>`<label class="cb"><input type="checkbox" data-act="sit" data-c="${ch.id}" ${e.situations[ch.id]?'checked':''}>${esc(ch.label)}</label>`).join('')}</div>`:'';
+  const secRows=new Set(t.criteria.filter(c=>c.sec||c.ne).map(c=>c.id));
+  const allRows=t.fiche?t.criteria.filter(shown).flatMap(c=>c.sec?[{sec:true,label:c.label}]:c.ne?[{ne:true,label:c.label,code:c.code}]:it.filter(x=>x.id===c.id)):it;
+  const rows=allRows.map(x=>{if(x.sec)return `<div class="crit" style="background:var(--brand-soft)"><div class="cl" style="color:var(--brand)">${esc(x.label)}</div></div>`;
+    if(x.ne)return `<div class="crit"><div class="cl">${x.code?`<span class="code">${esc(x.code)}</span>`:''}${esc(x.label)}<span class="feeds">Non évalué sur cette fiche</span></div></div>`;
+    const c=x.c;const sits=c&&c.subMode==='check'&&(c.children||[]).length?`<div class="sits">${c.children.map(ch=>`<label class="cb"><input type="checkbox" data-act="sit" data-c="${ch.id}" ${e.situations[ch.id]?'checked':''}>${esc(ch.label)}</label>`).join('')}</div>`:'';
     return `<div class="crit ${x.sub?'sub':''}">
-      <div class="cl">${x.code?`<span class="code">${esc(x.code)}</span>`:''}${esc(x.label)}${!x.sub&&x.feeds?`<span class="feeds">${feedsLabel(x.feeds)}</span>`:''}${sits}</div>
+      <div class="cl">${x.code?`<span class="code">${esc(x.code)}</span>`:''}${esc(x.label)}${!x.sub&&x.feeds&&!t.fiche?`<span class="feeds">${feedsLabel(x.feeds)}</span>`:''}${sits}</div>
       ${e.learners.map((l,i)=>`<div class="mk ${i===S.lt?'':'off'}"><div class="seg" role="group" aria-label="${esc(x.label)} — apprenant ${i+1}">${t.scale.map(sc=>`<button class="lv t-${sc.tone} ${l.marks[x.id]===sc.code?'on':''}" data-act="mark" data-i="${i}" data-c="${x.id}" data-v="${esc(sc.code)}" title="${esc(sc.label)}" aria-pressed="${l.marks[x.id]===sc.code}">${esc(sc.code)}</button>`).join('')}</div></div>`).join('')}
     </div>`}).join('');
   const p=Math.round(formProgress(e)*100);
   return `<div class="stack">
-    <section class="panel"><div class="hd"><h3>Cas concret</h3><span class="small muted">${esc(t.name)}</span></div>
+    <section class="panel"><div class="hd"><h3>${t.fiche?esc(t.ref.replace(/^FE\//,'Fiche ')+' · '+t.title):'Cas concret'}</h3><span class="small muted">${esc(t.name)}</span></div>
       <div class="bd stack">
-        <label class="f">Thème du cas concret<input type="text" id="f-theme" value="${esc(e.theme)}" placeholder="Ex. : hémorragie externe sur un lieu de travail" ${bind('theme')}></label>
+        <label class="f">${t.fiche?'Thème':'Thème du cas concret'}<input type="text" id="f-theme" value="${esc(e.theme)}" placeholder="Ex. : hémorragie externe sur un lieu de travail" ${bind('theme')}></label>
         <div class="fields">
           <label class="f">Date<input type="date" id="f-date" value="${esc(e.date)}" ${bind('date')}></label>
           <label class="f">Formateur évaluateur<select id="f-ev0" ${bind('evaluatorIds.0')}>${trainerOptions(e.evaluatorIds[0],s)}</select></label>
           <label class="f">2e évaluateur (facultatif)<select id="f-ev1" ${bind('evaluatorIds.1')}>${trainerOptions(e.evaluatorIds[1],s)}</select></label>
+          ${t.fiche?`<label class="f">Temps<input type="text" id="f-temps" value="${esc(e.temps||'')}" placeholder="ex. 15 min" ${bind('temps')}></label>`:''}
         </div>
         ${activeTrainers().length?'':'<p class="small muted" style="margin:0">Ajoutez les formateurs dans Réglages pour les retrouver dans ces listes.</p>'}
       </div></section>
     <section class="panel"><div class="hd"><h3>Apprenants</h3>${n<6?`<button class="btn sm" data-act="add-learner">${I.plus}Ajouter</button>`:''}</div>
       <div class="bd stack">${slots}
-        <label class="cb"><input type="checkbox" id="f-counts" ${e.counts!==false?'checked':''} ${bind('counts')}>Compte comme passage pour la certification</label></div></section>
+        <label class="cb"><input type="checkbox" id="f-counts" ${e.counts!==false?'checked':''} ${bind('counts')}>${t.fiche?'Reportée sur la fiche de suivi (journée de la date ci-dessus)':'Compte comme passage pour la certification'}</label></div></section>
     <section class="panel"><div class="hd"><h3>Critères d’évaluation</h3><span class="small muted num">${p} % renseigné</span></div>
       ${n>1?`<div class="bd lt" style="padding-bottom:0">${e.learners.map((l,i)=>`<button class="${i===S.lt?'on':''}" data-act="lt" data-i="${i}">Apprenant ${i+1}<span>${esc(l.pid?pName(s,l.pid):'—')}</span></button>`).join('')}</div>`:''}
       <div style="--n:${n};--colw:${colw}">
@@ -833,8 +903,9 @@ function viewFormative(){
       <div style="--n:${n};--colw:${colw}">${it.filter(x=>!x.sub).map(x=>`<div class="crit"><div class="cl">${x.code?`<span class="code">${esc(x.code)}</span>`:''}${esc(x.label)}</div>
         ${e.learners.map((l,i)=>`<div class="mk ${i===S.lt?'':'off'}"><div class="seg">${t.scale.map(sc=>`<button class="lv t-${sc.tone} ${(l.self||{})[x.id]===sc.code?'on':''}" data-act="self" data-i="${i}" data-c="${x.id}" data-v="${esc(sc.code)}" aria-pressed="${(l.self||{})[x.id]===sc.code}">${esc(sc.code)}</button>`).join('')}</div></div>`).join('')}</div>`).join('')}</div>
       <div class="bd small muted" style="padding-top:0">L’auto-évaluation est reprise dans la case Observations du PDF, sans modifier le format de la fiche.</div></section>`:''}
-    <section class="panel"><div class="hd"><h3>Observations</h3></div><div class="bd stack">
-      ${e.learners.map((l,i)=>`<label class="f">${esc(l.pid?pName(s,l.pid):'Apprenant '+(i+1))}<textarea id="f-obs-${i}" placeholder="Points forts, axes de progression…" ${bind('learners.'+i+'.obs')}>${esc(l.obs||'')}</textarea></label>`).join('')}
+    <section class="panel"><div class="hd"><h3>${t.fiche?'Observations et impression générale':'Observations'}</h3></div><div class="bd stack">
+      ${t.fiche?`<label class="f">Observations (colonne de la fiche)<textarea id="f-obscol" placeholder="Points forts, axes d’amélioration, éléments observés…" ${bind('obsCol')}>${esc(e.obsCol||'')}</textarea></label>`:''}
+      ${e.learners.map((l,i)=>`<label class="f">${t.fiche?'Impression générale':esc(l.pid?pName(s,l.pid):'Apprenant '+(i+1))}<textarea id="f-obs-${i}" placeholder="${t.fiche?'Impression générale sur la prestation':'Points forts, axes de progression…'}" ${bind('learners.'+i+'.obs')}>${esc(l.obs||'')}</textarea></label>`).join('')}
     </div></section>
     <section class="panel"><div class="hd"><h3>Degré d’atteinte de l’objectif</h3></div><div class="bd legend">${t.scale.map(sc=>`<div class="t-${sc.tone}"><b class="lvb">${esc(sc.code)}</b><span><b>${esc(sc.label)}</b>${sc.desc?' — '+esc(sc.desc):''}</span></div>`).join('')}</div></section>
     <div class="row">
@@ -871,11 +942,11 @@ function viewCert(){
     else if(ch.auto==='presence'){if(days.length){const n=days.filter(d=>pr[d]).length;note2=`Présence : ${n}/${days.length} jour${days.length>1?'s':''} (${hoursOf(s,days.filter(d=>pr[d]))}/${hoursOf(s,days)} h) — OUI automatique quand toutes les journées sont pointées`;lock=n===days.length?'all':'oui';
         extra=`<div class="chips" style="margin-top:6px">${days.map(d=>`<button class="chip ${pr[d]?'on':''}" data-act="presence" data-pid="${c.pid}" data-d="${d}" aria-pressed="${!!pr[d]}">${esc(dayLabel(s,d))}</button>`).join('')}</div>`}
       else note2='Renseignez les dates de la formation pour pointer la présence'}
-    else if(ch.auto==='theory'){note2=note===null?'Saisissez la note du questionnaire (QCM/QROC) : 12/20 minimum':note>=12?'Note ≥ 12/20 : validé':note>=10?'Note de 10 ou 11 : entretien de rattrapage avec le responsable pédagogique':'Note < 10 : pas de rattrapage possible pendant la session';
+    else if(ch.auto==='theory'){const th=thOf(c);note2=note===null?`Saisissez la note du questionnaire : ${th.pass}/${th.max} minimum`:note>=th.pass?`Note ≥ ${th.pass}/${th.max} : validé`:(th.retake!=null&&note>=th.retake)?'Note de 10 ou 11 : entretien de rattrapage avec le responsable pédagogique':`Note < ${th.retake!=null?th.retake:th.pass}/${th.max}`;
       if(c.checks[ch.id])note2+=' — décision saisie par le formateur (touchez à nouveau pour revenir au calcul)';lock='';
-      extra=`<div class="row" style="margin-top:6px"><label class="f" style="width:130px">Note /20<input type="text" inputmode="decimal" id="c-score" value="${esc(th.score??'')}" placeholder="ex. 14,5" ${bind('theory.score')}></label>
+      extra=`<div class="row" style="margin-top:6px"><label class="f" style="width:130px">Note /${thOf(c).max}<input type="text" inputmode="decimal" id="c-score" value="${esc(th.score??'')}" placeholder="ex. 14,5" ${bind('theory.score')}></label>
         ${qcmFor(s.cursus)?`<button class="btn sm primary" data-act="open-qcm" style="align-self:end">Corriger le QCM question par question</button>`:`<label class="f" style="width:150px">ou bonnes réponses /40<input type="number" min="0" max="40" id="c-qcm" value="" placeholder="ex. 31" data-act-input="qcm"></label>`}
-        ${note!==null&&note>=10&&note<12?`<label class="f" style="min-width:200px">Entretien de rattrapage<select id="c-retake" ${bind('theory.retake')}><option value="">— À faire —</option><option value="ok" ${th.retake==='ok'?'selected':''}>Connaissances suffisantes</option><option value="ko" ${th.retake==='ko'?'selected':''}>Insuffisantes</option></select></label>`:''}</div>`}
+        ${note!==null&&thOf(c).retake!=null&&note>=thOf(c).retake&&note<thOf(c).pass?`<label class="f" style="min-width:200px">Entretien de rattrapage<select id="c-retake" ${bind('theory.retake')}><option value="">— À faire —</option><option value="ok" ${th.retake==='ok'?'selected':''}>Connaissances suffisantes</option><option value="ko" ${th.retake==='ko'?'selected':''}>Insuffisantes</option></select></label>`:''}</div>`}
     else if(ch.auto){note2='Calculé : toutes les compétences validées';lock='all'}
     return `<div class="check"><span class="letter">${esc(ch.id)}</span><div><div style="font-weight:600">${esc(ch.label)}</div>${note2?`<div class="small muted">${esc(note2)}</div>`:''}${extra}</div>${yn('check',ch.id,v,lock)}</div>`}).join('');
   const v=verdict(c);const vt=v==='apte'?'t-vert':v==='inapte'?'t-rouge':'t-gris';
@@ -904,6 +975,42 @@ function viewCert(){
 /* =========================================================
    Fiche de technicité (cases « Fait »)
    ========================================================= */
+function viewSuivi(){
+  const x=curEval(),s=curSess();if(!x||!s)return viewSessions();const t=x.tpl,G=suiviGrid(x,s),C=suiviChecks(x,s,G),p=participant(s,x.pid)||{};
+  x.notes=x.notes||{};x.avis=x.avis||{};G.days.forEach(d=>{x.notes[d]=x.notes[d]||{}});
+  const codes=['',...t.scale.map(k=>k.code)];
+  const cell=(k,d)=>{const v=G.cells[k][d],sc=scaleOf(t,v);return `<button class="pc ${sc?'set t-'+sc.tone:''} ${G.manual[k][d]?'man':''}" style="width:48px;height:44px" data-act="sv-cell" data-k="${k}" data-d="${d}" aria-label="${esc(k)} ${esc(d)} : ${sc?esc(sc.label):'vide'}">${esc(d)}<b>${sc?esc(sc.code):''}</b></button>`};
+  const v=suiviVerdict(x,s),vt=v==='apte'?'t-vert':v==='inapte'?'t-rouge':'t-gris';
+  const groups=t.groups||[{label:'Capacités',codes:t.comps.map(k=>k.code)}];
+  const yn=(act,key,val,auto)=>`<div class="yn" role="group"><button class="y ${val==='oui'?'on':''}" data-act="${act}" data-k="${esc(key)}" data-v="oui" aria-pressed="${val==='oui'}">OUI</button><button class="n ${val==='non'?'on':''}" data-act="${act}" data-k="${esc(key)}" data-v="non" aria-pressed="${val==='non'}">NON</button></div>`;
+  return `<div class="stack">
+    <section class="panel"><div class="bd stack" style="gap:6px"><div class="row"><span class="av">${esc(initials(p).toUpperCase())}</span><div class="grow"><b>${esc(fullName(p))}</b><div class="small muted">${esc(t.name)}</div></div></div>
+      <div class="small muted">Chaque soir, le niveau de chaque ${t.rule==='any'?'capacité':'compétence'} est repris des fiches d’évaluation de la journée : le critère le plus représenté (à égalité, le moins favorable). Touchez une case pour la corriger (point blanc = correction).</div>
+      ${t.fpsc?`<label class="cb"><input type="checkbox" data-act="fpsc" ${p.fpsc?'checked':''}>Titulaire de la PAE FPSC : compétences ${t.fpsc.join(', ')} validées automatiquement</label>`:''}</div></section>
+    <section class="panel"><div class="hd"><h3>${t.rule==='any'?'Capacités visées':'Compétences du formateur PSE'}</h3><span class="small muted">Évaluation quotidienne</span></div>
+      <div class="lines">${t.comps.map(k=>`<div style="padding:10px 14px;display:grid;gap:8px">
+        <div class="row" style="flex-wrap:nowrap;align-items:flex-start"><span class="code">${esc(k.code)}</span><span class="grow small" style="font-weight:600">${esc(k.label)}</span>
+          ${G.fpsc.includes(k.code)?'<span class="pill ok">PAE FPSC</span>':G.ok[k.code]?'<span class="pill ok">Validée</span>':'<span class="pill wait">'+(t.rule==='any'?'À viser':'Non atteinte')+'</span>'}</div>
+        <div class="row" style="gap:6px">${G.days.map(d=>cell(k.code,d)).join('')}
+          ${t.rule==='final'?`<span class="grow"></span><span class="small muted">Note finale${k.req==='A'?' (A exigé)':' (A ou B)'}</span><button class="pc ${G.fin[k.code]?'set t-'+((scaleOf(t,G.fin[k.code])||{}).tone||'gris'):''} ${x.final[k.code]?'man':''}" style="width:56px;height:44px" data-act="sv-final" data-k="${k.code}" ${G.fpsc.includes(k.code)?'disabled':''}>Finale<b>${esc(G.fin[k.code]||'')}</b></button>`:''}</div></div>`).join('')}</div></section>
+    <section class="panel"><div class="hd"><h3>Points forts et axes d’amélioration</h3></div><div class="bd stack">
+      ${G.days.map(d=>`<div class="stack" style="gap:6px"><b class="small">${esc(dayLabel(s,d))}</b><div class="fields">
+        <label class="f">Points forts<textarea id="sn-${d}-f" style="min-height:64px" ${bind('notes.'+d+'.forts')}>${esc(x.notes[d].forts||'')}</textarea></label>
+        <label class="f">Axes d’amélioration<textarea id="sn-${d}-a" style="min-height:64px" ${bind('notes.'+d+'.axes')}>${esc(x.notes[d].axes||'')}</textarea></label></div></div>`).join('')}
+      <label class="f">Observations de l’équipe pédagogique<textarea id="sn-obs" ${bind('observations')}>${esc(x.observations||'')}</textarea></label></div></section>
+    ${t.avis?`<section class="panel"><div class="hd"><h3>Avis final de l’équipe pédagogique</h3><span class="small muted">destiné au jury préfectoral</span></div><div class="bd stack">
+      <label class="f">Évaluateurs (nom – prénom)<input type="text" id="av-ev" value="${esc(x.avis.evaluateurs??sessTrainers(s))}" ${bind('avis.evaluateurs')}></label>
+      ${groups.map((gr,i)=>`<div class="row"><span class="grow small" style="font-weight:600">${esc(gr.label)}</span>${yn('sv-check',gr.label,C.groups[i])}</div>`).join('')}
+      <div class="row"><b class="grow">Aptitude finale</b>${yn('sv-check','APT',(x.checks||{}).APT||(v==='apte'?'oui':v==='inapte'?'non':''))}</div>
+      <div class="fields"><label class="f">Lieu<input type="text" id="av-lieu" value="${esc(x.avis.lieu??(s.lieu||''))}" ${bind('avis.lieu')}></label><label class="f">Date<input type="date" id="av-date" value="${esc(x.avis.date||s.end||today())}" ${bind('avis.date')}></label></div>
+      <p class="small muted" style="margin:0">OUI / NON sont proposés automatiquement d’après les notes finales (1 à 4.2 : A ou B ; 5.1 à 6.2 : A) ; touchez pour décider, et une deuxième fois pour revenir au calcul.</p></div></section>`:
+    `<section class="panel"><div class="hd"><h3>Validation PIC F</h3></div><div class="bd stack" style="gap:8px">
+      <div class="small">Capacités visées au moins une fois : <b class="num">${t.comps.filter(k=>G.ok[k.code]).length}/${t.comps.length}</b> · Présence : <b>${C.pres===null?'journées non datées':C.pres?'complète':'incomplète'}</b></div>
+      <div class="row"><b class="grow">Décision</b>${yn('sv-check','APT',(x.checks||{}).APT||(v==='apte'?'oui':v==='inapte'?'non':''))}</div></div></section>`}
+    <div class="verdict ${vt}"><div><div class="eyebrow">${t.avis?'Aptitude finale':'Validation de la formation'}</div><div class="big">${v==='apte'?(t.avis?'APTE':'VALIDÉE'):v==='inapte'?(t.avis?'INAPTE':'NON VALIDÉE'):'EN ATTENTE'}</div></div></div>
+    <div class="row">${EMBED?'':`<button class="btn primary grow" data-act="pdf-suivi">${I.pdf}Fiche de suivi${t.avis?' et avis final':''} en PDF</button>`}</div>
+  </div>`;
+}
 function techChecklist(x,pse2){return x.tpl.groups.map((gr,gi)=>{const n=gr.items.filter(i=>x.done[i.id]).length;return `<section class="panel tgroup ${pse2?'pse2':''}"><div class="hd"><h3>${esc(gr.title)}</h3><span class="small num">${n}/${gr.items.length}</span><button class="btn sm" data-act="tech-all" data-g="${gi}">${n===gr.items.length?'Tout décocher':'Tout cocher'}</button></div>
       <div>${gr.items.map(it=>`<label class="titem ${x.done[it.id]?'done':''}"><input type="checkbox" data-act="tech" data-i="${it.id}" ${x.done[it.id]?'checked':''}><span>${esc(it.label)}</span>${x.done[it.id]?`<small>Fait ${esc(fmtDate(x.done[it.id]).slice(0,5))}</small>`:''}</label>`).join('')}</div></section>`}).join('')}
 function viewTechs(){
@@ -1098,7 +1205,7 @@ function viewSettings(){
       <button class="btn" data-act="restore">Restaurer les grilles PSE1 et PSE2 d’origine</button>
       <button class="btn" data-act="del-samples">Supprimer les exemples</button>
       <button class="btn danger" data-act="wipe">${I.trash}Tout effacer</button></div></section>
-    <p class="small muted" style="margin:0">Évaluations PSE · UDPS 28 · version ${APP_VERSION} · données stockées uniquement sur cet appareil.</p>
+    <p class="small muted" style="margin:0">Eval · UDPS 28 · version ${APP_VERSION} · données stockées uniquement sur cet appareil.</p>
   </div>`;
 }
 
@@ -1134,12 +1241,14 @@ function pen(doc){
     circle(cx,cy,rx,ry){doc.setLineWidth(.6);doc.setDrawColor(0);doc.ellipse(cx,cy,rx,ry,'S');doc.setLineWidth(.25)}
   };return P;
 }
-function stamp(){const d=new Date();return `Édité le ${fmtDate(today())} à ${String(d.getHours()).padStart(2,'0')}h${String(d.getMinutes()).padStart(2,'0')} - Évaluations PSE UDPS 28`}
+function stamp(){const d=new Date();return `Édité le ${fmtDate(today())} à ${String(d.getHours()).padStart(2,'0')}h${String(d.getMinutes()).padStart(2,'0')} - Eval UDPS 28`}
 
 /* ---- Fiche formative : A4 portrait, 2 apprenants par page ---- */
 function formativePages(e,sess,onlyPid){
   let idx=e.learners.map((l,i)=>i);if(onlyPid)idx=idx.filter(i=>e.learners[i].pid===onlyPid);
   const chunks=[];for(let i=0;i<idx.length;i+=2)chunks.push(idx.slice(i,i+2));
+  const F=ficheOf(e.tpl);if(F&&FORMS[F.id])return idx.map(li=>({orient:'p',draw:doc=>drawFicheBg(doc,e,sess,li,F)}));
+  if(e.tpl.id==='ce-formative'&&!e.tpl.edited&&FORMS['ce-formative'])return idx.map(li=>({orient:'p',draw:doc=>drawCeFormativeBg(doc,e,sess,li)}));
   const L=formLayout(e.tpl);
   return chunks.map(ch=>({orient:'p',draw:doc=>L?drawFormativeBg(doc,e,sess,ch,L):drawFormative(doc,e,sess,ch)}));
 }
@@ -1207,7 +1316,7 @@ function drawFormative(doc,e,sess,chunk){
 }
 
 /* ---- Fiche de certification : A4 paysage (Annexe 3) ---- */
-function certPages(c,sess){const L=certLayout(c);return [{orient:'l',draw:doc=>L?drawCertBg(doc,c,sess,L):drawCert(doc,c,sess)}]}
+function certPages(c,sess){if(c.tpl.id==='ce-certif'&&!c.tpl.edited&&FORMS['ce-certif'])return [{orient:'l',draw:doc=>drawCeCertBg(doc,c,sess)}];const L=certLayout(c);return [{orient:'l',draw:doc=>L?drawCertBg(doc,c,sess,L):drawCert(doc,c,sess)}]}
 function drawCert(doc,c,sess){
   const P=pen(doc),t=c.tpl,H=t.header||{},th=t.theme||{},BAND=hex2rgb(th.band||'#4f81bd'),LIGHT=hex2rgb(th.light||'#b8cce4');
   const M=14,W=269,PH=210,G=certGrid(c,sess),p=participant(sess,c.pid)||{};let y=9;
@@ -1344,7 +1453,7 @@ function attestationPages(s,pid){return [{orient:'l',draw:doc=>{
   P.text(`FC ${s.cursus} - ${o.code||'ORGA'} - n° ${yearOf(s)}/${p.certNo||'____'}`,M,196,{s:9,b:true});}}]}
 
 /* Procès-verbal de l'équipe pédagogique */
-function resultOfPerson(s,p){const c=certOf(s.id,p.id);const v=c?verdict(c):'';return v}
+function resultOfPerson(s,p){const c=certOf(s.id,p.id);if(c)return verdict(c);const x=suiviOf(s.id,p.id);if(x)return suiviVerdict(x,s);return ''}
 function pvPages(s){const k=pvBgKey(s);if(k)return pvBgPages(s,k);return [{orient:'p',draw:doc=>{
   const P=pen(doc),M=15,W=180,o=ORG(),u=ueOf(s.cursus),parts=s.participants.filter(p=>!p.archived);docHeader(doc,P,W,M);let y=44;
   P.text('PROCÈS-VERBAL DE L’ÉQUIPE PÉDAGOGIQUE',M+W/2,y,{b:true,s:14,a:'center',c:[0,43,107]});y+=6;
@@ -1420,7 +1529,7 @@ function satPages(s){return [{orient:'p',draw:doc=>{
    Fiches au format d'origine : fond = page du PDF d'origine (docs/app/forms),
    données placées dans les cases mesurées sur les modèles (tools/geom.py, tools/grid.py)
    ========================================================= */
-const FORM_FILES=['formative-pse1','formative-pse2','technicite-pse1','technicite-pse2','certification-pse1','pv-pse1','pv-fc-pse1','pv-pse2','pv-fc-pse2'];
+const FORM_FILES=__FORM_FILES__;
 let FORMS={},TECH_LAYOUT=null,formsReady=null;
 function loadForms(){
   if(formsReady)return formsReady;
@@ -1514,23 +1623,95 @@ function drawCertBg(doc,c,sess,L){
 const PVL={FI:{rows:[73.4,82.3,91.4,100.3,109.3,118.3,127.3,136.3,145.3,154.3,163.3],sig:[176.2,188.4]},
            FC:{rows:[74.3,83.3,92.2,101.3,110.2,119.3,128.2,137.2,146.2,155.2,164.2],sig:[177.1,189.4]},
   cols:[15,27.1,39.2,89.7,140.2,190.7,241.2,259,276.9],tr:[[15,80.5],[80.5,145.9],[145.9,211.4]],resp:[211.4,276.9]};
-function pvBgKey(s){const k=(s.type==='FC'?'pv-fc-':'pv-')+String(s.cursus).toLowerCase();return FORMS[k]?k:null}
+const PVX={'picf-pv':{rows:[79.4,87.1,94.9,102.6,110.3,117.9,125.5,133.4,141.0,148.8,156.4],cols:[33.2,43.7,54.0,97.2,140.6,183.9,227.1,242.2,257.8],sig:[167.3,177.7],tr:[[33.1,89.5],[89.5,145.4],[145.4,201.5]],resp:[201.5,257.9],udps:[66,54.8],lieu:[66,58.9],date:[66,63.0],num:[241,41.5,258,47.3]},
+  'paefpse-pv':{rows:[70.5,78.6,86.6,94.6,102.6,110.6,118.6,126.6,134.6,142.6,150.6],cols:[20.1,29.7,39.5,87.6,133.3,179.2,225.0,252.5,279.3],sig:[164.3,172.2],tr:[[17.5,83.0],[83.0,148.5],[148.5,213.9]],resp:[213.9,279.5],udps:[40,40.5],lieu:[52,45.3],date:[52,50.0],num:[267.5,25.2,284.5,30.6]},
+  'paefpse-pv-fc':{rows:[62.2,70.2,78.2,86.2,94.2,102.2,110.2,118.2,126.2,134.2,142.2],cols:[20.1,29.7,39.5,87.6,133.3,179.2,225.0,252.5,279.3],sig:[154.7,160.3],tr:[[17.5,83.0],[83.0,148.5],[148.5,213.9]],resp:[213.9,279.5],udps:[40,35.7],lieu:[52,40.5],date:[52,45.2],num:[269,21.8,286,27.2]},
+  'ce-pv':{rows:[70.2,78.5,86.6,94.9,103.3,111.5,119.8,128.1,136.4,144.7,152.9],cols:[15.6,27.8,40.1,91.4,142.8,194.3,245.6,263.7,281.9],sig:[164.9,176.1],tr:[[15.4,81.9],[81.9,148.5],[148.5,215.2],[215.2,281.9]],resp:null,udps:[60,44.0],lieu:[60,48.2],date:[60,52.6],num:[262,31,282,37]}};
+function pvBgKey(s){const c=String(s.cursus).toLowerCase();const k=c==='paefpse'?(s.type==='FC'?'paefpse-pv-fc':'paefpse-pv'):PVX[c+'-pv']?c+'-pv':(s.type==='FC'?'pv-fc-':'pv-')+c;return FORMS[k]?k:null}
 function pvBgPages(s,key){const parts=s.participants.filter(p=>!p.archived);const pages=[];for(let i=0;i<Math.max(1,parts.length);i+=10)pages.push(parts.slice(i,i+10));
   return pages.map((chunk,pi)=>({orient:'l',draw:doc=>{
-    const P=pen(doc),V=PVL[s.type==='FC'?'FC':'FI'],C=PVL.cols,o=ORG();bgPage(doc,key,'l');
-    fit(doc,P,(s.pvNum||'')+(pages.length>1?` (${pi+1}/${pages.length})`:''),258,30.5,277,36,{s:13,b:true,a:'center',pad:0});
-    P.text(o.udps||'',45.5,46.1,{s:10,b:true});P.text(s.lieu||'',61,50.6,{s:10,b:true});
-    P.text(s.start===s.end||!s.end?fmtDate(s.start):`du ${fmtDate(s.start)} au ${fmtDate(s.end)}`,61,55,{s:10,b:true});
+    const X=PVX[key];const P=pen(doc),V=X?{rows:X.rows,sig:X.sig}:PVL[s.type==='FC'?'FC':'FI'],C=X?X.cols:PVL.cols,o=ORG();bgPage(doc,key,'l');
+    const H=X||{udps:[45.5,46.1],lieu:[61,50.6],date:[61,55],num:[258,30.5,277,36]};
+    fit(doc,P,(s.pvNum||'')+(pages.length>1?` (${pi+1}/${pages.length})`:''),...H.num,{s:13,b:true,a:'center',pad:0});
+    P.text(o.udps||'',H.udps[0],H.udps[1],{s:10,b:true});P.text(s.lieu||'',H.lieu[0],H.lieu[1],{s:10,b:true});
+    P.text(s.start===s.end||!s.end?fmtDate(s.start):`du ${fmtDate(s.start)} au ${fmtDate(s.end)}`,H.date[0],H.date[1],{s:10,b:true});
     chunk.forEach((p,i)=>{const y0=V.rows[i],y1=V.rows[i+1],v=resultOfPerson(s,p);
       if(p.civ==='Madame')mark(P,C[0],y0,C[1],y1);if(p.civ==='Monsieur')mark(P,C[1],y0,C[2],y1);
       fit(doc,P,(p.nom||'').toUpperCase(),C[2],y0,C[3],y1,{s:9.5,b:true});fit(doc,P,p.prenom||'',C[3],y0,C[4],y1,{s:9.5});
       fit(doc,P,fmtDate(p.birthDate),C[4],y0,C[5],y1,{s:9.5,a:'center'});fit(doc,P,[p.birthPlace,p.birthDept?'('+p.birthDept+')':''].filter(Boolean).join(' '),C[5],y0,C[6],y1,{s:9.5,a:'center'});
       if(v==='apte')mark(P,C[6],y0,C[7],y1);if(v==='inapte')mark(P,C[7],y0,C[8],y1)});
-    const [s0]=V.sig;(s.trainerIds||[]).map(tName).filter(Boolean).slice(0,3).forEach((n,i)=>fit(doc,P,n,PVL.tr[i][0],s0+.4,PVL.tr[i][1],s0+4.6,{s:8,b:true}));
-    if(s.respPeda)fit(doc,P,s.respPeda,PVL.resp[0],s0+.4,PVL.resp[1],s0+4.6,{s:8,b:true});
+    const [s0]=V.sig,TR=X?X.tr:PVL.tr,RS=X?X.resp:PVL.resp;(s.trainerIds||[]).map(tName).filter(Boolean).slice(0,TR.length).forEach((n,i)=>fit(doc,P,n,TR[i][0],s0+.4,TR[i][1],s0+4.6,{s:8,b:true}));
+    if(s.respPeda&&RS)fit(doc,P,s.respPeda,RS[0],s0+.4,RS[1],s0+4.6,{s:8,b:true});
   }}));
 }
 
+/* ---- fiches d'évaluation des techniques pédagogiques (PIC F / PAE FPSE) ---- */
+const ficheOf=t=>{const cur=FICHES[t.cursus];return t.fiche&&!t.edited&&cur?cur.find(f=>f.id===t.id):null};
+function drawFicheBg(doc,e,sess,li,F){
+  const P=pen(doc),t=e.tpl,l=e.learners[li];bgPage(doc,F.id,'p');const fl=F.fields;
+  if(fl.eleve)fit(doc,P,pName(sess,l.pid),...fl.eleve,{s:9.5,b:true,a:'center'});
+  if(fl.formateur)fit(doc,P,evaluatorNames(e),...fl.formateur,{s:9,a:'center'});
+  if(fl.theme)fit(doc,P,e.theme||'',...fl.theme,{s:9.5,a:'center'});
+  if(fl.date)fit(doc,P,fmtDate(e.date),...fl.date,{s:9.5,b:true,a:'center'});
+  if(fl.temps)fit(doc,P,e.temps||'',...fl.temps,{s:9.5,a:'center'});
+  t.criteria.forEach((c,i)=>{const r=F.rows[i];if(!r||c.sec||c.ne)return;const sc=scaleOf(t,l.marks[c.id]);if(!sc||!F.cols[sc.code])return;const [x0,x1]=F.cols[sc.code];mark(P,x0,r.y0,x1,r.y1)});
+  const o=F.obs;const r1=fitBlock(doc,P,e.obsCol||'',o[0],o[1],o[2],o[3],{s:8});
+  const im=F.imp;const selfTxt=(()=>{const se=l.self||{};const ks=items(t).filter(x=>se[x.id]);return ks.length?' Auto-évaluation : '+ks.map(x=>(x.code||'')+' '+se[x.id]).join(' · '):''})();
+  const r2=fitBlock(doc,P,(l.obs||'')+selfTxt,im[0],im[1]+.8,im[2],im[3],{s:8.5});
+  if(r1||r2){doc.addPage('a4','p');let y=18;P.text('Suite - '+(t.ref||'')+' - '+pName(sess,l.pid),14,y,{b:true,s:10});y+=8;P.font(false,9);[['Observations',r1],['Impression générale',r2]].forEach(([h,r])=>{if(!r)return;P.text(h,14,y,{b:true,s:9});y+=5;P.font(false,9);doc.splitTextToSize(r,182).forEach(ln=>{doc.text(ln,14,y);y+=4});y+=4})}
+}
+/* ---- CE : fiche d'évaluation formative et fiche de certification (annexes 2 et 3) ---- */
+const CEF={rows:{e1:[108.7,115.1],e2:[115.1,125.0],e4:[125.0,131.3],e7:[131.3,137.8],e8:[137.8,159.3]},cols:[137.0,152.0,167.1,182.3,197.6],
+  boxes:{e8a:[28.05,144.65],e8b:[28.05,148.85],e8c:[28.05,153.05],e8d:[28.05,157.0]},name:[24.2,60.9,137.0,68.9],date:[137.0,60.9,198.4,68.9],theme:[16.3,79.0,198.4,90.2],obs:[17.1,163.9,197.2,225.6]};
+function drawCeFormativeBg(doc,e,sess,li){
+  const P=pen(doc),t=e.tpl,l=e.learners[li],L=CEF;bgPage(doc,'ce-formative','p');e.situations=e.situations||{};
+  fit(doc,P,pName(sess,l.pid),...L.name,{s:9.5,b:true});fit(doc,P,fmtDate(e.date)+'  -  '+evaluatorNames(e),...L.date,{s:8.5});fit(doc,P,e.theme||'',...L.theme,{s:10,a:'center'});
+  t.criteria.forEach(c=>{const r=L.rows[c.id];if(!r)return;const k=t.scale.findIndex(x=>x.code===l.marks[c.id]);if(k<0||k>3)return;mark(P,L.cols[k],r[0],L.cols[k+1],r[1])});
+  Object.entries(L.boxes).forEach(([id,[cx,cy]])=>{if(e.situations[id]){doc.setLineWidth(.45);doc.line(cx-1.1,cy-1.1,cx+1.1,cy+1.1);doc.line(cx-1.1,cy+1.1,cx+1.1,cy-1.1);doc.setLineWidth(.25)}});
+  fitBlock(doc,P,l.obs||'',L.obs[0],L.obs[1]+7,L.obs[2],L.obs[3],{s:9});
+}
+const CEC={rows:[[87.2,95.0],[95.0,102.0],[102.0,109.1],[109.1,116.1],[116.1,132.7]],pass:[151.6,164.7,178.0,191.3,204.5,217.8,229.4],yn:[229.4,252.5,274.1],
+  bands:{A:[54.4,60.3],B:[64.5,70.4],C:[137.0,142.7]},obs:[29.5,146.8,194.3,165.6],fin:[229.4,154.8,247.8,266.7,165.6]};
+function drawCeCertBg(doc,c,sess){
+  const P=pen(doc),t=c.tpl,G=certGrid(c,sess),p=participant(sess,c.pid)||{},L=CEC;bgPage(doc,'ce-certif','l');
+  P.text((p.nom||'').toUpperCase(),67,46,{s:10,b:true});P.text(p.prenom||'',170,46,{s:10,b:true});
+  const yn=(v,y0,y1)=>{if(v==='oui')ring(P,L.yn[0],y0,L.yn[1],y1);if(v==='non')ring(P,L.yn[1],y0,L.yn[2],y1)};
+  t.criteria.forEach((k,i)=>{const r=L.rows[i];if(!r)return;for(let q=0;q<Math.min(G.P,6);q++){const v=G.cells[k.id][q];if(v)P.text(v,(L.pass[q]+L.pass[q+1])/2,(r[0]+r[1])/2,{s:10,b:true,a:'center',c:resultOf(t,v)==='ko'?[180,20,30]:BLACK})}yn(validOf(c,k,G),r[0],r[1])});
+  t.checks.forEach(ch=>{const b=L.bands[ch.id];if(b)yn(checkVal(c,ch),b[0],b[1])});
+  const n=theoryNote(c);if(n!==null)P.text(`(note : ${String(c.theory.score).replace('.',',')}/${thOf(c).max})`,226,67.5,{s:7.5,a:'right',c:WHITE,b:true});
+  fitBlock(doc,P,c.observations||'',L.obs[0],L.obs[1]+5,L.obs[2],L.obs[3],{s:8.5});
+  const v=verdict(c),f=L.fin;if(v==='apte')ring(P,f[0],f[1],f[2],f[4]);if(v==='inapte')ring(P,f[2],f[1],f[3],f[4]);
+  P.text(fmtDate(sess.start)+(sess.end&&sess.end!==sess.start?' au '+fmtDate(sess.end):''),62,182,{s:9.5,b:true});
+  if(sess.respPeda)P.text(sess.respPeda,250,182,{s:9,b:true});
+}
+/* ---- fiche de suivi (2 pages) et avis final ---- */
+const SUL={'picf-suivi':{p1:'picf-suivi-1',p2:'picf-suivi-2',nom:[[12.7,73.1,107.2,83.7],[107.2,73.1,197.2,83.7]],rows:[107.9,116.3,124.7,133.2,141.7,150.1,158.6,167.0,175.5,183.9,192.4,200.8,209.2,217.7,226.2,234.6,243.0],
+    days:[167.6,175.0,182.3,189.7,197.0],nom2:[[12.7,66.2,106.3,76.7],[106.3,66.2,197.2,76.7]],drows:[92.1,119.6,147.1,174.5,202.1],forts:[55.1,125.2],axes:[125.2,197.0],obs:[12.7,214.3,197.2,254.4],resp:[15,269]},
+  'paefpse-suivi':{p1:'paefpse-suivi-1',p2:'paefpse-suivi-2',nomT:[[47,48],[141,48]],rows:[59.9,69.3,78.9,88.3,97.8,107.4,116.8,126.4,133.1,140.7,149.2,156.4],
+    days:[154.7,162.2,169.8,177.3,184.8,192.3,200.1],nomT2:[[40,52.6],[132,52.6]],drows:[72.2,90.8,111.0,133.6,156.8,178.2,199.5],forts:[35.5,115.5],axes:[115.5,194.9],obs:[13.3,213.7,196.7,234.1],resp:[28,250]}};
+function suiviPages(x,s){const L=SUL[x.tpl.id];if(!L||x.tpl.edited||!FORMS[L.p1])return [];
+  const G=suiviGrid(x,s),p=participant(s,x.pid)||{};
+  const names=(doc,P,pg)=>{if(L.nom){const b=pg===1?L.nom:L.nom2;fit(doc,P,(p.nom||'').toUpperCase(),...b[0],{s:10,b:true,a:'center'});fit(doc,P,p.prenom||'',...b[1],{s:10,b:true,a:'center'})}
+    else{const b=pg===1?L.nomT:L.nomT2;P.text((p.nom||'').toUpperCase(),b[0][0],b[0][1],{s:9.5,b:true});P.text(p.prenom||'',b[1][0],b[1][1],{s:9.5,b:true})}};
+  const pages=[{orient:'p',draw:doc=>{const P=pen(doc);bgPage(doc,L.p1,'p');names(doc,P,1);
+      x.tpl.comps.forEach((k,i)=>{const y0=L.rows[i],y1=L.rows[i+1];if(y1===undefined)return;G.days.forEach((d,j)=>{if(j>=L.days.length-1)return;const v=G.cells[k.code][d];if(v)P.text(v,(L.days[j]+L.days[j+1])/2,(y0+y1)/2,{s:9.5,b:true,a:'center',c:resultOf(x.tpl,v)==='ko'?[180,20,30]:BLACK})})})}},
+    {orient:'p',draw:doc=>{const P=pen(doc);bgPage(doc,L.p2,'p');names(doc,P,2);const notes=x.notes||{};
+      G.days.forEach((d,j)=>{const y0=L.drows[j],y1=L.drows[j+1];if(y1===undefined)return;const n=notes[d]||{};fitBlock(doc,P,n.forts||'',L.forts[0],y0,L.forts[1],y1,{s:8});fitBlock(doc,P,n.axes||'',L.axes[0],y0,L.axes[1],y1,{s:8})});
+      const o=L.obs;fitBlock(doc,P,x.observations||'',o[0],o[1],o[2],o[3],{s:8.5});if(s.respPeda)P.text(s.respPeda,L.resp[0],L.resp[1],{s:9,b:true})}}];
+  if(x.tpl.avis&&FORMS['paefpse-avis'])pages.push({orient:'p',draw:doc=>drawAvisBg(doc,x,s,G)});
+  return pages}
+const AVL={nom:[41,55.1],prenom:[138,55.1],ev:[8.5,70.0,201.5,78.3],rows:[93.2,102.0,110.6,119.3,127.9,136.5,145.2,153.8,158.5,163.3,168.0,173.0],cols:{A:163.35,B:179.0,C:194.0},
+  yn:[[192.6,195.9],[198.1,201.4]],apt:[210.4,213.6],oui:[147.6,153.3],non:[178.0,184.9],lieu:[38,230.8],form:[47.6,250]};
+function drawAvisBg(doc,x,s,G){
+  const P=pen(doc),L=AVL,p=participant(s,x.pid)||{},C=suiviChecks(x,s,G),v=suiviVerdict(x,s);bgPage(doc,'paefpse-avis','p');x.avis=x.avis||{};
+  P.text((p.nom||'').toUpperCase(),L.nom[0],L.nom[1],{s:10,b:true});P.text(p.prenom||'',L.prenom[0],L.prenom[1],{s:10,b:true});
+  fit(doc,P,x.avis.evaluateurs??sessTrainers(s),...L.ev,{s:9.5,a:'center'});
+  x.tpl.comps.forEach((k,i)=>{const y0=L.rows[i],y1=L.rows[i+1];const f=G.fin[k.code];if(!f||y1===undefined||!L.cols[f])return;mark(P,L.cols[f]-6,y0,L.cols[f]+6,y1)});
+  const circ=(val,[y0,y1])=>{if(val==='oui')P.circle((L.oui[0]+L.oui[1])/2,(y0+y1)/2,6,2.6);if(val==='non')P.circle((L.non[0]+L.non[1])/2,(y0+y1)/2,6.5,2.6)};
+  C.groups.forEach((g,i)=>circ(g,L.yn[i]));circ(v==='apte'?'oui':v==='inapte'?'non':'',L.apt);
+  P.text([x.avis.lieu??(s.lieu||''),fmtDate(x.avis.date||s.end||today())].filter(Boolean).join(', le '),L.lieu[0],L.lieu[1],{s:9.5,b:true});
+  fit(doc,P,sessTrainers(s),L.form[0]-20,L.form[1]-3,L.form[0]+60,L.form[1]+3,{s:8.5,a:'center'});
+}
 function buildPdf(pages){
   const J=window.jspdf&&window.jspdf.jsPDF;if(!J)throw new Error('module PDF indisponible');
   const doc=new J({orientation:pages[0].orient==='l'?'landscape':'portrait',unit:'mm',format:'a4',compress:true});
@@ -1542,7 +1723,8 @@ const pslug=(s,pid)=>{const p=participant(s,pid)||{};return slug(p.nom)+'_'+slug
 function dossierPages(s,pid){
   const pages=[];const x=techOf(s.id,pid)||ensureTech(s,pid);if(x)pages.push(...techPages(x,s));
   pages.push(...sessFormatives(s.id).filter(e=>e.learners.some(l=>l.pid===pid)).flatMap(e=>formativePages(e,s,pid)));
-  const c=ensureCert(s,pid);if(c){pages.push(...certPages(c,s));pages.push(...qcmPages(c,s))}return pages;
+  const x2=suiviTpl(s.cursus)?ensureSuivi(s,pid):null;if(x2)pages.push(...suiviPages(x2,s));
+  const c=certTpl(s.cursus)?ensureCert(s,pid):null;if(c){pages.push(...certPages(c,s));pages.push(...qcmPages(c,s))}return pages;
 }
 
 /* =========================================================
@@ -1565,10 +1747,10 @@ function downloadFiles(fl){
   fl.forEach((f,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)},i*350));
   toast(fl.length>1?`${fl.length} fichiers enregistrés dans Téléchargements`:'Enregistré dans Téléchargements : '+fl[0].name);
 }
-/* Enregistrement sur l'appareil : Documents/Eval-PSE/<formation>/ (Android) ou Téléchargements (navigateur) */
+/* Enregistrement sur l'appareil : Documents/Eval/<formation>/ (Android) ou Téléchargements (navigateur) */
 async function saveFiles(files,folder){
   if(!NATIVE){downloadFiles(files.map(f=>new File([f.data],f.name,{type:f.mime})));return}
-  const Pl=window.Capacitor.Plugins;const dir='Eval-PSE/'+slug(folder||'exports');
+  const Pl=window.Capacitor.Plugins;const dir='Eval/'+slug(folder||'exports');
   try{try{await Pl.Filesystem.requestPermissions()}catch(e){}
     for(const f of files){const txt=typeof f.data==='string';
       await Pl.Filesystem.writeFile({path:dir+'/'+f.name,data:txt?f.data:b64(f.data),directory:'DOCUMENTS',recursive:true,...(txt?{encoding:'utf8'}:{})})}
@@ -1582,7 +1764,7 @@ async function runExport(label,make,mode){
   finally{busy(false)}
 }
 const modeChips=()=>`<div class="chips" role="radiogroup" aria-label="Destination">${chip('expmode','save',S.expMode,I.pdf+'Enregistrer sur l’appareil')}${chip('expmode','share',S.expMode,I.share+'Envoyer (mail, Bluetooth…)')}</div>
-  <p class="small muted" style="margin:0">${S.expMode==='save'?(NATIVE?'Les PDF sont rangés dans Documents/Eval-PSE, par formation.':'Les PDF sont enregistrés dans le dossier Téléchargements.'):'Le menu de partage propose mail, Bluetooth, Quick Share, Drive, WhatsApp… Tout est créé sur l’appareil, sans réseau.'}</p>`;
+  <p class="small muted" style="margin:0">${S.expMode==='save'?(NATIVE?'Les PDF sont rangés dans Documents/Eval, par formation.':'Les PDF sont enregistrés dans le dossier Téléchargements.'):'Le menu de partage propose mail, Bluetooth, Quick Share, Drive, WhatsApp… Tout est créé sur l’appareil, sans réseau.'}</p>`;
 function pickExport(){
   const s=curSess(),p=participant(s,S.pid),tt=techTpl(s.cursus),ct=certTpl(s.cursus);
   const F=sessFormatives(s.id).filter(e=>e.learners.some(l=>l.pid===p.id));
@@ -1590,7 +1772,7 @@ function pickExport(){
   modal(`${head('Exporter les fiches de '+esc(fullName(p)))}
     <p class="small muted" style="margin:0">Ordre du dossier selon le référentiel : technicité, fiches d’évaluation, certification individuelle.</p>
     <div class="row"><button class="btn sm" data-act="xp-all" data-v="1">Tout cocher</button><button class="btn sm" data-act="xp-all" data-v="0">Tout décocher</button></div>
-    <div style="display:grid">${tt?row('tech','Fiche de technicité',''):''}${F.map((e,i)=>row('f:'+e.id,'Cas concret n°'+(i+1)+' · '+esc(fmtDate(e.date)),esc(e.theme||''))).join('')}${ct?row('cert','Fiche de certification individuelle',''):''}${(()=>{const c=certOf(s.id,p.id);return c&&qcmFor(s.cursus)&&qcmState(c,s).done?row('qcm','Questionnaire corrigé (QCM)',''):''})()}</div>
+    <div style="display:grid">${tt?row('tech','Fiche de technicité',''):''}${F.map((e,i)=>row('f:'+e.id,'Cas concret n°'+(i+1)+' · '+esc(fmtDate(e.date)),esc(e.theme||''))).join('')}${suiviTpl(s.cursus)?row('suivi',suiviTpl(s.cursus).avis?'Fiche de suivi et avis final de l’équipe pédagogique':'Fiche de suivi de l’apprenant',''):''}${ct?row('cert','Fiche de certification individuelle',''):''}${(()=>{const c=certOf(s.id,p.id);return c&&qcmFor(s.cursus)&&qcmState(c,s).done?row('qcm','Questionnaire corrigé (QCM)',''):''})()}</div>
     <label class="cb"><input type="checkbox" id="xp-sep">Un fichier PDF par fiche (sinon un seul PDF)</label>
     ${modeChips()}
     <button class="btn primary" data-act="xp-go">${S.expMode==='save'?I.pdf+'Enregistrer':I.share+'Envoyer'}</button>`);
@@ -1601,9 +1783,10 @@ function exportMenu(){
     ${modeChips()}
     <button class="pick" data-act="exp" data-v="dossiers"><b>Un dossier PDF par participant</b><span class="small muted">${n} fichiers : cas concrets, technicité et certification.</span></button>
     <button class="pick" data-act="exp" data-v="all"><b>Tous les dossiers dans un seul PDF</b><span class="small muted">Classés par participant : technicité, cas concrets, certification.</span></button>
-    <button class="pick" data-act="exp" data-v="forms"><b>Fiches formatives (1 PDF)</b><span class="small muted">Tous les cas concrets.</span></button>
-    <button class="pick" data-act="exp" data-v="techs"><b>Fiches de technicité (1 PDF)</b><span class="small muted">Une page par participant.</span></button>
-    <button class="pick" data-act="exp" data-v="certs"><b>Fiches de certification (1 PDF)</b><span class="small muted">Une page par participant.</span></button>
+    <button class="pick" data-act="exp" data-v="forms"><b>${isFicheCursus(s.cursus)?'Fiches d’évaluation':'Fiches formatives'} (1 PDF)</b><span class="small muted">Tous les ${evalWords(s)}.</span></button>
+    ${techTpl(s.cursus)?`<button class="pick" data-act="exp" data-v="techs"><b>Fiches de technicité (1 PDF)</b><span class="small muted">Une page par participant.</span></button>`:''}
+    ${suiviTpl(s.cursus)?`<button class="pick" data-act="exp" data-v="suivis"><b>Fiches de suivi${suiviTpl(s.cursus).avis?' et avis finaux':''} (1 PDF)</b><span class="small muted">Pour chaque participant.</span></button>`:''}
+    ${certTpl(s.cursus)?`<button class="pick" data-act="exp" data-v="certs"><b>Fiches de certification (1 PDF)</b><span class="small muted">Une page par participant.</span></button>`:''}
     <button class="pick" data-act="exp" data-v="csv"><b>Résultats en tableur (CSV)</b><span class="small muted">À ouvrir dans Excel ou LibreOffice.</span></button>
     <button class="pick" data-act="exp" data-v="json"><b>Sauvegarde de la formation (.json)</b><span class="small muted">Pour reprendre la formation sur une autre tablette (Réglages › Importer).</span></button>`);
 }
@@ -1613,6 +1796,7 @@ function sessionExport(kind){
   if(kind==='all')return one('dossiers-complets',parts.flatMap(p=>dossierPages(s,p.id)),'aucune fiche');
   if(kind==='forms')return one('cas-concrets',F.flatMap(e=>formativePages(e,s)),'aucun cas concret');
   if(kind==='techs')return one('technicite',parts.map(p=>ensureTech(s,p.id)).filter(Boolean).flatMap(x=>techPages(x,s)),'aucune fiche de technicité');
+  if(kind==='suivis')return one('fiches-de-suivi',parts.map(p=>ensureSuivi(s,p.id)).filter(Boolean).flatMap(x=>suiviPages(x,s)),'aucune fiche de suivi');
   if(kind==='certs')return one('certifications',parts.map(p=>ensureCert(s,p.id)).filter(Boolean).flatMap(c=>certPages(c,s)),'aucune fiche de certification');
   if(kind==='dossiers'){const files=parts.map(p=>{const pg=dossierPages(s,p.id);return pg.length?pdfFile(`${s.cursus}_dossier_${pslug(s,p.id)}`,pg):null}).filter(Boolean);if(!files.length)throw new Error('aucun participant');return {files,title:s.title}}
   if(kind==='csv')return {files:[{name:base+'_resultats.csv',mime:'text/csv',data:csv([s.id])}],title:s.title};
@@ -1697,7 +1881,7 @@ const A={
   'new-formative':d=>{const s=curSess();const T=formTpls(s.cursus);if(!T.length){toast('Aucune grille formative pour '+s.cursus);return}
     if(!s.participants.filter(p=>!p.archived).length)toast('Astuce : saisissez d’abord les participants avec « Gérer »');
     if(T.length===1)return newFormative(s,T[0],d.pid);S._pid=d.pid;
-    modal(`${head('Choisir la grille')}${T.map(t=>`<button class="pick" data-act="pick-form" data-id="${t.id}"><b>${esc(t.name)}</b><span class="small muted">${t.criteria.length} critères</span></button>`).join('')}`)},
+    modal(`${head(isFicheCursus(s.cursus)?'Quelle technique pédagogique ?':'Choisir la grille')}${T.map(t=>`<button class="pick" data-act="pick-form" data-id="${t.id}"><b>${esc(t.fiche?(t.ref.replace(/^FE\//,'')+' · '+t.title):t.name)}</b><span class="small muted">${items(t).length} élément${items(t).length>1?'s':''} évalué${items(t).length>1?'s':''}${t.fiche?' · capacités '+[...new Set(t.criteria.flatMap(feedsOf))].join(', '):''}</span></button>`).join('')}`)},
   'pick-form':d=>{closeModal();newFormative(curSess(),DB.templates.find(t=>t.id===d.id),S._pid)},
   'open-formative':d=>go('formative',{eid:d.id,lt:0}),
   'open-cert':()=>{const s=curSess();const c=ensureCert(s,S.pid);if(!c){toast('Aucune fiche de certification '+s.cursus+' : créez-la dans Grilles');return}go('cert',{eid:c.id})},
@@ -1710,7 +1894,7 @@ const A={
   'add-learner':()=>{const e=curEval();e.learners.push({pid:'',caseNo:e.learners[0]?e.learners[0].caseNo:'',obs:'',marks:{}});S.lt=e.learners.length-1;touch(e);render()},
   'rm-learner':d=>{const e=curEval(),i=+d.i;confirmBox(`Retirer l’apprenant n°${i+1} et ses résultats de cette fiche ?`,'Retirer',()=>{e.learners.splice(i,1);S.lt=0;touch(e);render()})},
   'toggle-done':()=>{const e=curEval();if(!e.done&&e.learners.some(l=>!l.pid)){toast('Choisissez chaque apprenant avant d’enregistrer');return}e.done=!e.done;touch(e);save(true);
-    if(e.done){toast('Fiche enregistrée : la certification est mise à jour');go(S.pid?'person':'session')}else{toast('Fiche rouverte');render()}},
+    if(e.done){toast(e.tpl.fiche?'Fiche enregistrée : la fiche de suivi est mise à jour':'Fiche enregistrée : la certification est mise à jour');go(S.pid?'person':'session')}else{toast('Fiche rouverte');render()}},
   'del-eval':()=>confirmBox('Supprimer définitivement cette fiche ?','Supprimer',()=>{DB.evals=DB.evals.filter(x=>x.id!==S.eid);save(true);go(S.pid?'person':'session');toast('Fiche supprimée')}),
   cell:d=>{const c=curEval(),s=curSess(),t=c.tpl,G=certGrid(c,s),p=+d.p;const codes=['',...t.scale.map(x=>x.code)];const cur=G.cells[d.k][p]||'';
     const next=codes[(codes.indexOf(cur)+1)%codes.length];const auto=G.auto[p]?feedValue(G.auto[p],t.criteria.find(k=>k.id===d.k).code,t):'';
@@ -1738,6 +1922,13 @@ const A={
   /* auto-évaluation (formation continue) */
   self:d=>{const e=curEval(),l=e.learners[+d.i];l.self=l.self||{};if(l.self[d.c]===d.v)delete l.self[d.c];else l.self[d.c]=d.v;touch(e);render()},
   /* QCM */
+  'open-suivi':()=>{const s=curSess();const x=ensureSuivi(s,S.pid);if(!x)return;go('suivi',{eid:x.id})},
+  'sv-cell':d=>{const x=curEval(),s=curSess(),G=suiviGrid(x,s),codes=['',...x.tpl.scale.map(k=>k.code)];const cur=G.cells[d.k][d.d]||'';const next=codes[(codes.indexOf(cur)+1)%codes.length];
+    const auto=majority(((()=>{const g2=suiviGrid({...x,overrides:{}},s);return [g2.cells[d.k][d.d]].filter(Boolean)})()),x.tpl);
+    x.overrides[d.k]=x.overrides[d.k]||{};if(next===auto)delete x.overrides[d.k][d.d];else x.overrides[d.k][d.d]=next;touch(x);render()},
+  'sv-final':d=>{const x=curEval(),codes=['',...x.tpl.scale.map(k=>k.code)];const cur=x.final[d.k]||'';x.final[d.k]=codes[(codes.indexOf(cur)+1)%codes.length];if(!x.final[d.k])delete x.final[d.k];touch(x);render()},
+  'sv-check':d=>{const x=curEval();x.checks=x.checks||{};if(x.checks[d.k]===d.v)delete x.checks[d.k];else x.checks[d.k]=d.v;touch(x);render()},
+  fpsc:(d,ev,el)=>{const s=curSess(),x=curEval(),p=participant(s,x.pid);if(p){p.fpsc=el.checked;s.updatedAt=Date.now();save()}render()},
   'person-qcm':()=>{const s=curSess();const c=ensureCert(s,S.pid);if(!c)return;S.eid=c.id;go('qcm')},
   'open-qcm':()=>{if(!qcmFor(curSess().cursus)){toast('Pas de QCM pour cette formation');return}go('qcm')},
   'qcm-show':(d,ev,el)=>{S.qcmShow=el.checked;render()},
@@ -1745,6 +1936,7 @@ const A={
   'qcm-ans':(d,ev,el)=>{const c=curEval();c.qcm=c.qcm||{};c.qcm.ans=c.qcm.ans||{};const a=Array.isArray(c.qcm.ans[d.n])?c.qcm.ans[d.n]:[];const k=+d.k;const i=a.indexOf(k);if(el.checked&&i<0)a.push(k);if(!el.checked&&i>=0)a.splice(i,1);c.qcm.ans[d.n]=a;qcmToScore(c);render()},
   'qcm-rest':()=>{const c=curEval(),s=curSess(),st=qcmState(c,s);c.qcm=c.qcm||{};c.qcm.mark=c.qcm.mark||{};st.Q.forEach((q,i)=>{if(!st.res[i])c.qcm.mark[q.n]='ok'});qcmToScore(c);render();toast('Questions restantes marquées justes')},
   'qcm-reset':()=>confirmBox('Effacer toute la correction du QCM ?','Effacer',()=>{const c=curEval();c.qcm={};if((c.theory||{}).src==='qcm')c.theory={};touch(c);render()}),
+  'pdf-suivi':()=>{const x=curEval(),s=curSess();runExport('Création du PDF…',()=>({files:[pdfFile(`${s.cursus}_fiche-de-suivi_${pslug(s,x.pid)}`,suiviPages(x,s))],title:'Fiche de suivi'}))},
   'pdf-qcm':()=>{const c=curEval(),s=curSess();runExport('Création du PDF…',()=>({files:[pdfFile(`${s.cursus}_${pslug(s,c.pid)}_qcm-corrige`,qcmPages(c,s))],title:'QCM corrigé'}))},
   /* satisfaction */
   'survey-start':()=>{S.surveyBack=S.view;S.surveyDraft={scores:Array(SAT_CRITERIA.length).fill(0),why:{},comment:''};go('survey')},
@@ -1780,6 +1972,7 @@ const A={
         if(id==='tech'){const x=ensureTech(s,pid);return {n:'technicite',pages:techPages(x,s)}}
         if(id==='cert'){const c=ensureCert(s,pid);return {n:'certification',pages:certPages(c,s)}}
         if(id==='qcm'){const c=ensureCert(s,pid);return {n:'qcm-corrige',pages:qcmPages(c,s)}}
+        if(id==='suivi'){const x=ensureSuivi(s,pid);return {n:'fiche-de-suivi',pages:suiviPages(x,s)}}
         const e=evalById(id.slice(2));return {n:'cas-concret_'+e.date,pages:formativePages(e,s,pid)}});
       const base=`${s.cursus}_${pslug(s,pid)}`;
       const files=sep?parts.map((x,i)=>pdfFile(`${base}_${String(i+1).padStart(2,'0')}_${x.n}`,x.pages)):[pdfFile(ids.length===parts.length&&ids.includes('cert')&&ids.includes('tech')&&ids.length>2?`${base}_dossier`:`${base}_fiches`,parts.flatMap(x=>x.pages))];
@@ -1831,8 +2024,8 @@ const A={
   'add-trainer':()=>{DB.settings.trainers.push({id:uid(),nom:'',prenom:''});save();render();const L=document.querySelectorAll('[id$="-prenom"][data-scope="settings"]');L.length&&L[L.length-1].focus()},
   'rm-trainer':d=>{const t=DB.settings.trainers[+d.i];const used=DB.evals.some(e=>(e.evaluatorIds||[]).includes(t.id))||DB.sessions.some(s=>(s.trainerIds||[]).includes(t.id));
     if(used)t.archived=true;else DB.settings.trainers.splice(+d.i,1);save(true);render();if(used)toast('Formateur retiré des listes ; il reste affiché sur ses fiches')},
-  backup:()=>runExport('Préparation…',()=>({files:[{name:`evaluations-pse_sauvegarde_${today()}.json`,mime:'application/json',data:backupJSON()}],title:'Sauvegarde Évaluations PSE'})),
-  'csv-all':()=>runExport('Préparation…',()=>({files:[{name:`evaluations-pse_resultats_${today()}.csv`,mime:'text/csv',data:csv()}],title:'Résultats'})),
+  backup:()=>runExport('Préparation…',()=>({files:[{name:`eval_sauvegarde_${today()}.json`,mime:'application/json',data:backupJSON()}],title:'Sauvegarde Eval'})),
+  'csv-all':()=>runExport('Préparation…',()=>({files:[{name:`eval_resultats_${today()}.csv`,mime:'text/csv',data:csv()}],title:'Résultats'})),
   'copy-json':()=>copyText(backupJSON()),
   import:()=>{const f=$('#imp-file').files[0];const txt=$('#imp-text').value.trim();
     if(f){const r=new FileReader();r.onload=()=>importData(String(r.result));r.readAsText(f)}else if(txt)importData(txt);else toast('Choisissez un fichier ou collez une sauvegarde')},
@@ -1880,11 +2073,11 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)save(true)}
 /* Bouton retour Android */
 if(NATIVE&&window.Capacitor.Plugins.App){window.Capacitor.Plugins.App.addListener('backButton',()=>{
   if($('#overlay').innerHTML){closeModal();return}
-  const m={session:'sessions',person:'session',sessionEdit:S.draftNew?'sessions':'session',formative:S.pid?'person':'session',cert:'person',tech:'person',techs:'session',qcm:'cert',satis:'session',survey:'session',tpl:'tpls'};
+  const m={session:'sessions',person:'session',sessionEdit:S.draftNew?'sessions':'session',formative:S.pid?'person':'session',cert:'person',tech:'person',suivi:'person',techs:'session',qcm:'cert',satis:'session',survey:'session',tpl:'tpls'};
   if(m[S.view])go(m[S.view]);else if(S.view!=='sessions'){S.tab='sessions';go('sessions')}else window.Capacitor.Plugins.App.exitApp();
 })}
 window.__loadForms=loadForms;
-window.__app={DB:()=>DB,S,A,go,qcmState,pvPages,certificatePages,notifPages,attestationPages,satPages,qcmPages,buildPdf,formativePages,certPages,techPages,dossierPages,sessionExport,certGrid};
+window.__app={DB:()=>DB,S,A,go,ensureSuivi,suiviPages,suiviGrid,suiviVerdict,ensureCert,qcmState,pvPages,certificatePages,notifPages,attestationPages,satPages,qcmPages,buildPdf,formativePages,certPages,techPages,dossierPages,sessionExport,certGrid};
 render();
 })();
 </script>

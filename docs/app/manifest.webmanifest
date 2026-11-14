@@ -1,7 +1,7 @@
 {
-  "name": "Évaluations PSE - UDPS 28",
-  "short_name": "Éval PSE",
-  "description": "Fiches formatives, technicité et certification PSE1 / PSE2, sans réseau.",
+  "name": "Eval - UDPS 28",
+  "short_name": "Eval",
+  "description": "Évaluations des formations PSE1, PSE2, PIC F, PAE FPSE et chef d’équipe, sans réseau.",
   "lang": "fr",
   "start_url": "./index.html",
   "scope": "./",

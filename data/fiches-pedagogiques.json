@@ -1,0 +1,3644 @@
+{
+ "PICF": [
+  {
+   "id": "fe-picf-01",
+   "ref": "FE/PICF/01",
+   "num": "1",
+   "title": "LE TRAVAIL DE GROUPE",
+   "cols": {
+    "A": [
+     109.6,
+     122.6
+    ],
+    "B": [
+     122.6,
+     135.5
+    ]
+   },
+   "el": [
+    44.5,
+    109.6
+   ],
+   "obs": [
+    135.5,
+    121.81,
+    191.2,
+    202.46
+   ],
+   "imp": [
+    18.8,
+    206.86,
+    191.18,
+    224.27
+   ],
+   "fields": {
+    "eleve": [
+     18.8,
+     62.98,
+     109.64,
+     70.26
+    ],
+    "formateur": [
+     109.81,
+     62.98,
+     191.18,
+     70.26
+    ],
+    "theme": [
+     18.8,
+     82.79,
+     191.18,
+     92.27
+    ],
+    "date": [
+     44.62,
+     97.35,
+     44.79,
+     106.75
+    ],
+    "temps": [
+     135.64,
+     97.35,
+     191.18,
+     106.75
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "2.1"
+     ],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 121.53,
+     "y1": 128.93
+    },
+    {
+     "comp": [
+      "5"
+     ],
+     "label": "Donne des consignes claires et précises (travail demandé, conditions de réalisation/ évaluation)",
+     "y0": 128.93,
+     "y1": 142.03
+    },
+    {
+     "comp": [
+      "5"
+     ],
+     "label": "Distribue les rôles.",
+     "y0": 142.03,
+     "y1": 149.53
+    },
+    {
+     "comp": [
+      "5"
+     ],
+     "label": "Recentre les débats sur l’objectif",
+     "y0": 149.53,
+     "y1": 156.93
+    },
+    {
+     "comp": [
+      "5"
+     ],
+     "label": "Reformule les idées émises",
+     "y0": 156.93,
+     "y1": 164.53
+    },
+    {
+     "comp": [
+      "5"
+     ],
+     "label": "N’impose pas son point de vue",
+     "y0": 164.53,
+     "y1": 171.93
+    },
+    {
+     "comp": [
+      "5"
+     ],
+     "label": "Utilise l’interactivité",
+     "y0": 171.93,
+     "y1": 179.43
+    },
+    {
+     "comp": [
+      "6",
+      "10"
+     ],
+     "label": "Gestion du temps et de l’espace.",
+     "y0": 179.43,
+     "y1": 186.93
+    },
+    {
+     "comp": [
+      "9"
+     ],
+     "label": "S’exprime de façon claire et précise.",
+     "y0": 186.93,
+     "y1": 194.33
+    },
+    {
+     "comp": [
+      "13"
+     ],
+     "label": "Gère les comportements et attitudes.",
+     "y0": 194.33,
+     "y1": 201.83
+    }
+   ]
+  },
+  {
+   "id": "fe-picf-02",
+   "ref": "FE/PICF/02",
+   "num": "2",
+   "title": "L’ÉTUDE DE CAS",
+   "cols": {
+    "A": [
+     109.6,
+     122.6
+    ],
+    "B": [
+     122.6,
+     135.5
+    ]
+   },
+   "el": [
+    44.5,
+    109.6
+   ],
+   "obs": [
+    135.5,
+    119.61,
+    191.2,
+    212.11
+   ],
+   "imp": [
+    18.8,
+    216.51,
+    191.18,
+    240.18
+   ],
+   "fields": {
+    "eleve": [
+     18.8,
+     60.78,
+     109.64,
+     68.06
+    ],
+    "formateur": [
+     109.81,
+     60.78,
+     191.18,
+     68.06
+    ],
+    "theme": [
+     18.8,
+     80.67,
+     191.18,
+     90.15
+    ],
+    "date": [
+     44.62,
+     95.23,
+     44.79,
+     104.55
+    ],
+    "temps": [
+     135.64,
+     95.23,
+     191.18,
+     104.55
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "12"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 119.25,
+     "y1": 127.25
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 127.25,
+     "y1": 134.65
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Présente une situation simple et crédible.",
+     "y0": 134.65,
+     "y1": 142.15
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Utilise un support pédagogique pour lancer la discussion.",
+     "y0": 142.15,
+     "y1": 150.05
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Selon l’action, demande à un participant d’évaluer l’action.",
+     "y0": 150.05,
+     "y1": 158.05
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Anime une discussion en axant sur - Les signes ; - Les risques ; Le résultat attendu de l’action de secours.",
+     "y0": 158.05,
+     "y1": 173.75
+    },
+    {
+     "comp": [
+      "9"
+     ],
+     "label": "Utilise au moins 2 canaux de communication.",
+     "y0": 173.75,
+     "y1": 181.15
+    },
+    {
+     "comp": [
+      "14"
+     ],
+     "label": "Utilise un outil pédagogique adapté.",
+     "y0": 181.15,
+     "y1": 188.75
+    },
+    {
+     "comp": [
+      "13"
+     ],
+     "label": "Gère les comportements et attitudes du groupe.",
+     "y0": 188.75,
+     "y1": 196.55
+    },
+    {
+     "comp": [],
+     "label": "Remplit sa grille d’autodiagnostic.",
+     "y0": 196.55,
+     "y1": 204.15
+    },
+    {
+     "comp": [
+      "8"
+     ],
+     "label": "S’autoévalue dans son rôle de formateur.",
+     "y0": 204.15,
+     "y1": 211.55
+    }
+   ]
+  },
+  {
+   "id": "fe-picf-03",
+   "ref": "FE/PICF/03",
+   "num": "3",
+   "title": "LE REMUE-MÉNINGES",
+   "cols": {
+    "A": [
+     109.6,
+     122.6
+    ],
+    "B": [
+     122.6,
+     135.5
+    ]
+   },
+   "el": [
+    44.5,
+    109.6
+   ],
+   "obs": [
+    135.5,
+    119.61,
+    191.2,
+    223.04
+   ],
+   "imp": [
+    18.8,
+    227.43,
+    191.18,
+    251.02
+   ],
+   "fields": {
+    "eleve": [
+     18.8,
+     60.78,
+     103.55,
+     68.06
+    ],
+    "formateur": [
+     103.72,
+     60.78,
+     191.18,
+     68.06
+    ],
+    "theme": [
+     18.8,
+     80.67,
+     191.18,
+     90.15
+    ],
+    "date": [
+     44.62,
+     95.23,
+     44.79,
+     104.55
+    ],
+    "temps": [
+     128.69,
+     95.23,
+     191.18,
+     104.55
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "12"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 119.28,
+     "y1": 127.28
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Annonce le thème et l’objectif",
+     "y0": 127.28,
+     "y1": 134.68
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Pose une question claire.",
+     "y0": 134.68,
+     "y1": 142.18
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Écrit au tableau toutes les idées sans censure.",
+     "y0": 142.18,
+     "y1": 149.68
+    },
+    {
+     "comp": [
+      "2.2"
+     ],
+     "label": "Analyse de la production de travail : - Compile ; - Clarifie ; - Regroupe les idées ; - Exploite les idées.",
+     "y0": 149.68,
+     "y1": 169.28
+    },
+    {
+     "comp": [
+      "2.2"
+     ],
+     "label": "Répond aux questions.",
+     "y0": 169.28,
+     "y1": 176.68
+    },
+    {
+     "comp": [
+      "2.2"
+     ],
+     "label": "Synthétise en insistant sur les points importants.",
+     "y0": 176.68,
+     "y1": 184.68
+    },
+    {
+     "comp": [
+      "14"
+     ],
+     "label": "Utilise un outil ou un support pédagogique.",
+     "y0": 184.68,
+     "y1": 192.08
+    },
+    {
+     "comp": [
+      "6",
+      "10"
+     ],
+     "label": "Gestion du temps et de l’espace.",
+     "y0": 192.08,
+     "y1": 199.58
+    },
+    {
+     "comp": [
+      "13"
+     ],
+     "label": "Gère les comportements et attitudes du groupe.",
+     "y0": 199.58,
+     "y1": 207.48
+    },
+    {
+     "comp": [],
+     "label": "Remplit sa grille d’autodiagnostic.",
+     "y0": 207.48,
+     "y1": 214.98
+    },
+    {
+     "comp": [
+      "8"
+     ],
+     "label": "S’autoévalue dans son rôle de formateur.",
+     "y0": 214.98,
+     "y1": 222.48
+    }
+   ]
+  },
+  {
+   "id": "fe-picf-04",
+   "ref": "FE/PICF/04",
+   "num": "4",
+   "title": "MÉTAPLAN",
+   "cols": {
+    "A": [
+     116.1,
+     128.5
+    ],
+    "B": [
+     128.5,
+     141.1
+    ]
+   },
+   "el": [
+    44.5,
+    116.1
+   ],
+   "obs": [
+    141.1,
+    119.61,
+    191.2,
+    181.04
+   ],
+   "imp": [
+    18.8,
+    185.44,
+    191.18,
+    209.11
+   ],
+   "fields": {
+    "eleve": [
+     18.8,
+     60.78,
+     103.55,
+     68.06
+    ],
+    "formateur": [
+     103.72,
+     60.78,
+     191.18,
+     68.06
+    ],
+    "theme": [
+     18.8,
+     80.67,
+     191.18,
+     90.15
+    ],
+    "date": [
+     44.62,
+     95.23,
+     44.79,
+     104.55
+    ],
+    "temps": [
+     128.69,
+     95.23,
+     191.18,
+     104.55
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "12"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 119.3,
+     "y1": 127.2
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 127.2,
+     "y1": 134.7
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Inscrit la question au tableau.",
+     "y0": 134.7,
+     "y1": 142.1
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Invite les participants à répondre avec une seule idée via un post-it par une phrase courte.",
+     "y0": 142.1,
+     "y1": 150.1
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Affiche les post-it et les classe par catégorie. Commentaires par post-it de 30 secondes maxi.",
+     "y0": 150.1,
+     "y1": 158.1
+    },
+    {
+     "comp": [
+      "6",
+      "10"
+     ],
+     "label": "Gestion du temps et de l’espace.",
+     "y0": 158.1,
+     "y1": 165.5
+    },
+    {
+     "comp": [
+      "13"
+     ],
+     "label": "Gère les comportements et attitudes du groupe.",
+     "y0": 165.5,
+     "y1": 173.0
+    },
+    {
+     "comp": [
+      "8"
+     ],
+     "label": "S’autoévalue dans son rôle de formateur.",
+     "y0": 173.0,
+     "y1": 180.5
+    }
+   ]
+  },
+  {
+   "id": "fe-picf-05",
+   "ref": "FE/PICF/05",
+   "num": "5",
+   "title": "LA CARTE MENTALE",
+   "cols": {
+    "A": [
+     109.6,
+     122.6
+    ],
+    "B": [
+     122.6,
+     135.5
+    ]
+   },
+   "el": [
+    44.5,
+    109.6
+   ],
+   "obs": [
+    135.5,
+    119.61,
+    191.2,
+    227.44
+   ],
+   "imp": [
+    18.8,
+    231.83,
+    191.18,
+    255.51
+   ],
+   "fields": {
+    "eleve": [
+     18.8,
+     60.78,
+     109.64,
+     68.06
+    ],
+    "formateur": [
+     109.81,
+     60.78,
+     191.18,
+     68.06
+    ],
+    "theme": [
+     18.8,
+     80.67,
+     191.18,
+     90.15
+    ],
+    "date": [
+     44.62,
+     95.23,
+     44.79,
+     104.55
+    ],
+    "temps": [
+     135.64,
+     95.23,
+     191.18,
+     104.55
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "12"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 119.32,
+     "y1": 127.22
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 127.22,
+     "y1": 134.72
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Donne des consignes claires et précises",
+     "y0": 134.72,
+     "y1": 142.12
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Pose une question qui lance son mot clef central - Note toutes les idées émises - Facilite les interventions - Ne critique pas les idées - Utilise une disposition circulaire",
+     "y0": 142.12,
+     "y1": 165.62
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Effectue une synthèse de la production - Fait clarifier ou reformule les termes - Regroupe les idées - Utilise les acquis des apprenants - Structure une synthèse autour des points clefs.",
+     "y0": 165.62,
+     "y1": 189.02
+    },
+    {
+     "comp": [
+      "14"
+     ],
+     "label": "Utilise un outil pédagogique adapté.",
+     "y0": 189.02,
+     "y1": 196.52
+    },
+    {
+     "comp": [
+      "6",
+      "10"
+     ],
+     "label": "Gestion du temps et de l’espace.",
+     "y0": 196.52,
+     "y1": 204.02
+    },
+    {
+     "comp": [
+      "13"
+     ],
+     "label": "Gère les comportements et attitudes du groupe.",
+     "y0": 204.02,
+     "y1": 211.92
+    },
+    {
+     "comp": [],
+     "label": "Remplit sa grille d’autodiagnostic.",
+     "y0": 211.92,
+     "y1": 219.42
+    },
+    {
+     "comp": [
+      "8"
+     ],
+     "label": "S’autoévalue dans son rôle de formateur.",
+     "y0": 219.42,
+     "y1": 226.92
+    }
+   ]
+  },
+  {
+   "id": "fe-picf-06",
+   "ref": "FE/PICF/06",
+   "num": "6",
+   "title": "L’EXPOSÉ INTERACTIF",
+   "cols": {
+    "A": [
+     121.1,
+     135.5
+    ],
+    "B": [
+     135.5,
+     151.0
+    ]
+   },
+   "el": [
+    44.5,
+    121.1
+   ],
+   "obs": [
+    151.0,
+    119.61,
+    191.2,
+    217.11
+   ],
+   "imp": [
+    18.8,
+    221.5,
+    191.18,
+    245.09
+   ],
+   "fields": {
+    "eleve": [
+     18.8,
+     60.78,
+     109.64,
+     68.06
+    ],
+    "formateur": [
+     109.81,
+     60.78,
+     191.18,
+     68.06
+    ],
+    "theme": [
+     18.8,
+     80.67,
+     191.18,
+     90.15
+    ],
+    "date": [
+     44.62,
+     95.23,
+     44.79,
+     104.55
+    ],
+    "temps": [
+     135.64,
+     95.23,
+     191.18,
+     104.55
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "11"
+     ],
+     "label": "Préparation de l’espace de formation.",
+     "y0": 119.25,
+     "y1": 126.85
+    },
+    {
+     "comp": [
+      "2.2"
+     ],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 126.85,
+     "y1": 134.25
+    },
+    {
+     "comp": [
+      "2.2"
+     ],
+     "label": "Annonce les 2 ou 3 parties.",
+     "y0": 134.25,
+     "y1": 141.75
+    },
+    {
+     "comp": [
+      "2.2"
+     ],
+     "label": "Introduit chaque partie par une question.",
+     "y0": 141.75,
+     "y1": 149.25
+    },
+    {
+     "comp": [
+      "2.2"
+     ],
+     "label": "Centre chaque partie sur un point important.",
+     "y0": 149.25,
+     "y1": 156.75
+    },
+    {
+     "comp": [
+      "2.2"
+     ],
+     "label": "Favorise, valide et complète les apports du groupe.",
+     "y0": 156.75,
+     "y1": 164.15
+    },
+    {
+     "comp": [
+      "2.2"
+     ],
+     "label": "Corrige les connaissances ou représentations erronées.",
+     "y0": 164.15,
+     "y1": 171.65
+    },
+    {
+     "comp": [
+      "2.2"
+     ],
+     "label": "Synthétise en insistant sur les points importants.",
+     "y0": 171.65,
+     "y1": 179.15
+    },
+    {
+     "comp": [
+      "14"
+     ],
+     "label": "Utilise un outil pédagogique adapté.",
+     "y0": 179.15,
+     "y1": 186.55
+    },
+    {
+     "comp": [
+      "9"
+     ],
+     "label": "S’exprime de façon claire et précise.",
+     "y0": 186.55,
+     "y1": 194.15
+    },
+    {
+     "comp": [
+      "13"
+     ],
+     "label": "Gère les comportements et attitudes du groupe.",
+     "y0": 194.15,
+     "y1": 201.55
+    },
+    {
+     "comp": [],
+     "label": "Remplit sa grille d’autodiagnostic.",
+     "y0": 201.55,
+     "y1": 209.05
+    },
+    {
+     "comp": [
+      "8"
+     ],
+     "label": "S’autoévalue dans son rôle de formateur.",
+     "y0": 209.05,
+     "y1": 216.55
+    }
+   ]
+  },
+  {
+   "id": "fe-picf-07",
+   "ref": "FE/PICF/07",
+   "num": "7",
+   "title": "LA DÉMONSTRATION PRATIQUE",
+   "cols": {
+    "A": [
+     118.5,
+     131.0
+    ],
+    "B": [
+     131.0,
+     143.6
+    ]
+   },
+   "el": [
+    44.5,
+    118.5
+   ],
+   "obs": [
+    143.6,
+    112.92,
+    191.2,
+    224.81
+   ],
+   "imp": [
+    18.8,
+    229.21,
+    191.18,
+    248.06
+   ],
+   "fields": {
+    "eleve": [
+     18.8,
+     58.24,
+     103.55,
+     65.52
+    ],
+    "formateur": [
+     103.72,
+     58.24,
+     191.18,
+     65.52
+    ],
+    "theme": [
+     18.8,
+     75.51,
+     191.18,
+     84.99
+    ],
+    "date": [
+     44.62,
+     90.07,
+     44.79,
+     97.69
+    ],
+    "temps": [
+     130.98,
+     90.07,
+     131.15,
+     97.69
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "12"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 112.77,
+     "y1": 120.77
+    },
+    {
+     "comp": [],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 120.77,
+     "y1": 128.17
+    },
+    {
+     "comp": [
+      "2.1",
+      "2.2",
+      "2.3",
+      "6",
+      "14"
+     ],
+     "label": "Démonstration en temps réel ð Simple et crédible ð Explique la situation ð Ne commente pas ce qu’il fait ð Procédure conforme ð Gestuelles conformes",
+     "y0": 128.17,
+     "y1": 151.67
+    },
+    {
+     "comp": [
+      "2.1",
+      "2.2",
+      "2.3",
+      "6",
+      "14"
+     ],
+     "label": "Démonstration commentée et justifiée ð Identique à la DTR ; ð Fait identifier les étapes de la CAT ; ð Explique le geste ; ð Donne des justifications pertinentes ; ð Indique les points clés ; ð Gestuelles conformes.",
+     "y0": 151.67,
+     "y1": 178.87
+    },
+    {
+     "comp": [
+      "2.1",
+      "2.2",
+      "2.3",
+      "6",
+      "14"
+     ],
+     "label": "Reformulation le cas échéant ð Se fait guider par un participant.",
+     "y0": 178.87,
+     "y1": 186.87
+    },
+    {
+     "comp": [
+      "2.1",
+      "2.2",
+      "2.3",
+      "6",
+      "14"
+     ],
+     "label": "Réponds aux questions.",
+     "y0": 186.87,
+     "y1": 194.27
+    },
+    {
+     "comp": [
+      "14"
+     ],
+     "label": "Utilise un outil ou support pédagogique.",
+     "y0": 194.27,
+     "y1": 201.87
+    },
+    {
+     "comp": [
+      "13"
+     ],
+     "label": "Gère les comportements et attitudes du groupe.",
+     "y0": 201.87,
+     "y1": 209.27
+    },
+    {
+     "comp": [],
+     "label": "Remplit sa grille d’autodiagnostic.",
+     "y0": 209.27,
+     "y1": 216.77
+    },
+    {
+     "comp": [
+      "8"
+     ],
+     "label": "S’autoévalue dans son rôle de formateur.",
+     "y0": 216.77,
+     "y1": 224.27
+    }
+   ]
+  },
+  {
+   "id": "fe-picf-08",
+   "ref": "FE/PICF/08",
+   "num": "8",
+   "title": "LA DÉMONSTRATION PRATIQUE EN MIROIR",
+   "cols": {
+    "A": [
+     116.1,
+     131.0
+    ],
+    "B": [
+     131.0,
+     146.0
+    ]
+   },
+   "el": [
+    44.6,
+    116.1
+   ],
+   "obs": [
+    146.0,
+    119.61,
+    191.2,
+    222.36
+   ],
+   "imp": [
+    18.71,
+    226.75,
+    191.18,
+    250.43
+   ],
+   "fields": {
+    "eleve": [
+     18.71,
+     60.78,
+     103.55,
+     68.06
+    ],
+    "formateur": [
+     103.72,
+     60.78,
+     191.18,
+     68.06
+    ],
+    "theme": [
+     18.71,
+     80.67,
+     191.18,
+     90.15
+    ],
+    "date": [
+     44.62,
+     95.23,
+     44.79,
+     104.55
+    ],
+    "temps": [
+     128.69,
+     95.23,
+     191.18,
+     104.55
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "12"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 119.29,
+     "y1": 127.19
+    },
+    {
+     "comp": [],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 127.19,
+     "y1": 134.69
+    },
+    {
+     "comp": [
+      "2"
+     ],
+     "label": "Positionne les participants.",
+     "y0": 134.69,
+     "y1": 142.09
+    },
+    {
+     "comp": [
+      "2"
+     ],
+     "label": "Démonstration commentée justifiée - Explique le geste - Donne des justifications pertinentes - Indique les points clés - Gestuelles conformes - Participant réalise les gestes en même temps que le formateur",
+     "y0": 142.09,
+     "y1": 169.49
+    },
+    {
+     "comp": [
+      "2"
+     ],
+     "label": "Corrige les gestes.",
+     "y0": 169.49,
+     "y1": 176.89
+    },
+    {
+     "comp": [
+      "2"
+     ],
+     "label": "Répond aux questions.",
+     "y0": 176.89,
+     "y1": 184.49
+    },
+    {
+     "comp": [
+      "2"
+     ],
+     "label": "Synthétise en insistant sur les points importants.",
+     "y0": 184.49,
+     "y1": 191.89
+    },
+    {
+     "comp": [
+      "14"
+     ],
+     "label": "Utilise un outil ou support pédagogique.",
+     "y0": 191.89,
+     "y1": 199.39
+    },
+    {
+     "comp": [
+      "13"
+     ],
+     "label": "Gère les comportements et attitudes.",
+     "y0": 199.39,
+     "y1": 206.89
+    },
+    {
+     "comp": [],
+     "label": "Remplit sa grille d’autodiagnostic.",
+     "y0": 206.89,
+     "y1": 214.39
+    },
+    {
+     "comp": [
+      "8"
+     ],
+     "label": "S’autoévalue en groupe.",
+     "y0": 214.39,
+     "y1": 221.79
+    }
+   ]
+  },
+  {
+   "id": "fe-picf-09",
+   "ref": "FE/PICF/09",
+   "num": "9",
+   "title": "LA DÉMONSTRATION PRATIQUE DIRIGÉE",
+   "cols": {
+    "A": [
+     128.5,
+     141.1
+    ],
+    "B": [
+     141.1,
+     153.6
+    ]
+   },
+   "el": [
+    44.5,
+    128.5
+   ],
+   "obs": [
+    153.6,
+    117.07,
+    191.2,
+    235.06
+   ],
+   "imp": [
+    18.8,
+    239.45,
+    191.18,
+    256.95
+   ],
+   "fields": {
+    "eleve": [
+     18.8,
+     60.78,
+     106.09,
+     68.06
+    ],
+    "formateur": [
+     106.26,
+     60.78,
+     191.18,
+     68.06
+    ],
+    "theme": [
+     18.8,
+     78.05,
+     191.18,
+     87.53
+    ],
+    "date": [
+     44.62,
+     92.61,
+     44.79,
+     102.01
+    ],
+    "temps": [
+     138.6,
+     92.61,
+     138.77,
+     102.01
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "12"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 116.72,
+     "y1": 124.72
+    },
+    {
+     "comp": [],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 124.72,
+     "y1": 132.12
+    },
+    {
+     "comp": [
+      "2.1",
+      "2.2",
+      "2.3",
+      "6",
+      "14"
+     ],
+     "label": "Organise la démonstration.",
+     "y0": 132.12,
+     "y1": 139.62
+    },
+    {
+     "comp": [
+      "2.1",
+      "2.2",
+      "2.3",
+      "6",
+      "14"
+     ],
+     "label": "Précise les points clés de la technique ou du matériel Explique la technique avec le QPACRE Quand réaliser ce geste ou utiliser ce matériel ? Pourquoi réaliser ce geste ou utiliser ce matériel ? Avec quoi réaliser ce geste ? Comment réaliser ce geste ou utiliser ce matériel ? Quels sont les risques de ce geste ou de ce matériel ? Quels sont les critères d’efficacité de ce geste ou de l’utilisation du matériel ?",
+     "y0": 139.62,
+     "y1": 174.62
+    },
+    {
+     "comp": [
+      "2.1",
+      "2.2",
+      "2.3",
+      "6",
+      "14"
+     ],
+     "label": "Faire reformuler l’action à effectuer",
+     "y0": 174.62,
+     "y1": 182.22
+    },
+    {
+     "comp": [
+      "2.1",
+      "2.2",
+      "2.3",
+      "6",
+      "14"
+     ],
+     "label": "Évalue l’action et/ou corrige",
+     "y0": 182.22,
+     "y1": 189.62
+    },
+    {
+     "comp": [
+      "2.1",
+      "2.2",
+      "2.3",
+      "6",
+      "14"
+     ],
+     "label": "Fait refaire l’action à vitesse réelle",
+     "y0": 189.62,
+     "y1": 197.12
+    },
+    {
+     "comp": [
+      "12"
+     ],
+     "label": "Positionne le groupe en situation d’apprentissage du geste",
+     "y0": 197.12,
+     "y1": 204.62
+    },
+    {
+     "comp": [
+      "9"
+     ],
+     "label": "S’exprime de façon claire et précise.",
+     "y0": 204.62,
+     "y1": 212.12
+    },
+    {
+     "comp": [
+      "13"
+     ],
+     "label": "Gère les comportements et attitudes",
+     "y0": 212.12,
+     "y1": 219.52
+    },
+    {
+     "comp": [],
+     "label": "Remplit sa grille d’autodiagnostic.",
+     "y0": 219.52,
+     "y1": 227.02
+    },
+    {
+     "comp": [
+      "8"
+     ],
+     "label": "S’autoévalue dans son rôle de formateur.",
+     "y0": 227.02,
+     "y1": 234.52
+    }
+   ]
+  },
+  {
+   "id": "fe-picf-10",
+   "ref": "FE/PICF/10",
+   "num": "10",
+   "title": "L’APPRENTISSAGE DU GESTE",
+   "cols": {
+    "A": [
+     109.6,
+     122.6
+    ],
+    "B": [
+     122.6,
+     135.5
+    ]
+   },
+   "el": [
+    44.5,
+    109.6
+   ],
+   "obs": [
+    135.5,
+    121.81,
+    191.2,
+    201.19
+   ],
+   "imp": [
+    18.8,
+    205.59,
+    191.18,
+    223.08
+   ],
+   "fields": {
+    "eleve": [
+     18.8,
+     62.98,
+     109.64,
+     70.26
+    ],
+    "formateur": [
+     109.81,
+     62.98,
+     191.18,
+     70.26
+    ],
+    "theme": [
+     18.8,
+     82.79,
+     191.18,
+     92.27
+    ],
+    "date": [
+     44.62,
+     97.35,
+     44.79,
+     106.75
+    ],
+    "temps": [
+     135.64,
+     97.35,
+     191.18,
+     106.75
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "12"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 121.44,
+     "y1": 129.34
+    },
+    {
+     "comp": [],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 129.34,
+     "y1": 136.94
+    },
+    {
+     "comp": [
+      "2",
+      "3"
+     ],
+     "label": "Positionne les participants en binôme ou trinôme.",
+     "y0": 136.94,
+     "y1": 145.74
+    },
+    {
+     "comp": [
+      "2",
+      "3"
+     ],
+     "label": "Demande de faire le geste.",
+     "y0": 145.74,
+     "y1": 153.14
+    },
+    {
+     "comp": [
+      "2",
+      "3"
+     ],
+     "label": "Selon l’action, demande à un participant d’évaluer l’action.",
+     "y0": 153.14,
+     "y1": 161.94
+    },
+    {
+     "comp": [
+      "2",
+      "3"
+     ],
+     "label": "Corrige les gestes.",
+     "y0": 161.94,
+     "y1": 169.44
+    },
+    {
+     "comp": [
+      "2",
+      "3"
+     ],
+     "label": "Synthétise en insistant sur les points importants.",
+     "y0": 169.44,
+     "y1": 178.24
+    },
+    {
+     "comp": [
+      "13"
+     ],
+     "label": "Gère les comportements et attitudes.",
+     "y0": 178.24,
+     "y1": 185.64
+    },
+    {
+     "comp": [],
+     "label": "Remplit sa grille d’autodiagnostic.",
+     "y0": 185.64,
+     "y1": 193.24
+    },
+    {
+     "comp": [
+      "8"
+     ],
+     "label": "S’autoévalue en groupe.",
+     "y0": 193.24,
+     "y1": 200.64
+    }
+   ]
+  },
+  {
+   "id": "fe-picf-11",
+   "ref": "FE/PICF/11",
+   "num": "11",
+   "title": "LA MISE EN SITUATION",
+   "cols": {
+    "A": [
+     116.1,
+     128.5
+    ],
+    "B": [
+     128.5,
+     141.1
+    ]
+   },
+   "el": [
+    44.5,
+    116.1
+   ],
+   "obs": [
+    141.1,
+    119.61,
+    191.2,
+    228.71
+   ],
+   "imp": [
+    18.8,
+    233.1,
+    191.18,
+    256.78
+   ],
+   "fields": {
+    "eleve": [
+     18.8,
+     60.78,
+     103.55,
+     68.06
+    ],
+    "formateur": [
+     103.72,
+     60.78,
+     191.18,
+     68.06
+    ],
+    "theme": [
+     18.8,
+     80.67,
+     191.18,
+     90.15
+    ],
+    "date": [
+     44.62,
+     95.23,
+     44.79,
+     104.55
+    ],
+    "temps": [
+     128.69,
+     95.23,
+     191.18,
+     104.55
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "12"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 119.26,
+     "y1": 127.26
+    },
+    {
+     "comp": [
+      "4"
+     ],
+     "label": "Préparation du cas concret - Simple et crédible / effet de surprise - Pas de danger réel - Donne des consignes à la victime - Donne des consignes au témoin - Met le sauveteur à l’écart - Fait reformuler les consignes",
+     "y0": 127.26,
+     "y1": 154.46
+    },
+    {
+     "comp": [
+      "4"
+     ],
+     "label": "Pendant le cas concret - Se tient en retrait - Répond à l’alerte - Utilise une grille d’évaluation - Arrête le cas en cas de danger réel",
+     "y0": 154.46,
+     "y1": 174.06
+    },
+    {
+     "comp": [
+      "7",
+      "2"
+     ],
+     "label": "Évaluation du sauveteur - Fait parler le sauveteur en 1 er - Demande l’avis du groupe - Analyse l’action de secours - Donne les axes d’amélioration - Indique les points positifs - Rappelle les points clés - Fait refaire le geste si besoin",
+     "y0": 174.06,
+     "y1": 205.26
+    },
+    {
+     "comp": [
+      "14"
+     ],
+     "label": "Utilise du matériel de simulation (Maquillage – fausse plaie – matériels)",
+     "y0": 205.26,
+     "y1": 213.16
+    },
+    {
+     "comp": [
+      "13"
+     ],
+     "label": "Gère les comportements et attitudes.",
+     "y0": 213.16,
+     "y1": 220.66
+    },
+    {
+     "comp": [
+      "8"
+     ],
+     "label": "S’autoévalue en groupe.",
+     "y0": 220.66,
+     "y1": 228.16
+    }
+   ]
+  }
+ ],
+ "PAEFPSE": [
+  {
+   "id": "fe-paefpse-00",
+   "ref": "FE/PAE FPSE/00",
+   "num": "00",
+   "title": "ANIMATION GQS",
+   "cols": {
+    "A": [
+     110.3,
+     120.1
+    ],
+    "B": [
+     120.1,
+     131.8
+    ],
+    "C": [
+     131.8,
+     142.4
+    ]
+   },
+   "el": [
+    40.1,
+    110.3
+   ],
+   "obs": [
+    142.4,
+    107.76,
+    195.2,
+    239.04
+   ],
+   "imp": [
+    22.86,
+    243.43,
+    195.16,
+    253.65
+   ],
+   "fields": {
+    "eleve": [
+     22.86,
+     57.98,
+     108.29,
+     63.06
+    ],
+    "formateur": [
+     108.46,
+     57.98,
+     195.16,
+     63.06
+    ],
+    "theme": [
+     22.86,
+     73.56,
+     195.16,
+     80.84
+    ],
+    "date": [
+     48.77,
+     85.92,
+     108.29,
+     92.69
+    ],
+    "temps": [
+     132.84,
+     85.92,
+     195.16,
+     92.69
+    ]
+   },
+   "rows": [
+    {
+     "sec": "Exposé interactif",
+     "y0": 107.45,
+     "y1": 111.45
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 111.45,
+     "y1": 119.05
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Annonce les 2 ou 3 parties.",
+     "y0": 119.05,
+     "y1": 126.45
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Introduit chaque partie par une question.",
+     "y0": 126.45,
+     "y1": 133.95
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Centre chaque partie sur un point important.",
+     "y0": 133.95,
+     "y1": 141.45
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Favorise, valide et complète les apports du groupe.",
+     "y0": 141.45,
+     "y1": 149.35
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Corrige les connaissances ou représentations erronées.",
+     "y0": 149.35,
+     "y1": 157.25
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Synthétise en insistant sur les points importants.",
+     "y0": 157.25,
+     "y1": 164.75
+    },
+    {
+     "sec": "Démonstration Commentée et Justifiée",
+     "y0": 164.75,
+     "y1": 168.95
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Positionne les participants.",
+     "y0": 168.95,
+     "y1": 176.45
+    },
+    {
+     "comp": [
+      "1"
+     ],
+     "label": "Démonstration commentée justifiée - Explique le geste - Donne des justifications pertinentes - Indique les points clés Participant réalise les gestes en même temps que le formateur",
+     "y0": 176.45,
+     "y1": 199.85
+    },
+    {
+     "comp": [],
+     "label": "Corrige les gestes.",
+     "y0": 199.85,
+     "y1": 207.35
+    },
+    {
+     "comp": [],
+     "label": "Répond aux questions.",
+     "y0": 207.35,
+     "y1": 214.85
+    },
+    {
+     "comp": [],
+     "label": "Synthétise en insistant sur les points importants.",
+     "y0": 214.85,
+     "y1": 222.35
+    },
+    {
+     "comp": [
+      "5.1"
+     ],
+     "label": "Maîtriser les techniques des recommandations « Citoyen Sauveteur »",
+     "y0": 222.35,
+     "y1": 230.25,
+     "ne": true
+    },
+    {
+     "comp": [
+      "5.2"
+     ],
+     "label": "Maîtriser les procédures des recommandations « Citoyen Sauveteur »",
+     "y0": 230.25,
+     "y1": 238.45,
+     "ne": true
+    }
+   ]
+  },
+  {
+   "id": "fe-paefpse-01",
+   "ref": "FE/PAE FPSE/01",
+   "num": "01",
+   "title": "LE TRAVAIL DE GROUPE",
+   "cols": {
+    "A": [
+     104.3,
+     116.1
+    ],
+    "B": [
+     116.1,
+     127.8
+    ],
+    "C": [
+     127.8,
+     140.2
+    ]
+   },
+   "el": [
+    36.1,
+    104.3
+   ],
+   "obs": [
+    140.2,
+    121.81,
+    191.2,
+    218.29
+   ],
+   "imp": [
+    18.88,
+    222.69,
+    191.18,
+    240.18
+   ],
+   "fields": {
+    "eleve": [
+     18.88,
+     62.98,
+     104.31,
+     70.26
+    ],
+    "formateur": [
+     104.48,
+     62.98,
+     191.18,
+     70.26
+    ],
+    "theme": [
+     18.88,
+     82.87,
+     191.18,
+     92.36
+    ],
+    "date": [
+     44.79,
+     97.44,
+     104.31,
+     106.75
+    ],
+    "temps": [
+     128.86,
+     97.44,
+     191.18,
+     106.75
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 121.49,
+     "y1": 128.99
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Donne des consignes claires et précises (travail demandé, conditions de réalisation/ évaluation)",
+     "y0": 128.99,
+     "y1": 142.09
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Distribue les rôles.",
+     "y0": 142.09,
+     "y1": 149.59
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Recentre les débats sur l’objectif",
+     "y0": 149.59,
+     "y1": 157.09
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Reformule les idées émises",
+     "y0": 157.09,
+     "y1": 164.49
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "N’impose pas son point de vue",
+     "y0": 164.49,
+     "y1": 171.99
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Utilise l’interactivité",
+     "y0": 171.99,
+     "y1": 179.49
+    },
+    {
+     "comp": [],
+     "label": "Gestion du temps et de l’espace.",
+     "y0": 179.49,
+     "y1": 186.89
+    },
+    {
+     "comp": [],
+     "label": "S’exprime de façon claire et précise.",
+     "y0": 186.89,
+     "y1": 194.49
+    },
+    {
+     "comp": [],
+     "label": "Gère les comportements et attitudes.",
+     "y0": 194.49,
+     "y1": 201.89
+    },
+    {
+     "comp": [
+      "5.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Citoyen Sauveteur »",
+     "y0": 201.89,
+     "y1": 209.89
+    },
+    {
+     "comp": [
+      "6.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Premiers Secours en Équipe »",
+     "y0": 209.89,
+     "y1": 217.79
+    }
+   ]
+  },
+  {
+   "id": "fe-paefpse-02",
+   "ref": "FE/PAE FPSE/02",
+   "num": "02",
+   "title": "L’ÉTUDE DE CAS",
+   "cols": {
+    "A": [
+     104.5,
+     116.2
+    ],
+    "B": [
+     116.2,
+     128.5
+    ],
+    "C": [
+     128.5,
+     142.5
+    ]
+   },
+   "el": [
+    37.4,
+    104.5
+   ],
+   "obs": [
+    142.5,
+    114.87,
+    194.3,
+    222.87
+   ],
+   "imp": [
+    15.75,
+    227.61,
+    194.31,
+    248.23
+   ],
+   "fields": {
+    "eleve": [
+     15.75,
+     60.78,
+     104.48,
+     68.06
+    ],
+    "formateur": [
+     104.65,
+     60.78,
+     194.31,
+     68.06
+    ],
+    "theme": [
+     15.75,
+     80.67,
+     194.31,
+     87.95
+    ],
+    "date": [
+     45.13,
+     93.03,
+     45.3,
+     102.35
+    ],
+    "temps": [
+     128.52,
+     93.03,
+     128.69,
+     102.35
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 114.5,
+     "y1": 122.5
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 122.5,
+     "y1": 129.9
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Présente une situation simple et crédible.",
+     "y0": 129.9,
+     "y1": 137.4
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Utilise un support pédagogique pour lancer la discussion.",
+     "y0": 137.4,
+     "y1": 145.4
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Selon l’action, demande à un participant d’évaluer l’action.",
+     "y0": 145.4,
+     "y1": 153.3
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Anime une discussion en axant sur - Les signes ; - Les risques ; Le résultat attendu de l’action de secours.",
+     "y0": 153.3,
+     "y1": 169.0
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Utilise au moins 2 canaux de communication.",
+     "y0": 169.0,
+     "y1": 176.4
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Utilise un outil pédagogique adapté.",
+     "y0": 176.4,
+     "y1": 183.9
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Gère les comportements et attitudes du groupe.",
+     "y0": 183.9,
+     "y1": 191.4
+    },
+    {
+     "comp": [],
+     "label": "Remplit sa grille d’autodiagnostic.",
+     "y0": 191.4,
+     "y1": 198.9
+    },
+    {
+     "comp": [],
+     "label": "S’autoévalue dans son rôle de formateur.",
+     "y0": 198.9,
+     "y1": 206.3
+    },
+    {
+     "comp": [
+      "5.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Citoyen Sauveteur »",
+     "y0": 206.3,
+     "y1": 214.3
+    },
+    {
+     "comp": [
+      "6.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Premiers Secours en Équipe »",
+     "y0": 214.3,
+     "y1": 222.2
+    }
+   ]
+  },
+  {
+   "id": "fe-paefpse-03",
+   "ref": "FE/PAE FPSE/03",
+   "num": "03",
+   "title": "LE REMUE-MÉNINGES",
+   "cols": {
+    "A": [
+     104.5,
+     116.2
+    ],
+    "B": [
+     116.2,
+     128.5
+    ],
+    "C": [
+     128.5,
+     142.5
+    ]
+   },
+   "el": [
+    37.5,
+    104.5
+   ],
+   "obs": [
+    142.5,
+    114.88,
+    194.2,
+    225.84
+   ],
+   "imp": [
+    15.75,
+    230.57,
+    194.23,
+    254.58
+   ],
+   "fields": {
+    "eleve": [
+     15.75,
+     59.51,
+     95.0,
+     66.79
+    ],
+    "formateur": [
+     95.17,
+     59.51,
+     194.23,
+     66.79
+    ],
+    "theme": [
+     15.75,
+     79.83,
+     194.23,
+     87.11
+    ],
+    "date": [
+     45.13,
+     90.92,
+     45.3,
+     100.23
+    ],
+    "temps": [
+     121.16,
+     90.92,
+     194.23,
+     100.23
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 114.5,
+     "y1": 122.5
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Annonce le thème et l’objectif",
+     "y0": 122.5,
+     "y1": 129.9
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Pose une question claire.",
+     "y0": 129.9,
+     "y1": 137.4
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Écrit au tableau toutes les idées sans censure.",
+     "y0": 137.4,
+     "y1": 144.9
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Analyse de la production de travail : - Compile ; - Clarifie ; - Regroupe les idées ; - Exploite les idées.",
+     "y0": 144.9,
+     "y1": 164.5
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Répond aux questions.",
+     "y0": 164.5,
+     "y1": 171.9
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Synthétise en insistant sur les points importants.",
+     "y0": 171.9,
+     "y1": 179.4
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Utilise un outil ou un support pédagogique.",
+     "y0": 179.4,
+     "y1": 186.9
+    },
+    {
+     "comp": [],
+     "label": "Gestion du temps et de l’espace.",
+     "y0": 186.9,
+     "y1": 194.4
+    },
+    {
+     "comp": [],
+     "label": "Gère les comportements et attitudes du groupe.",
+     "y0": 194.4,
+     "y1": 201.8
+    },
+    {
+     "comp": [],
+     "label": "S’autoévalue dans son rôle de formateur.",
+     "y0": 201.8,
+     "y1": 209.4
+    },
+    {
+     "comp": [
+      "5.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Citoyen Sauveteur »",
+     "y0": 209.4,
+     "y1": 217.2
+    },
+    {
+     "comp": [
+      "6.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Premiers Secours en Équipe »",
+     "y0": 217.2,
+     "y1": 225.2
+    }
+   ]
+  },
+  {
+   "id": "fe-paefpse-04",
+   "ref": "FE/PAE FPSE/04",
+   "num": "04",
+   "title": "MÉTAPLAN",
+   "cols": {
+    "A": [
+     112.9,
+     128.5
+    ],
+    "B": [
+     128.5,
+     142.5
+    ],
+    "C": [
+     142.5,
+     151.7
+    ]
+   },
+   "el": [
+    37.4,
+    112.9
+   ],
+   "obs": [
+    151.7,
+    128.14,
+    194.3,
+    205.49
+   ],
+   "imp": [
+    15.75,
+    210.22,
+    194.31,
+    236.01
+   ],
+   "fields": {
+    "eleve": [
+     15.75,
+     66.34,
+     99.48,
+     73.62
+    ],
+    "formateur": [
+     99.65,
+     66.34,
+     194.31,
+     73.62
+    ],
+    "theme": [
+     15.75,
+     86.57,
+     194.31,
+     96.99
+    ],
+    "date": [
+     43.69,
+     102.49,
+     43.86,
+     111.8
+    ],
+    "temps": [
+     128.52,
+     102.49,
+     128.69,
+     111.8
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 127.79,
+     "y1": 135.79
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 135.79,
+     "y1": 143.19
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Inscrit la question au tableau.",
+     "y0": 143.19,
+     "y1": 150.79
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Invite les participants à répondre avec une seule idée via un post-it par une phrase courte.",
+     "y0": 150.79,
+     "y1": 158.59
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Affiche les post-it et les classe par catégorie. Commentaires par post-it de 30 secondes maxi.",
+     "y0": 158.59,
+     "y1": 166.59
+    },
+    {
+     "comp": [],
+     "label": "Gestion du temps et de l’espace.",
+     "y0": 166.59,
+     "y1": 173.99
+    },
+    {
+     "comp": [],
+     "label": "Gère les comportements et attitudes du groupe.",
+     "y0": 173.99,
+     "y1": 181.59
+    },
+    {
+     "comp": [],
+     "label": "S’autoévalue dans son rôle de formateur.",
+     "y0": 181.59,
+     "y1": 188.99
+    },
+    {
+     "comp": [
+      "5.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Citoyen Sauveteur »",
+     "y0": 188.99,
+     "y1": 196.99
+    },
+    {
+     "comp": [
+      "6.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Premiers Secours en Équipe »",
+     "y0": 196.99,
+     "y1": 204.89
+    }
+   ]
+  },
+  {
+   "id": "fe-paefpse-05",
+   "ref": "FE/PAE FPSE/05",
+   "num": "05",
+   "title": "L’EXPOSÉ INTERACTIF",
+   "cols": {
+    "A": [
+     119.9,
+     129.9
+    ],
+    "B": [
+     129.9,
+     139.9
+    ],
+    "C": [
+     139.9,
+     149.9
+    ]
+   },
+   "el": [
+    34.9,
+    119.9
+   ],
+   "obs": [
+    149.9,
+    117.49,
+    192.4,
+    223.29
+   ],
+   "imp": [
+    17.61,
+    227.68,
+    192.36,
+    251.36
+   ],
+   "fields": {
+    "eleve": [
+     17.61,
+     60.78,
+     108.46,
+     68.06
+    ],
+    "formateur": [
+     108.63,
+     60.78,
+     192.36,
+     68.06
+    ],
+    "theme": [
+     17.61,
+     80.67,
+     192.36,
+     87.95
+    ],
+    "date": [
+     43.43,
+     93.03,
+     43.6,
+     102.35
+    ],
+    "temps": [
+     134.45,
+     93.03,
+     192.36,
+     102.35
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Préparation de l’espace de formation.",
+     "y0": 117.2,
+     "y1": 124.6
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 124.6,
+     "y1": 132.1
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Annonce les 2 ou 3 parties.",
+     "y0": 132.1,
+     "y1": 139.6
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Introduit chaque partie par une question.",
+     "y0": 139.6,
+     "y1": 147.1
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Centre chaque partie sur un point important.",
+     "y0": 147.1,
+     "y1": 154.5
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Favorise, valide et complète les apports du groupe.",
+     "y0": 154.5,
+     "y1": 162.0
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Corrige les connaissances ou représentations erronées.",
+     "y0": 162.0,
+     "y1": 169.5
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Synthétise en insistant sur les points importants.",
+     "y0": 169.5,
+     "y1": 176.9
+    },
+    {
+     "comp": [],
+     "label": "Utilise un outil pédagogique adapté.",
+     "y0": 176.9,
+     "y1": 184.5
+    },
+    {
+     "comp": [],
+     "label": "S’exprime de façon claire et précise.",
+     "y0": 184.5,
+     "y1": 191.9
+    },
+    {
+     "comp": [],
+     "label": "Gère les comportements et attitudes du groupe.",
+     "y0": 191.9,
+     "y1": 199.4
+    },
+    {
+     "comp": [],
+     "label": "S’autoévalue dans son rôle de formateur.",
+     "y0": 199.4,
+     "y1": 206.9
+    },
+    {
+     "comp": [
+      "5.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Citoyen Sauveteur »",
+     "y0": 206.9,
+     "y1": 214.8
+    },
+    {
+     "comp": [
+      "6.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Premiers Secours en Équipe »",
+     "y0": 214.8,
+     "y1": 222.7
+    }
+   ]
+  },
+  {
+   "id": "fe-paefpse-06",
+   "ref": "FE/PAE FPSE/06",
+   "num": "06",
+   "title": "LA DÉMONSTRATION PRATIQUE",
+   "cols": {
+    "A": [
+     118.6,
+     128.6
+    ],
+    "B": [
+     128.6,
+     138.7
+    ],
+    "C": [
+     138.7,
+     148.7
+    ]
+   },
+   "el": [
+    36.2,
+    118.6
+   ],
+   "obs": [
+    148.7,
+    103.41,
+    191.2,
+    229.95
+   ],
+   "imp": [
+    18.88,
+    234.35,
+    191.18,
+    257.35
+   ],
+   "fields": {
+    "eleve": [
+     18.88,
+     59.39,
+     103.63,
+     65.41
+    ],
+    "formateur": [
+     103.8,
+     59.39,
+     191.18,
+     65.41
+    ],
+    "theme": [
+     18.88,
+     74.13,
+     191.18,
+     79.88
+    ],
+    "date": [
+     44.7,
+     83.69,
+     44.87,
+     89.71
+    ],
+    "temps": [
+     131.06,
+     83.69,
+     131.23,
+     89.71
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Préparation de l’espace de formation.",
+     "y0": 103.09,
+     "y1": 110.29
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 110.29,
+     "y1": 117.49
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Démonstration en temps réel ð Simple et crédible ð Explique la situation ð Ne commente pas ce qu’il fait",
+     "y0": 117.49,
+     "y1": 136.99
+    },
+    {
+     "comp": [
+      "2.2",
+      "3.2",
+      "4.2"
+     ],
+     "label": "Démonstration commentée et justifiée ð Identique à la DTR ; ð Fait identifier les étapes de la CAT ; ð Explique le geste ; ð Donne des justifications pertinentes ; ð Indique les points clés ;",
+     "y0": 136.99,
+     "y1": 164.39
+    },
+    {
+     "comp": [
+      "2.2",
+      "3.2",
+      "4.2"
+     ],
+     "label": "Reformulation le cas échéant ð Se fait guider par un participant.",
+     "y0": 164.39,
+     "y1": 176.19
+    },
+    {
+     "comp": [
+      "2.2",
+      "3.2",
+      "4.2"
+     ],
+     "label": "Réponds aux questions.",
+     "y0": 176.19,
+     "y1": 183.39
+    },
+    {
+     "comp": [],
+     "label": "Gère les comportements et attitudes du groupe.",
+     "y0": 183.39,
+     "y1": 190.59
+    },
+    {
+     "comp": [],
+     "label": "S’autoévalue dans son rôle de formateur.",
+     "y0": 190.59,
+     "y1": 197.69
+    },
+    {
+     "comp": [
+      "5.1"
+     ],
+     "label": "Maitriser les techniques dans un cadre de « Citoyen sauveteur »",
+     "y0": 197.69,
+     "y1": 205.59
+    },
+    {
+     "comp": [
+      "5.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Citoyen sauveteur »",
+     "y0": 205.59,
+     "y1": 213.59
+    },
+    {
+     "comp": [
+      "6.1"
+     ],
+     "label": "Maitriser les techniques dans un cadre de « Premiers Secours en Équipe »",
+     "y0": 213.59,
+     "y1": 221.49
+    },
+    {
+     "comp": [
+      "6.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Premiers Secours en Équipe »",
+     "y0": 221.49,
+     "y1": 229.39
+    }
+   ]
+  },
+  {
+   "id": "fe-paefpse-07",
+   "ref": "FE/PAE FPSE/07",
+   "num": "07",
+   "title": "LA DÉMONSTRATION PRATIQUE DIRIGÉE",
+   "cols": {
+    "A": [
+     123.6,
+     133.7
+    ],
+    "B": [
+     133.7,
+     143.7
+    ],
+    "C": [
+     143.7,
+     153.7
+    ]
+   },
+   "el": [
+    31.2,
+    123.6
+   ],
+   "obs": [
+    153.7,
+    118.24,
+    196.2,
+    247.06
+   ],
+   "imp": [
+    13.89,
+    251.8,
+    196.17,
+    263.27
+   ],
+   "fields": {
+    "eleve": [
+     13.89,
+     71.16,
+     101.18,
+     78.36
+    ],
+    "formateur": [
+     101.35,
+     71.16,
+     196.17,
+     78.36
+    ],
+    "theme": [
+     13.89,
+     87.5,
+     196.17,
+     93.43
+    ],
+    "date": [
+     39.71,
+     97.24,
+     39.88,
+     103.59
+    ],
+    "temps": [
+     133.69,
+     97.24,
+     133.86,
+     103.59
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 117.91,
+     "y1": 124.11
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 124.11,
+     "y1": 130.21
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Organise la démonstration.",
+     "y0": 130.21,
+     "y1": 136.41
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Précise les points clés de la technique ou du matériel Explique la technique avec le QPACRE Quand réaliser ce geste ou utiliser ce matériel ? Pourquoi réaliser ce geste ou utiliser ce matériel ? Avec quoi réaliser ce geste ? Comment réaliser ce geste ou utiliser ce matériel ? Quels sont les risques de ce geste ou de ce matériel ? Quels sont les critères d’efficacité de ce geste ou de l’utilisation du matériel ?",
+     "y0": 136.41,
+     "y1": 171.51
+    },
+    {
+     "comp": [
+      "2.2",
+      "3.2",
+      "4.2"
+     ],
+     "label": "Faire reformuler l’action à effectuer",
+     "y0": 171.51,
+     "y1": 177.71
+    },
+    {
+     "comp": [
+      "2.2",
+      "3.2",
+      "4.2"
+     ],
+     "label": "Évalue l’action et/ou corrige",
+     "y0": 177.71,
+     "y1": 183.81
+    },
+    {
+     "comp": [
+      "2.2",
+      "3.2",
+      "4.2"
+     ],
+     "label": "Fait refaire l’action à vitesse réelle",
+     "y0": 183.81,
+     "y1": 189.91
+    },
+    {
+     "comp": [],
+     "label": "Positionne le groupe en situation d’apprentissage du geste",
+     "y0": 189.91,
+     "y1": 196.11
+    },
+    {
+     "comp": [],
+     "label": "S’exprime de façon claire et précise.",
+     "y0": 196.11,
+     "y1": 202.31
+    },
+    {
+     "comp": [],
+     "label": "Gère les comportements et attitudes",
+     "y0": 202.31,
+     "y1": 208.51
+    },
+    {
+     "comp": [],
+     "label": "S’autoévalue dans son rôle de formateur.",
+     "y0": 208.51,
+     "y1": 214.71
+    },
+    {
+     "comp": [
+      "5.1"
+     ],
+     "label": "Maitriser les techniques dans un cadre de « Citoyen Sauveteur »",
+     "y0": 214.71,
+     "y1": 222.61
+    },
+    {
+     "comp": [
+      "5.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Citoyen Sauveteur »",
+     "y0": 222.61,
+     "y1": 230.51
+    },
+    {
+     "comp": [
+      "6.1"
+     ],
+     "label": "Maitriser les techniques dans un cadre de « Premiers Secours en Équipe »",
+     "y0": 230.51,
+     "y1": 238.51
+    },
+    {
+     "comp": [
+      "6.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Premiers Secours en Équipe »",
+     "y0": 238.51,
+     "y1": 246.41
+    }
+   ]
+  },
+  {
+   "id": "fe-paefpse-08",
+   "ref": "FE/PAE FPSE/08",
+   "num": "08",
+   "title": "LA DÉMONSTRATION PRATIQUE EN MIROIR",
+   "cols": {
+    "A": [
+     117.4,
+     127.3
+    ],
+    "B": [
+     127.3,
+     137.3
+    ],
+    "C": [
+     137.3,
+     147.3
+    ]
+   },
+   "el": [
+    37.3,
+    117.4
+   ],
+   "obs": [
+    147.3,
+    111.71,
+    192.2,
+    238.67
+   ],
+   "imp": [
+    17.44,
+    243.07,
+    192.45,
+    262.0
+   ],
+   "fields": {
+    "eleve": [
+     17.44,
+     58.66,
+     104.9,
+     65.01
+    ],
+    "formateur": [
+     105.07,
+     58.66,
+     192.45,
+     65.01
+    ],
+    "theme": [
+     17.3,
+     75.42,
+     147.3,
+     80.14
+    ],
+    "date": [
+     46.06,
+     92.75,
+     104.9,
+     98.76
+    ],
+    "temps": [
+     130.05,
+     92.75,
+     192.45,
+     98.76
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 111.41,
+     "y1": 119.21
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 119.21,
+     "y1": 126.81
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Positionne les participants.",
+     "y0": 126.81,
+     "y1": 134.21
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Démonstration commentée justifiée - Explique le geste - Donne des justifications pertinentes - Indique les points clés - Gestuelles conformes - Participant réalise les gestes en même temps que le formateur",
+     "y0": 134.21,
+     "y1": 161.51
+    },
+    {
+     "comp": [
+      "2.2",
+      "3.2",
+      "4.2"
+     ],
+     "label": "Corrige les gestes.",
+     "y0": 161.51,
+     "y1": 169.01
+    },
+    {
+     "comp": [
+      "2.2",
+      "3.2",
+      "4.2"
+     ],
+     "label": "Répond aux questions.",
+     "y0": 169.01,
+     "y1": 176.51
+    },
+    {
+     "comp": [
+      "2.2",
+      "3.2",
+      "4.2"
+     ],
+     "label": "Synthétise en insistant sur les points importants.",
+     "y0": 176.51,
+     "y1": 183.91
+    },
+    {
+     "comp": [],
+     "label": "Utilise un outil ou support pédagogique.",
+     "y0": 183.91,
+     "y1": 191.51
+    },
+    {
+     "comp": [],
+     "label": "Gère les comportements et attitudes.",
+     "y0": 191.51,
+     "y1": 198.91
+    },
+    {
+     "comp": [],
+     "label": "S’autoévalue dans son rôle de formateur",
+     "y0": 198.91,
+     "y1": 206.41
+    },
+    {
+     "comp": [
+      "5.1"
+     ],
+     "label": "Maitriser les techniques dans un cadre de « Citoyen Sauveteur »",
+     "y0": 206.41,
+     "y1": 214.31
+    },
+    {
+     "comp": [
+      "5.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Citoyen sauveteur »",
+     "y0": 214.31,
+     "y1": 222.31
+    },
+    {
+     "comp": [
+      "6.1"
+     ],
+     "label": "Maitriser les techniques dans un cadre de « Premiers Secours en Équipe »",
+     "y0": 222.31,
+     "y1": 230.21
+    },
+    {
+     "comp": [
+      "6.2"
+     ],
+     "label": "Maitriser les procédures dans un cadre de « Premiers Secours en Équipe »",
+     "y0": 230.21,
+     "y1": 238.11
+    }
+   ]
+  },
+  {
+   "id": "fe-paefpse-09",
+   "ref": "FE/PAE FPSE/09",
+   "num": "09",
+   "title": "L’APPRENTISSAGE DU GESTE",
+   "cols": {
+    "A": [
+     116.2,
+     124.0
+    ],
+    "B": [
+     124.0,
+     133.9
+    ],
+    "C": [
+     133.9,
+     143.9
+    ]
+   },
+   "el": [
+    36.2,
+    116.2
+   ],
+   "obs": [
+    143.9,
+    129.24,
+    191.4,
+    230.3
+   ],
+   "imp": [
+    18.54,
+    235.03,
+    191.43,
+    257.85
+   ],
+   "fields": {
+    "eleve": [
+     18.54,
+     66.62,
+     117.86,
+     73.9
+    ],
+    "formateur": [
+     118.03,
+     66.62,
+     191.43,
+     73.9
+    ],
+    "theme": [
+     18.54,
+     86.94,
+     191.43,
+     94.9
+    ],
+    "date": [
+     53.26,
+     103.51,
+     53.42,
+     112.82
+    ],
+    "temps": [
+     138.85,
+     103.51,
+     191.43,
+     112.82
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 128.87,
+     "y1": 136.77
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Indique le thème et l’objectif.",
+     "y0": 136.77,
+     "y1": 144.27
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Positionne les participants en binôme ou trinôme.",
+     "y0": 144.27,
+     "y1": 151.77
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Demande de faire le geste.",
+     "y0": 151.77,
+     "y1": 159.17
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Synthétise en insistant sur les points importants.",
+     "y0": 159.17,
+     "y1": 166.77
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Gère les comportements et attitudes.",
+     "y0": 166.77,
+     "y1": 174.17
+    },
+    {
+     "comp": [
+      "2.2",
+      "3.2",
+      "4.2"
+     ],
+     "label": "Selon l’action, demande à un participant d’évaluer l’action.",
+     "y0": 174.17,
+     "y1": 182.97
+    },
+    {
+     "comp": [
+      "2.2",
+      "3.2",
+      "4.2"
+     ],
+     "label": "Corrige les gestes.",
+     "y0": 182.97,
+     "y1": 190.47
+    },
+    {
+     "comp": [
+      "2.2",
+      "3.2",
+      "4.2"
+     ],
+     "label": "S’autoévalue en groupe.",
+     "y0": 190.47,
+     "y1": 197.97
+    },
+    {
+     "comp": [
+      "5.1"
+     ],
+     "label": "Maîtriser les techniques des recommandations « Citoyen Sauveteur »",
+     "y0": 197.97,
+     "y1": 205.87
+    },
+    {
+     "comp": [
+      "5.2"
+     ],
+     "label": "Maîtriser les procédures des recommandations « Citoyen Sauveteur »",
+     "y0": 205.87,
+     "y1": 213.87
+    },
+    {
+     "comp": [
+      "6.1"
+     ],
+     "label": "Maîtriser les techniques des recommandations « Premiers Secours en Équipe »",
+     "y0": 213.87,
+     "y1": 221.67
+    },
+    {
+     "comp": [
+      "6.2"
+     ],
+     "label": "Maîtriser les procédures des recommandations « Premiers Secours en Équipe »",
+     "y0": 221.67,
+     "y1": 229.67
+    }
+   ]
+  },
+  {
+   "id": "fe-paefpse-10",
+   "ref": "FE/PAE FPSE/10",
+   "num": "10",
+   "title": "LA MISE EN SITUATION",
+   "cols": {
+    "A": [
+     117.5,
+     130.0
+    ],
+    "B": [
+     130.0,
+     142.5
+    ],
+    "C": [
+     142.5,
+     155.0
+    ]
+   },
+   "el": [
+    32.3,
+    117.5
+   ],
+   "obs": [
+    155.0,
+    104.88,
+    194.9,
+    230.23
+   ],
+   "imp": [
+    15.16,
+    234.63,
+    194.9,
+    253.56
+   ],
+   "fields": {
+    "eleve": [
+     15.16,
+     58.66,
+     104.99,
+     65.01
+    ],
+    "formateur": [
+     105.16,
+     58.66,
+     194.9,
+     65.01
+    ],
+    "theme": [
+     15.16,
+     75.42,
+     194.9,
+     82.7
+    ],
+    "date": [
+     32.43,
+     85.67,
+     32.6,
+     91.93
+    ],
+    "temps": [
+     130.05,
+     85.67,
+     130.22,
+     91.93
+    ]
+   },
+   "rows": [
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Préparation de son espace de formation facilitant l’apprentissage.",
+     "y0": 104.5,
+     "y1": 112.5
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Préparation du cas concret - Simple et crédible / effet de surprise - Pas de danger réel - Donne des consignes à la victime - Donne des consignes au témoin - Met le sauveteur à l’écart - Fait reformuler les consignes",
+     "y0": 112.5,
+     "y1": 139.8
+    },
+    {
+     "comp": [
+      "2.1",
+      "3.1",
+      "4.1"
+     ],
+     "label": "Pendant le cas concret - Se tient en retrait - Répond à l’alerte - Utilise une grille d’évaluation - Arrête le cas en cas de danger réel",
+     "y0": 139.8,
+     "y1": 159.3
+    },
+    {
+     "comp": [
+      "2.2",
+      "3.2",
+      "4.2"
+     ],
+     "label": "Évaluation du sauveteur - Fait parler le sauveteur en 1 er - Demande l’avis du groupe - Analyse l’action de secours - Donne les axes d’amélioration - Indique les points positifs - Rappelle les points clés - Fait refaire le geste si besoin",
+     "y0": 159.3,
+     "y1": 190.5
+    },
+    {
+     "comp": [],
+     "label": "S’autoévalue en groupe.",
+     "y0": 190.5,
+     "y1": 198.0
+    },
+    {
+     "comp": [
+      "5.1"
+     ],
+     "label": "Maîtriser les techniques des recommandations « Citoyen Sauveteur »",
+     "y0": 198.0,
+     "y1": 205.9
+    },
+    {
+     "comp": [
+      "5.2"
+     ],
+     "label": "Maîtriser les procédures des recommandations « Citoyen Sauveteur »",
+     "y0": 205.9,
+     "y1": 213.9
+    },
+    {
+     "comp": [
+      "6.1"
+     ],
+     "label": "Maîtriser les techniques des recommandations « Premiers Secours en Équipe »",
+     "y0": 213.9,
+     "y1": 221.8
+    },
+    {
+     "comp": [
+      "6.2"
+     ],
+     "label": "Maîtriser les procédures des recommandations « Premiers Secours en Équipe »",
+     "y0": 221.8,
+     "y1": 229.7
+    }
+   ]
+  }
+ ]
+}

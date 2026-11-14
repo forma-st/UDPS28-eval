@@ -13,7 +13,7 @@ LOGO = 'data:image/jpeg;base64,' + b64('brand/logo-480.jpg')
 MARK = 'data:image/png;base64,' + b64('brand/symbole-96.png')
 import json
 QCM = json.dumps({'PSE1': json.load(open('data/qcm-pse1.json', encoding='utf-8')), 'PSE2': json.load(open('data/qcm-pse2.json', encoding='utf-8'))}, ensure_ascii=False)
-src = src.replace('__LOGO__', LOGO).replace('__MARK__', MARK).replace('const QCM=__QCM__;', 'const QCM=' + QCM + ';')
+src = src.replace('__LOGO__', LOGO).replace('__MARK__', MARK).replace('const QCM=__QCM__;', 'const QCM=' + QCM + ';').replace('const FORM_FILES=__FORM_FILES__;', 'const FORM_FILES=' + json.dumps(sorted(f[:-4] for f in os.listdir('docs/app/forms') if f.endswith('.png'))) + ';').replace('const FICHES=__FICHES__;', 'const FICHES=' + json.dumps(json.load(open('data/fiches-pedagogiques.json', encoding='utf-8')), ensure_ascii=False, separators=(',', ':')) + ';')
 
 WEIGHTS = (400, 500, 600, 700, 800)
 FONT_FILES = [f'montserrat-latin-{w}-normal.woff2' for w in WEIGHTS]
@@ -51,7 +51,7 @@ head = '''<link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Éval PSE">
+<meta name="apple-mobile-web-app-title" content="Eval">
 '''
 sw_reg = '''
 <script>
@@ -82,9 +82,9 @@ self.addEventListener('fetch',e=>{{
 }});
 ''')
 open('docs/app/manifest.webmanifest', 'w', encoding='utf-8').write('''{
-  "name": "Évaluations PSE - UDPS 28",
-  "short_name": "Éval PSE",
-  "description": "Fiches formatives, technicité et certification PSE1 / PSE2, sans réseau.",
+  "name": "Eval - UDPS 28",
+  "short_name": "Eval",
+  "description": "Évaluations des formations PSE1, PSE2, PIC F, PAE FPSE et chef d’équipe, sans réseau.",
   "lang": "fr",
   "start_url": "./index.html",
   "scope": "./",
