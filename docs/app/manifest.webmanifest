@@ -1,0 +1,17 @@
+{
+  "name": "Évaluations PSE - UDPS 28",
+  "short_name": "Éval PSE",
+  "description": "Fiches formatives, technicité et certification PSE1 / PSE2, sans réseau.",
+  "lang": "fr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f7fa",
+  "theme_color": "#002b6b",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

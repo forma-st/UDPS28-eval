@@ -1,0 +1,19 @@
+{
+  "name": "evaluations-pse",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Application mobile Évaluations PSE (Capacitor)",
+  "scripts": {
+    "build:web": "python3 ../build.py",
+    "sync": "npm run build:web && npx cap sync android",
+    "apk": "npm run sync && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/app": "^6.0.2",
+    "@capacitor/cli": "^6.2.0",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/filesystem": "^6.0.2",
+    "@capacitor/share": "^6.0.3"
+  }
+}

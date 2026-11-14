@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Évaluations PSE · UDPS 28</title>
+<meta name="theme-color" content="#002b6b">
+<link rel="icon" type="image/png" href="icon.png">
+<style>
+@font-face{font-family:'Montserrat';font-weight:500;font-display:swap;src:url(app/fonts/montserrat-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:700;font-display:swap;src:url(app/fonts/montserrat-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:800;font-display:swap;src:url(app/fonts/montserrat-latin-800-normal.woff2) format('woff2')}
+:root{--navy:#002b6b;--red:#e30613;--bg:#f4f7fa;--ink:#1f2937;--muted:#5b6b80;--line:#d7e1ea}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Montserrat,Arial,sans-serif;line-height:1.5}
+header{background:var(--navy);border-bottom:4px solid var(--red);padding:22px max(16px,env(safe-area-inset-left)) 26px;color:#fff;text-align:center}
+header .logo{background:#fff;border-radius:14px;display:inline-block;padding:10px 16px}
+header .logo img{height:84px;display:block}
+h1{font-size:1.45rem;font-weight:800;margin:16px 0 4px}
+header p{margin:0;opacity:.85;font-weight:500}
+main{max-width:620px;margin:0 auto;padding:22px max(16px,env(safe-area-inset-left)) 40px;display:grid;gap:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:12px}
+.card h2{margin:0;font-size:1.05rem;color:var(--navy);font-weight:800}
+.card.hl{border:2px solid var(--navy)}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:54px;border-radius:12px;font-weight:700;font-size:1rem;text-decoration:none;text-align:center;padding:0 18px}
+.btn.red{background:var(--red);color:#fff}
+.btn.navy{background:var(--navy);color:#fff}
+.btn.ghost{border:1.5px solid var(--navy);color:var(--navy);background:#fff}
+ol{margin:0;padding-left:1.2em;display:grid;gap:6px}
+.muted{color:var(--muted);font-size:.88rem;margin:0}
+.tag{display:inline-block;background:#e3eaf5;color:var(--navy);font-weight:700;font-size:.75rem;border-radius:6px;padding:2px 8px;margin-right:6px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><img src="logo.jpg" alt="ANPS · UDPS 28"></div>
+  <h1>Évaluations PSE</h1>
+  <p>Fiches formatives, technicité et certification PSE1 / PSE2 · fonctionne sans réseau</p>
+</header>
+<main>
+  <section class="card hl" id="android">
+    <h2><span class="tag">Android</span>Installer l'application</h2>
+    <a class="btn red" href="Eval-PSE.apk" download>Télécharger l'application (APK, 4,4 Mo)</a>
+    <ol>
+      <li>Touchez le bouton ci-dessus, puis ouvrez le fichier téléchargé.</li>
+      <li>Si Android le demande, autorisez « Installer des applis inconnues » pour Chrome (ou Fichiers).</li>
+      <li>Touchez « Installer » : l'application <b>Éval PSE</b> apparaît avec les autres applis.</li>
+    </ol>
+    <p class="muted">Avec l'APK, le partage des PDF passe par le menu Android : mail, Bluetooth, Quick Share, Drive, WhatsApp…</p>
+  </section>
+  <section class="card" id="ios">
+    <h2><span class="tag">iPhone / iPad</span>Ajouter à l'écran d'accueil</h2>
+    <a class="btn navy" href="app/">Ouvrir l'application</a>
+    <ol>
+      <li>Ouvrez cette page dans <b>Safari</b>, puis touchez « Ouvrir l'application ».</li>
+      <li>Touchez le bouton Partager <b>⎙</b>, puis « Sur l'écran d'accueil ».</li>
+      <li>Lancez « Éval PSE » depuis l'écran d'accueil une première fois avec du réseau : ensuite, elle fonctionne hors ligne.</li>
+    </ol>
+  </section>
+  <section class="card" id="web">
+    <h2>Sans installation</h2>
+    <a class="btn ghost" href="app/">Utiliser dans le navigateur</a>
+    <p class="muted">Sur Android, Chrome propose aussi « Installer l'application » depuis son menu ⋮.</p>
+  </section>
+  <p class="muted">Les données (formations, fiches, résultats) restent sur l'appareil. Pensez à envoyer régulièrement une sauvegarde depuis Réglages.</p>
+</main>
+<script>
+var ua=navigator.userAgent,ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),android=/Android/.test(ua);
+var m=document.querySelector('main');
+if(ios){m.insertBefore(document.getElementById('ios'),m.firstChild);document.getElementById('ios').classList.add('hl');document.getElementById('android').classList.remove('hl')}
+</script>
+</body>
+</html>
