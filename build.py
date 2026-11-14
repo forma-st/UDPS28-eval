@@ -34,8 +34,10 @@ def page(body, extra_head='', extra_body=''):
 jspdf = open('vendor/jspdf.umd.min.js', encoding='utf-8').read()
 
 # 1) Fichier unique
+FORMS = {os.path.splitext(f)[0]: 'data:image/png;base64,' + b64('docs/app/forms/' + f) for f in sorted(os.listdir('docs/app/forms')) if f.endswith('.png')}
+embed = '<script>window.__FORMS_EMBED__=' + json.dumps(FORMS) + ';window.__TECH_LAYOUT__=' + open('docs/app/forms/layout-tech.json', encoding='utf-8').read() + ';</script>'
 single = src.replace('<!--FONTS-->', '<style>' + font_css(lambda f: 'data:font/woff2;base64,' + b64('docs/app/fonts/' + f)) + '</style>') \
-            .replace('<!--JSPDF-->', '<script>' + jspdf + '</script>')
+            .replace('<!--JSPDF-->', embed + '<script>' + jspdf + '</script>')
 open('fichier-unique.html', 'w', encoding='utf-8').write(page(single))
 
 # 2) PWA / Android
@@ -61,7 +63,7 @@ html = page(body, head, sw_reg)
 open('docs/app/index.html', 'w', encoding='utf-8').write(html)
 
 assets = ['./', 'index.html', 'manifest.webmanifest', 'vendor/jspdf.umd.min.js'] + [f'fonts/{f}' for f in FONT_FILES] + \
-         ['icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png']
+         [f'forms/{f}' for f in sorted(os.listdir('docs/app/forms'))] + ['icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png']
 version = hashlib.sha1((html + jspdf).encode()).hexdigest()[:10]
 open('docs/app/sw.js', 'w', encoding='utf-8').write(f'''// Service worker : met l'application en cache pour un fonctionnement hors ligne.
 const CACHE='eval-pse-{version}';

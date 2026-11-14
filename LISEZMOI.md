@@ -1,4 +1,4 @@
-# Évaluations PSE · UDPS 28 (version 2.2)
+# Évaluations PSE · UDPS 28 (version 2.3)
 
 Application de terrain pour les formations PSE1 et PSE2. Elle fonctionne **entièrement sans réseau**.
 
@@ -27,6 +27,17 @@ Application de terrain pour les formations PSE1 et PSE2. Elle fonctionne **enti�
 - **C** : OUI quand le participant est pointé présent à toutes les journées (feuille de présence).
 - **D** : OUI à partir de 12/20 au questionnaire. Entre 10 et 11 : entretien de rattrapage avec le responsable pédagogique. Sous 10 : NON.
 - **Dossier** par participant, dans l'ordre du référentiel : technicité, fiches d'évaluation, certification.
+
+## Format d'origine des PDF (version 2.3)
+Les fiches exportées utilisent comme fond **la page des fichiers d'origine** (dossier `modeles/`), et les données sont placées dans les cases mesurées au dixième de millimètre :
+- fiches formatives PSE1 et PSE2 (2 apprenants par page ; au-delà, page suivante avec « APPRENANT N°3 »…) ;
+- fiches de technicité PSE1 et PSE2 ;
+- fiche de certification individuelle PSE1 ;
+- procès-verbaux de formation FI / FC, PSE1 / PSE2 (10 participants par page ; au-delà, page suivante numérotée).
+
+Les fonds sont régénérés avec `python3 tools/forms.py` et les mesures sont faites avec `tools/geom.py` et `tools/grid.py`.
+Une grille modifiée ou ajoutée, ou l'option « habiletés complémentaires », bascule automatiquement sur la version redessinée, puisque le modèle papier n'a pas ces lignes.
+La fiche de certification PSE2 reste redessinée : seul un exemplaire à 96 dpi, trop flou, est disponible dans le référentiel.
 
 ## Fin de formation (version 2.2)
 - **Procès-verbal de l'équipe pédagogique** : n° et date à saisir dans « Modifier la formation ». Il contient la liste des participants APTE / INAPTE et des cases de signature.

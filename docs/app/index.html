@@ -308,31 +308,31 @@ const CERT_CHECKS=()=>[
   {id:'C',label:'Avoir suivi l’ensemble de la formation.',auto:'presence'},
   {id:'D',label:'Avoir validé l’évaluation théorique.',auto:'theory'}];
 const FORM_HEADER=r=>({left:'EPN ANPS',center:'Conception des formations',title:'Evaluation formative',ref:'EVAL/ '+r,maj:'25.02.2023'});
-const g=(title,items)=>({id:slug(title).toLowerCase(),title,items:items.map(l=>({id:slug(title+'-'+l).toLowerCase().slice(0,50),label:l}))});
+const g=(title,items)=>({id:slug(title).toLowerCase(),title,items:items.map((l,i)=>({id:slug(title).toLowerCase().slice(0,14)+'-'+(i+1),label:l}))});
 function builtinTemplates(){return [
- {id:'pse1-formative',builtin:true,rev:3,cursus:'PSE1',kind:'formative',name:'PSE1 · Évaluation formative (cas concret)',learners:2,header:FORM_HEADER('PSE1'),
+ {id:'pse1-formative',builtin:true,rev:4,cursus:'PSE1',kind:'formative',name:'PSE1 · Évaluation formative (cas concret)',learners:2,header:FORM_HEADER('PSE1'),
   scale:FORMATIVE_SCALE(),situations:SITUATIONS_PSE1(),criteria:[
    {id:'c1',code:'C1',label:'Possède un comportement adapté à la situation',feeds:'1',children:[]},
    {id:'c2',code:'C2',label:'Assure ou participe à la sécurité de l’intervention',feeds:'2',children:[]},
-   {id:'c3',code:'C3',label:'Réalise un bilan conforme',feeds:'3',subMode:'rated',children:[{id:'c3a',label:'1er REGARD'},{id:'c3b',label:'2ème REGARD'},{id:'c3c',label:'3ème REGARD'},{id:'c3d',label:'4ème REGARD'}]},
+   {id:'c3',code:'C3',label:'Réalise un bilan conforme',feeds:'3',subMode:'check',children:[{id:'c3a',label:'1er REGARD'},{id:'c3b',label:'2ème REGARD'},{id:'c3c',label:'3ème REGARD'},{id:'c3d',label:'4ème REGARD'}]},
    {id:'c8',code:'C3',label:'Surveille la victime',feeds:'3',optional:true,children:[]},
    {id:'c4',code:'C4',label:'Réalise des gestes de premiers secours efficaces',feeds:'4',children:[]},
    {id:'c9',code:'C4',label:'Utilise correctement du matériel de premiers secours',feeds:'4',optional:true,children:[]},
    {id:'c5',code:'C5',label:'Rend compte au chef d’équipe',feeds:'5',children:[]},
    {id:'c6',code:'C6',label:'Respecte une conduite à tenir appropriée',feeds:'6',children:[]},
    {id:'c7',code:'C6',label:'Établit une communication au sein de l’équipe',feeds:'6',children:[]}]},
- {id:'pse1-certif',builtin:true,rev:2,cursus:'PSE1',kind:'certificative',name:'PSE1 · Fiche de certification individuelle',
+ {id:'pse1-certif',builtin:true,rev:3,cursus:'PSE1',kind:'certificative',name:'PSE1 · Fiche de certification individuelle',
   header:{title:'FICHE DE CERTIFICATION INDIVIDUELLE « PSE 1 »',ref:'Premier Secours en Equipe de niveau 1 - EPN - Mai 2022'},
   theme:{band:'#4f81bd',light:'#b8cce4'},passages:{min:3,max:6},scale:CERT_SCALE(),
   criteria:[
    {id:'k1',code:'1',label:'Évoluer dans le cadre juridique applicable à son action.',expected:'3B'},
    {id:'k2',code:'2',label:'Assurer une protection immédiate adaptée et permanente.',expected:'2A'},
-   {id:'k3',code:'3',label:'Réaliser le bilan et assurer sa transmission.',expected:'3B',cond:{type:'marks',ids:['c3c','c3d'],label:'Dont au moins 1 troisième et quatrième regard'}},
+   {id:'k3',code:'3',label:'Réaliser le bilan et assurer sa transmission.',expected:'3B',cond:{type:'situation',ids:['c3c','c3d'],label:'Dont au moins 1 troisième et quatrième regard'}},
    {id:'k4',code:'4',label:'Réaliser les gestes de premiers secours.',expected:'3B',cond:{type:'situation',id:'acr',label:'Dont au moins 1 prise en charge d’arrêt cardiaque'}},
    {id:'k5',code:'5',label:'Assister des équipiers secouristes',expected:'1C'},
    {id:'k6',code:'6',label:'Adapter son comportement à la situation ou à l’état de la victime.',expected:'3B'}],
   checks:CERT_CHECKS()},
- {id:'pse1-tech',builtin:true,rev:2,cursus:'PSE1',kind:'technicite',name:'PSE1 · Suivi de la technicité',
+ {id:'pse1-tech',builtin:true,rev:3,cursus:'PSE1',kind:'technicite',name:'PSE1 · Suivi de la technicité',
   header:{title:'FICHE DE SUIVI DE LA MAITRISE DE LA TECHNICITÉ DE L’APPRENANT PSE 1'},theme:{band:'#4472c4'},
   groups:[
    g('ATTITUDE ET COMPORTEMENT',['Évaluation de l’impact psychologique','Stabiliser l’état psycho-physiologique d’une victime','L’écoute active','La respiration contrôlée','La focalisation / défocalisation attentionnelle','Effectuer l’inventaire du matériel de premiers secours']),
@@ -368,7 +368,7 @@ function builtinTemplates(){return [
    {id:'m6',code:'6',label:'Réaliser un bilan et assurer sa transmission.',expected:'3B',cond:{type:'marks',ids:['d6'],label:'Dont au moins 1 bilan complet'}},
    {id:'m7',code:'7',label:'Adapter son comportement à la situation et à la victime.',expected:'2B'}],
   checks:CERT_CHECKS()},
- {id:'pse2-tech',builtin:true,rev:2,cursus:'PSE2',kind:'technicite',name:'PSE2 · Suivi de la technicité',
+ {id:'pse2-tech',builtin:true,rev:3,cursus:'PSE2',kind:'technicite',name:'PSE2 · Suivi de la technicité',
   header:{title:'FICHE DE SUIVI DE LA MAITRISE DE LA TECHNICITÉ DE L’APPRENANT PSE 2'},theme:{band:'#c00000'},
   groups:[
    g('TRAUMATISMES',['Contention pelvienne','Immobilisation d’un membre inférieur au moyen d’une attelle à traction','Immobilisation générale sur un plan dur (3 possibilités)','Immobilisation générale sur un matelas à dépression','Pose de l’attelle cervico-thoracique','Réalignement de membre']),
@@ -387,7 +387,7 @@ function blankTemplate(kind,cursus){
    Stockage local (fonctionne sans réseau)
    ========================================================= */
 let DB;
-const ORG_DEFAULT=()=>({name:'UDPS 28',code:'UDPS28',ville:'Chartres',repQualite:'Le Président',repPrenom:'',repNom:'',habilitation:'',nextCert:1});
+const ORG_DEFAULT=()=>({udps:'28',name:'UDPS 28',code:'UDPS28',ville:'Chartres',repQualite:'Le Président',repPrenom:'',repNom:'',habilitation:'',nextCert:1});
 const DOC_TEXTS=()=>({
   notifFI:`Vous avez suivi une session de formation initiale relative à l’unité d’enseignement « {UE} » ({CURSUS}) organisée du {DEBUT} au {FIN}{LIEU}.
 
@@ -420,7 +420,11 @@ function load(){
   try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);if(d&&Array.isArray(d.sessions)&&Array.isArray(d.evals)){d.settings=Object.assign({trainers:[],useLogo:true,extraSkills:false},d.settings||{});d.settings.org=Object.assign(ORG_DEFAULT(),d.settings.org||{});d.settings.texts=Object.assign(DOC_TEXTS(),d.settings.texts||{});
     builtinTemplates().forEach(b=>{const i=d.templates.findIndex(t=>t.id===b.id);
       if(i<0){if(!(d.removedBuiltins||[]).includes(b.id))d.templates.push(b)}
-      else if(!d.templates[i].edited&&(d.templates[i].rev||1)<(b.rev||1))d.templates[i]=b});return d}}}catch(e){}
+      else if(!d.templates[i].edited&&(d.templates[i].rev||1)<(b.rev||1))d.templates[i]=b});
+    d.evals.forEach(x=>{if(x.kind!=='technicite')return;const all=x.tpl.groups.flatMap(g=>g.items);if(new Set(all.map(i=>i.id)).size===all.length)return;
+      const b=builtinTemplates().find(t=>t.id===x.tpl.id);if(!b)return;const done={};
+      b.groups.forEach(g=>g.items.forEach(it=>{const old=all.find(o=>o.label===it.label);if(old&&x.done[old.id])done[it.id]=x.done[old.id]}));x.tpl=clone(b);x.done=done});
+    return d}}}catch(e){}
   const d=emptyDB();seedSamples(d);return d;
 }
 let saveT;
@@ -479,7 +483,8 @@ function feedValue(pass,code,ct){
 /* « 3B » = 3 validations au niveau B ou mieux (tableau des niveaux d'acquisition du référentiel) */
 const parseReq=s=>{const m=/^\s*(\d+)\s*([A-Za-z]{1,3})\s*$/.exec(s||'');return m?{n:+m[1],lvl:m[2].toUpperCase()}:null};
 function condMet(cond,auto){
-  if(cond.type==='situation')return auto.some(a=>(a.e.cases||{})[cond.id]||(a.e.situations||{})[cond.id]);
+  if(cond.type==='situation'){const has=(a,id)=>(a.e.cases||{})[id]||(a.e.situations||{})[id]||(a.l.marks[id]&&resultOf(a.e.tpl,a.l.marks[id])==='ok');
+    return auto.some(a=>(cond.ids||[cond.id]).every(id=>has(a,id)))}
   if(cond.type==='marks')return auto.some(a=>cond.ids.every(id=>resultOf(a.e.tpl,a.l.marks[id])==='ok'));
   return false;
 }
@@ -735,6 +740,7 @@ function viewSessionEdit(){
           <label class="f">N° du procès-verbal<input type="text" id="sd-pv" value="${esc(d.pvNum||'')}" placeholder="ex. 2026-014" ${db('pvNum')}></label>
           <label class="f">Date du procès-verbal<input type="date" id="sd-pvdate" value="${esc(d.pvDate||'')}" ${db('pvDate')}></label>
           <label class="f">Date des documents<input type="date" id="sd-docdate" value="${esc(d.docDate||'')}" ${db('docDate')}></label>
+          <label class="f">Responsable pédagogique<input type="text" id="sd-resp" list="resp-list" value="${esc(d.respPeda||'')}" ${db('respPeda')}><datalist id="resp-list">${activeTrainers().map(t=>`<option value="${esc(tName(t.id))}">`).join('')}</datalist></label>
           ${d.type==='FC'?`<label class="f">Programme de l’année<input type="text" id="sd-fcan" inputmode="numeric" value="${esc((d.fc||{}).annee||'')}" placeholder="${esc((d.start||today()).slice(0,4))}" ${db('fc.annee')}></label>
           <label class="f">Date de la circulaire FC<input type="text" id="sd-fccirc" value="${esc((d.fc||{}).circulaire||'')}" placeholder="JJ/MM/AAAA" ${db('fc.circulaire')}></label>`:''}
         </div></details>
@@ -1043,7 +1049,7 @@ function viewSettings(){
       <label class="cb"><input type="checkbox" id="set-extra" ${DB.settings.extraSkills?'checked':''} ${bind('extraSkills','settings')}>Habiletés complémentaires des référentiels (surveille la victime, utilise le matériel, tient sa place dans l’équipe, plusieurs victimes)</label>
       <p class="small muted" style="margin:0 0 0 30px">Désactivé : fiches strictement au format d’origine. Activé : ces lignes s’ajoutent aux fiches formatives et au PDF, et comptent pour la certification.</p></div></section>
     <section class="panel"><div class="hd"><h3>Organisme (certificats, attestations, notifications)</h3></div><div class="bd fields">
-      ${[['name','Nom de l’organisme habilité'],['code','Code organisme (n° de certificat)'],['ville','Ville (« <Ville>, le <date> »)'],['repQualite','Qualité du signataire'],['repPrenom','Prénom du signataire'],['repNom','Nom du signataire'],['habilitation','Date de l’arrêté d’habilitation'],['nextCert','Prochain n° de certificat']]
+      ${[['udps','U.D.P.S. n° (procès-verbal)'],['name','Nom de l’organisme habilité'],['code','Code organisme (n° de certificat)'],['ville','Ville (« <Ville>, le <date> »)'],['repQualite','Qualité du signataire'],['repPrenom','Prénom du signataire'],['repNom','Nom du signataire'],['habilitation','Date de l’arrêté d’habilitation'],['nextCert','Prochain n° de certificat']]
         .map(([k,l])=>`<label class="f">${l}<input type="text" id="org-${k}" value="${esc(DB.settings.org[k]??'')}" ${bind('org.'+k,'settings')}></label>`).join('')}</div></section>
     <details class="panel"><summary class="hd" style="cursor:pointer;list-style:none"><h3>Textes des notifications défavorables</h3><span class="small muted">modifiables</span></summary><div class="bd stack">
       <p class="small muted" style="margin:0">Champs remplacés automatiquement : {UE} {CURSUS} {QUALITE} {DEBUT} {FIN} {LIEU}. Le texte « formation initiale » est une correction du modèle des référentiels, qui reprend par erreur le texte de la formation continue.</p>
@@ -1069,7 +1075,7 @@ function viewSettings(){
       <button class="btn" data-act="restore">Restaurer les grilles PSE1 et PSE2 d’origine</button>
       <button class="btn" data-act="del-samples">Supprimer les exemples</button>
       <button class="btn danger" data-act="wipe">${I.trash}Tout effacer</button></div></section>
-    <p class="small muted" style="margin:0">Évaluations PSE · UDPS 28 · version 2.2 · données stockées uniquement sur cet appareil.</p>
+    <p class="small muted" style="margin:0">Évaluations PSE · UDPS 28 · version 2.3 · données stockées uniquement sur cet appareil.</p>
   </div>`;
 }
 
@@ -1111,7 +1117,8 @@ function stamp(){const d=new Date();return `Édité le ${fmtDate(today())} à ${
 function formativePages(e,sess,onlyPid){
   let idx=e.learners.map((l,i)=>i);if(onlyPid)idx=idx.filter(i=>e.learners[i].pid===onlyPid);
   const chunks=[];for(let i=0;i<idx.length;i+=2)chunks.push(idx.slice(i,i+2));
-  return chunks.map(ch=>({orient:'p',draw:doc=>drawFormative(doc,e,sess,ch)}));
+  const L=formLayout(e.tpl);
+  return chunks.map(ch=>({orient:'p',draw:doc=>L?drawFormativeBg(doc,e,sess,ch,L):drawFormative(doc,e,sess,ch)}));
 }
 function drawFormative(doc,e,sess,chunk){
   const P=pen(doc),t=e.tpl,H=t.header||{},M=14,W=182,PH=297;let y=12;e.situations=e.situations||{};
@@ -1177,7 +1184,7 @@ function drawFormative(doc,e,sess,chunk){
 }
 
 /* ---- Fiche de certification : A4 paysage (Annexe 3) ---- */
-function certPages(c,sess){return [{orient:'l',draw:doc=>drawCert(doc,c,sess)}]}
+function certPages(c,sess){const L=certLayout(c);return [{orient:'l',draw:doc=>L?drawCertBg(doc,c,sess,L):drawCert(doc,c,sess)}]}
 function drawCert(doc,c,sess){
   const P=pen(doc),t=c.tpl,H=t.header||{},th=t.theme||{},BAND=hex2rgb(th.band||'#4f81bd'),LIGHT=hex2rgb(th.light||'#b8cce4');
   const M=14,W=269,PH=210,G=certGrid(c,sess),p=participant(sess,c.pid)||{};let y=9;
@@ -1215,7 +1222,7 @@ function drawCert(doc,c,sess){
 }
 
 /* ---- Fiche de technicité : A4 paysage, deux colonnes ---- */
-function techPages(x,sess){return [{orient:'l',draw:doc=>drawTech(doc,x,sess)}]}
+function techPages(x,sess){const T=techLayout(x);return [{orient:'l',draw:doc=>T?drawTechBg(doc,x,sess,T):drawTech(doc,x,sess)}]}
 function drawTech(doc,x,sess){
   const P=pen(doc),t=x.tpl,BAND=hex2rgb((t.theme||{}).band||'#4472c4'),M=12,W=273,PH=210,p=participant(sess,x.pid)||{};let y=10;
   const fw=11,colW=(W-4)/2,lw=colW-fw;
@@ -1315,7 +1322,7 @@ function attestationPages(s,pid){return [{orient:'l',draw:doc=>{
 
 /* Procès-verbal de l'équipe pédagogique */
 function resultOfPerson(s,p){const c=certOf(s.id,p.id);const v=c?verdict(c):'';return v}
-function pvPages(s){return [{orient:'p',draw:doc=>{
+function pvPages(s){const k=pvBgKey(s);if(k)return pvBgPages(s,k);return [{orient:'p',draw:doc=>{
   const P=pen(doc),M=15,W=180,o=ORG(),u=ueOf(s.cursus),parts=s.participants.filter(p=>!p.archived);docHeader(doc,P,W,M);let y=44;
   P.text('PROCÈS-VERBAL DE L’ÉQUIPE PÉDAGOGIQUE',M+W/2,y,{b:true,s:14,a:'center',c:[0,43,107]});y+=6;
   P.text(`n° ${s.pvNum||'…'} du ${fmtDate(s.pvDate)||'…'}`,M+W/2,y,{s:10,a:'center'});y+=9;
@@ -1386,6 +1393,121 @@ function satPages(s){return [{orient:'p',draw:doc=>{
   if(com.length){P.text('Justifications et commentaires',M,y,{b:true,s:9.5});y+=5;P.font(false,8);com.forEach(t=>{doc.splitTextToSize(PT('• '+t),W).forEach(ln=>{if(y>284){doc.addPage('a4','p');y=18}doc.text(ln,M,y);y+=3.8})})}
   P.text('1 = Inadapté (ou nul) - 2 = Insuffisant - 3 = Bien - 4 = Très bien · '+stamp(),M,290,{s:6.5,c:GREY});}}]}
 
+/* =========================================================
+   Fiches au format d'origine : fond = page du PDF d'origine (docs/app/forms),
+   données placées dans les cases mesurées sur les modèles (tools/geom.py, tools/grid.py)
+   ========================================================= */
+const FORM_FILES=['formative-pse1','formative-pse2','technicite-pse1','technicite-pse2','certification-pse1','pv-pse1','pv-fc-pse1','pv-pse2','pv-fc-pse2'];
+let FORMS={},TECH_LAYOUT=null,formsReady=null;
+function loadForms(){
+  if(formsReady)return formsReady;
+  if(window.__FORMS_EMBED__){FORMS=window.__FORMS_EMBED__;TECH_LAYOUT=window.__TECH_LAYOUT__||null;return formsReady=Promise.resolve()}
+  const toData=b=>new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=()=>res(null);fr.readAsDataURL(b)});
+  formsReady=Promise.all(FORM_FILES.map(n=>fetch('forms/'+n+'.png').then(r=>r.ok?r.blob():null).then(b=>b?toData(b):null).then(d=>{if(d)FORMS[n]=d}).catch(()=>{})))
+    .then(()=>fetch('forms/layout-tech.json').then(r=>r.ok?r.json():null).then(j=>{TECH_LAYOUT=j}).catch(()=>{}));
+  return formsReady;
+}
+const bgPage=(doc,key,orient)=>{doc.addImage(FORMS[key],'PNG',0,0,orient==='l'?297:210,orient==='l'?210:297,key,'FAST')};
+const normTxt=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]/g,'');
+/* texte ajusté à une case : une ligne, police réduite si nécessaire */
+function fit(doc,P,t,x0,y0,x1,y1,o={}){t=PT(t);if(!t)return;let sz=o.s||9;P.font(o.b,sz,o.c);const w=x1-x0-(o.pad??1.5)*2;
+  while(sz>5.5&&doc.getTextWidth(t)>w){sz-=.25;P.font(o.b,sz,o.c)}
+  const x=o.a==='center'?(x0+x1)/2:x0+(o.pad??1.5);doc.text(t,x,(y0+y1)/2,{align:o.a==='center'?'center':'left',baseline:'middle'})}
+/* bloc de texte dans une case : réduit la police pour tout faire tenir, renvoie le reste éventuel */
+function fitBlock(doc,P,t,x0,y0,x1,y1,o={}){t=PT(t);if(!t)return '';const pad=o.pad??2;let sz=o.s||8.5,ls;
+  for(;;){P.font(false,sz);ls=doc.splitTextToSize(t,x1-x0-2*pad);if(ls.length*sz*.42+pad<=y1-y0||sz<=6)break;sz-=.25}
+  const lh=sz*.42,max=Math.floor((y1-y0-pad)/lh);ls.slice(0,max).forEach((ln,i)=>doc.text(ln,x0+pad,y0+pad+lh*.8+i*lh));
+  return ls.length>max?ls.slice(max).join(' '):''}
+const mark=(P,x0,y0,x1,y1)=>P.cross((x0+x1)/2,(y0+y1)/2,Math.min(1.9,(x1-x0)/4,(y1-y0)/4));
+const ring=(P,x0,y0,x1,y1)=>P.circle((x0+x1)/2,(y0+y1)/2,(x1-x0)/2-1,(y1-y0)/2-.6);
+
+/* ---- fiches formatives PSE1 / PSE2 ---- */
+const FL_TOP={theme:[15.6,65.4,200.2,73.5],date:[147.4,86.0,200.2,104.8],
+  L:[{lab:[15.5,86.2,39.4,93.6],name:[39.4,86.2,92.2,93.6],cas:[111.4,86.2,138.1,93.6]},{lab:[15.5,97.2,39.4,104.8],name:[39.4,97.2,92.2,104.8],cas:[111.4,97.2,138.1,104.8]}],
+  cols:[[106.9,118.4,129.9,141.4,152.9],[152.9,164.4,175.9,187.4,198.9]]};
+const FL={
+  'pse1-formative':{bg:'formative-pse1',th:[[107.1,111.1,152.9,118.9],[153.1,111.1,198.9,118.9]],
+    rows:{c1:[124.1,130.0],c2:[130.0,135.9],c3:[135.9,156.7],c4:[156.7,162.6],c5:[162.6,168.5],c6:[168.5,174.4],c7:[174.4,180.4]},
+    boxes:{c3a:[27.55,141.9],c3b:[27.55,146.0],c3c:[27.55,150.05],c3d:[27.55,153.95]},obs:[[16.4,194.6,109.0,219.5],[109.0,194.6,199.0,219.5]]},
+  'pse2-formative':{bg:'formative-pse2',th:[[107.1,107.4,152.9,115.2],[153.1,107.4,198.9,115.2]],
+    rows:{d1:[120.3,143.0],d2:[143.0,161.8],d3:[161.8,167.7],d4:[167.7,173.6],d5:[173.6,179.5],d6:[179.5,185.5],d7:[185.5,191.3],d8:[191.3,197.3]},
+    boxes:{d1a:[27.8,129.1],d1b:[27.8,133.15],d1c:[27.8,137.2],d2a:[27.8,151.7],d2b:[27.8,159.9]},obs:[[16.4,207.7,109.0,234.6],[109.0,207.7,199.0,234.6]]}};
+function formLayout(t){const L=FL[t.id];if(!L||t.edited||!FORMS[L.bg])return null;
+  if(t.criteria.some(c=>shown(c)&&!L.rows[c.id]))return null;return L}
+function drawFormativeBg(doc,e,sess,chunk,L){
+  const P=pen(doc),t=e.tpl,F=FL_TOP;bgPage(doc,L.bg,'p');e.situations=e.situations||{};
+  fit(doc,P,e.theme,...F.theme,{s:10,a:'center'});
+  chunk.forEach((li,j)=>{const l=e.learners[li],S_=F.L[j];
+    if(li!==j){doc.setFillColor(...F_BAND);doc.rect(S_.lab[0]+.3,S_.lab[1]+2.2,S_.lab[2]-S_.lab[0]-.6,S_.lab[3]-S_.lab[1]-4.4,'F');P.text('APPRENANT N°'+(li+1),S_.lab[0]+2.6,(S_.lab[1]+S_.lab[3])/2,{s:5.5,c:WHITE,b:true});
+      const h=L.th[j];doc.setFillColor(...F_BAND);doc.rect(h[0]+.3,h[1]+1.6,h[2]-h[0]-.6,h[3]-h[1]-3.4,'F');P.text('APPRENANT N°'+(li+1),(h[0]+h[2])/2,(h[1]+h[3])/2,{s:5.5,c:WHITE,b:true,a:'center'})}
+    fit(doc,P,pName(sess,l.pid),...S_.name,{s:9,b:true});fit(doc,P,l.caseNo||'',...S_.cas,{s:9.5,b:true,a:'center'});
+    const ro=L.rows;items(t).forEach(x=>{const r=ro[x.id];if(!r)return;const k=t.scale.findIndex(s=>s.code===l.marks[x.id]);if(k<0||k>3)return;const c=F.cols[j];mark(P,c[k],r[0],c[k+1],r[1])})});
+  // cases des situations / regards (communes au cas concret)
+  Object.entries(L.boxes).forEach(([id,[cx,cy]])=>{const on=e.situations[id]||(t.criteria.some(c=>c.subMode!=='check'&&(c.children||[]).some(ch=>ch.id===id))&&chunk.some(li=>e.learners[li].marks[id]));if(on){doc.setLineWidth(.45);doc.line(cx-1.15,cy-1.15,cx+1.15,cy+1.15);doc.line(cx-1.15,cy+1.15,cx+1.15,cy-1.15);doc.setLineWidth(.25)}});
+  const D=F.date;P.text(fmtDate(e.date),D[0]+2.5,D[1]+5,{s:9.5,b:true});
+  P.font(false,8.5);doc.splitTextToSize(PT(evaluatorNames(e)),D[2]-D[0]-5).slice(0,3).forEach((ln,i)=>doc.text(ln,D[0]+2.5,D[1]+10.5+i*3.8));
+  const selfTxt=l=>{const se=l.self||{};const ks=items(t).filter(x=>!x.sub&&se[x.id]);return ks.length?'\nAuto-évaluation : '+ks.map(x=>(x.code||'')+' '+se[x.id]).join(' · '):''};
+  const rest=[];chunk.forEach((li,j)=>{const l=e.learners[li],o=L.obs[j];const r=fitBlock(doc,P,(l.obs||'')+selfTxt(l),...o,{s:8.5});if(r)rest.push([pName(sess,l.pid),r])});
+  if(rest.length){doc.addPage('a4','p');let y=18;P.text('OBSERVATIONS (suite) - cas concret du '+fmtDate(e.date),14,y,{b:true,s:10});y+=8;
+    rest.forEach(([n,r])=>{P.text(n,14,y,{b:true,s:9});y+=5;P.font(false,9);doc.splitTextToSize(r,182).forEach(ln=>{doc.text(ln,14,y);y+=4});y+=4})}
+}
+
+/* ---- fiches de technicité PSE1 / PSE2 ---- */
+const TL={'pse1-tech':{bg:'technicite-pse1',fait:[[137.9,148.6],[272.8,284.3]],nom:[178.5,178.45],dy:178.3,dx:[239.4,246.35,253.25,266.9,273.8,280.75],oui:[246.4,184.7,264.4,191.4]},
+          'pse2-tech':{bg:'technicite-pse2',fait:[[142.9,155.3],[272.8,284.3]],nom:[191.5,142.55],dy:160.8,dx:[237.1,244.05,250.95,264.6,271.5,278.45],oui:[244.5,173.1,262.4,179.8]}};
+function techLayout(x){const L=TL[x.tpl.id];if(!L||x.tpl.edited||!FORMS[L.bg]||!TECH_LAYOUT||!TECH_LAYOUT[L.bg])return null;
+  const rows=TECH_LAYOUT[L.bg].rows;const map={};
+  for(const it of techItems(x)){const n=normTxt(it.label);const r=rows.find(r=>r.t===n)||rows.find(r=>r.t.startsWith(n)||n.startsWith(r.t)&&r.t.length>12);if(!r)return null;map[it.id]=r}
+  return {L,map}}
+function drawTechBg(doc,x,sess,TLx){
+  const P=pen(doc),{L,map}=TLx,p=participant(sess,x.pid)||{};bgPage(doc,L.bg,'l');
+  techItems(x).forEach(it=>{if(!x.done[it.id])return;const r=map[it.id],f=L.fait[r.col];mark(P,f[0],r.y0,f[1],r.y1)});
+  P.text(fullName(p),L.nom[0],L.nom[1],{s:10,b:true});
+  const dd=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');return m?[m[3],m[2],m[1].slice(2)]:null};
+  [dd(x.start),dd(x.end)].forEach((v,k)=>{if(v)v.forEach((n,i)=>P.text(n,L.dx[k*3+i],L.dy,{s:8.5,b:true,a:'center'}))});
+  const o=L.oui;if(techStat(x).ok)ring(P,o[0],o[1],o[2],o[3]);
+}
+
+/* ---- fiche de certification PSE1 (Annexe 3) ---- */
+const CL={'pse1-certif':{bg:'certification-pse1',dates:[68.5,38.6],form:[166.5,38.6],nom:[74,44.7],prenom:[163.5,44.7],
+  rows:[[74.9,82.6],[82.6,89.4],[89.4,96.3],[96.3,103.1],[103.1,110.0],[110.0,120.2]],pass:[149.9,161.3,173.0,184.4,196.0,207.6,219.2],yn:[219.2,238.2,256.9],
+  bands:{A:[50.0,55.8],B:[120.2,126.0],C:[128.1,133.9],D:[136.3,142.0]},obs:[35.6,150.9,210.6,180.1],fin:[215.9,165.4,234.8,251.6,171.1]}};
+function certLayout(c){const L=CL[c.tpl.id];if(!L||c.tpl.edited||!FORMS[L.bg]||c.tpl.criteria.length!==L.rows.length||c.tpl.passages.max!==6)return null;if(c.tpl.checks.some(ch=>!L.bands[ch.id]))return null;return L}
+function drawCertBg(doc,c,sess,L){
+  const P=pen(doc),t=c.tpl,G=certGrid(c,sess),p=participant(sess,c.pid)||{};bgPage(doc,L.bg,'l');
+  P.text(fmtDate(sess.start)+(sess.end?' au '+fmtDate(sess.end):''),L.dates[0],L.dates[1],{s:9.5,b:true});
+  fit(doc,P,sessTrainers(sess),L.form[0]-1.5,L.form[1]-3,256.9,L.form[1]+3,{s:9.5,b:true});
+  P.text((p.nom||'').toUpperCase(),L.nom[0],L.nom[1],{s:9.5,b:true});P.text(p.prenom||'',L.prenom[0],L.prenom[1],{s:9.5,b:true});
+  const yn=(v,y0,y1)=>{if(v==='oui')ring(P,L.yn[0],y0,L.yn[1],y1);if(v==='non')ring(P,L.yn[1],y0,L.yn[2],y1)};
+  t.criteria.forEach((k,i)=>{const [y0,y1]=L.rows[i];for(let q=0;q<Math.min(G.P,6);q++){const v=G.cells[k.id][q];if(v)P.text(v,(L.pass[q]+L.pass[q+1])/2,(y0+y1)/2,{s:10,b:true,a:'center',c:resultOf(t,v)==='ko'?[180,20,30]:BLACK})}
+    yn(validOf(c,k,G),y0,y1)});
+  t.checks.forEach(ch=>{const b=L.bands[ch.id];yn(checkVal(c,ch),b[0],b[1])});
+  const r=fitBlock(doc,P,c.observations||'',L.obs[0],L.obs[1]+4.5,L.obs[2],L.obs[3],{s:8.5});
+  const v=verdict(c),f=L.fin;if(v==='apte')ring(P,f[0],f[1],f[2],f[4]);if(v==='inapte')ring(P,f[2],f[1],f[3],f[4]);
+  if(r){doc.addPage('a4','l');P.text('Observations (suite) - '+fullName(p),14,16,{b:true,s:10});P.font(false,9);let y=24;doc.splitTextToSize(r,269).forEach(ln=>{doc.text(ln,14,y);y+=4})}
+}
+
+/* ---- procès-verbal de formation (modèles UDPS : FI / FC, PSE1 / PSE2), 10 lignes par page ---- */
+const PVL={FI:{rows:[73.4,82.3,91.4,100.3,109.3,118.3,127.3,136.3,145.3,154.3,163.3],sig:[176.2,188.4]},
+           FC:{rows:[74.3,83.3,92.2,101.3,110.2,119.3,128.2,137.2,146.2,155.2,164.2],sig:[177.1,189.4]},
+  cols:[15,27.1,39.2,89.7,140.2,190.7,241.2,259,276.9],tr:[[15,80.5],[80.5,145.9],[145.9,211.4]],resp:[211.4,276.9]};
+function pvBgKey(s){const k=(s.type==='FC'?'pv-fc-':'pv-')+String(s.cursus).toLowerCase();return FORMS[k]?k:null}
+function pvBgPages(s,key){const parts=s.participants.filter(p=>!p.archived);const pages=[];for(let i=0;i<Math.max(1,parts.length);i+=10)pages.push(parts.slice(i,i+10));
+  return pages.map((chunk,pi)=>({orient:'l',draw:doc=>{
+    const P=pen(doc),V=PVL[s.type==='FC'?'FC':'FI'],C=PVL.cols,o=ORG();bgPage(doc,key,'l');
+    fit(doc,P,(s.pvNum||'')+(pages.length>1?` (${pi+1}/${pages.length})`:''),258,30.5,277,36,{s:13,b:true,a:'center',pad:0});
+    P.text(o.udps||'',45.5,46.1,{s:10,b:true});P.text(s.lieu||'',61,50.6,{s:10,b:true});
+    P.text(s.start===s.end||!s.end?fmtDate(s.start):`du ${fmtDate(s.start)} au ${fmtDate(s.end)}`,61,55,{s:10,b:true});
+    chunk.forEach((p,i)=>{const y0=V.rows[i],y1=V.rows[i+1],v=resultOfPerson(s,p);
+      if(p.civ==='Madame')mark(P,C[0],y0,C[1],y1);if(p.civ==='Monsieur')mark(P,C[1],y0,C[2],y1);
+      fit(doc,P,(p.nom||'').toUpperCase(),C[2],y0,C[3],y1,{s:9.5,b:true});fit(doc,P,p.prenom||'',C[3],y0,C[4],y1,{s:9.5});
+      fit(doc,P,fmtDate(p.birthDate),C[4],y0,C[5],y1,{s:9.5,a:'center'});fit(doc,P,[p.birthPlace,p.birthDept?'('+p.birthDept+')':''].filter(Boolean).join(' '),C[5],y0,C[6],y1,{s:9.5,a:'center'});
+      if(v==='apte')mark(P,C[6],y0,C[7],y1);if(v==='inapte')mark(P,C[7],y0,C[8],y1)});
+    const [s0]=V.sig;(s.trainerIds||[]).map(tName).filter(Boolean).slice(0,3).forEach((n,i)=>fit(doc,P,n,PVL.tr[i][0],s0+.4,PVL.tr[i][1],s0+4.6,{s:8,b:true}));
+    if(s.respPeda)fit(doc,P,s.respPeda,PVL.resp[0],s0+.4,PVL.resp[1],s0+4.6,{s:8,b:true});
+  }}));
+}
+
 function buildPdf(pages){
   const J=window.jspdf&&window.jspdf.jsPDF;if(!J)throw new Error('module PDF indisponible');
   const doc=new J({orientation:pages[0].orient==='l'?'landscape':'portrait',unit:'mm',format:'a4',compress:true});
@@ -1432,7 +1554,7 @@ async function saveFiles(files,folder){
 }
 async function runExport(label,make,mode){
   if(EMBED){toast('L’export est disponible dans l’application installée.');return}
-  busy(true,label);await new Promise(r=>setTimeout(r,30));
+  busy(true,label);await new Promise(r=>setTimeout(r,30));await loadForms();
   try{const {files,title}=make();if((mode||S.expMode)==='save')await saveFiles(files,title);else await shareFiles(files,title)}catch(err){console.error(err);toast('Export impossible : '+(err&&err.message||err))}
   finally{busy(false)}
 }
@@ -1724,6 +1846,7 @@ if(NATIVE&&window.Capacitor.Plugins.App){window.Capacitor.Plugins.App.addListene
   const m={session:'sessions',person:'session',sessionEdit:S.draftNew?'sessions':'session',formative:S.pid?'person':'session',cert:'person',tech:'person',qcm:'cert',satis:'session',survey:'session',tpl:'tpls'};
   if(m[S.view])go(m[S.view]);else if(S.view!=='sessions'){S.tab='sessions';go('sessions')}else window.Capacitor.Plugins.App.exitApp();
 })}
+window.__loadForms=loadForms;
 window.__app={DB:()=>DB,S,A,go,qcmState,pvPages,certificatePages,notifPages,attestationPages,satPages,qcmPages,buildPdf,formativePages,certPages,techPages,dossierPages,sessionExport,certGrid};
 render();
 })();
