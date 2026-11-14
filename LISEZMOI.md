@@ -29,7 +29,7 @@ Application de terrain pour les formations PSE1 et PSE2. Elle fonctionne **enti�
 - **Dossier** par participant, dans l'ordre du référentiel : technicité, fiches d'évaluation, certification.
 
 ## Version 2.4
-- **Journées de formation** J1… avec date et heures : PSE1 5 × 7 h = 35 h, PSE2 4 × 7 h = 28 h, formation continue 1 × 7 h. Elles peuvent être réparties sur plusieurs semaines (Modifier la formation › Journées). La présence se pointe par journée, avec le total d'heures ; la feuille de présence reste ouverte pendant le pointage.
+- **Journées de formation** J1… avec date et heures : PSE1 5 × 7 h = 35 h, PSE2 4 × 7 h = 28 h, formation continue 1 × 7 h. Elles peuvent être réparties sur plusieurs semaines (Modifier la formation › Journées). La présence se pointe par journée, avec le total d'heures ; la feuille de présence reste ouverte pendant le pointage. La ligne « Tous les participants » pointe (ou retire) une journée pour tout le groupe en un geste.
 - **Fiches de technicité** (bouton dans la formation) : liste déroulante pour passer d'un participant à l'autre, ou mode « Tous les participants » pour cocher une technique, ou une rubrique entière, pour tout le groupe en une fois.
 - **Évaluation théorique** : la note /20 se saisit dans la formation (tableau du groupe), sur la fiche du participant ou sur la certification. OUI / NON reste modifiable à la main : la décision du formateur prime sur le calcul, par exemple après un entretien de rattrapage.
 

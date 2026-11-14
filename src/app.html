@@ -649,6 +649,7 @@ function viewSession(){
     ${sessDays(s).length&&parts.length?`<details class="panel" data-panel="pres" ${S.open.pres?'open':''}><summary class="hd" style="cursor:pointer;list-style:none"><h3>Feuille de présence</h3><span class="small muted">${sessDays(s).length} jour${sessDays(s).length>1?'s':''} · ${hoursOf(s,sessDays(s))} h · touchez pour pointer</span></summary>
       <div style="overflow-x:auto"><table style="border-collapse:collapse;min-width:100%;font-size:.85rem">
         <tr><th style="text-align:left;padding:8px 14px">Participant</th>${sessDays(s).map(d=>`<th style="padding:8px 4px;line-height:1.15" class="num">${esc(d)}<span class="small muted" style="display:block;font-weight:500">${esc(fmtDate(dayOf(s,d).date).slice(0,5))} ${dayOf(s,d).h} h</span></th>`).join('')}<th style="padding:8px">Heures</th></tr>
+        <tr style="border-top:1px solid var(--line);background:var(--surface-2)"><td style="padding:6px 14px;font-weight:700;font-size:.82rem">Tous les participants</td>${sessDays(s).map(d=>{const all=parts.every(p=>presenceOf(s,p.id)[d]);return `<td style="text-align:center;padding:4px"><button class="btn sm ${all?'primary':''}" style="min-width:56px;padding:0 8px" data-act="presence-all" data-d="${d}" aria-pressed="${all}" aria-label="${all?'Retirer':'Pointer'} tous les participants en ${esc(d)}">${all?'✓ Tous':'Tous'}</button></td>`}).join('')}<td></td></tr>
         ${parts.map(p=>{const pr=presenceOf(s,p.id);return `<tr style="border-top:1px solid var(--line)"><td style="padding:6px 14px;white-space:nowrap;font-weight:600">${esc(fullName(p))}</td>${sessDays(s).map(d=>`<td style="text-align:center;padding:4px"><button class="chip ${pr[d]?'on':''}" style="min-width:44px;justify-content:center" data-act="presence" data-pid="${p.id}" data-d="${d}" aria-label="${esc(fullName(p))} ${esc(d)}" aria-pressed="${!!pr[d]}">${pr[d]?'✓':'·'}</button></td>`).join('')}<td class="num small" style="text-align:center;font-weight:700">${hoursOf(s,sessDays(s).filter(d=>pr[d]))}/${hoursOf(s,sessDays(s))} h</td></tr>`}).join('')}
       </table></div></details>`:''}
     ${parts.length&&certTpl(s.cursus)?`<details class="panel" data-panel="theo" ${S.open.theo?'open':''}><summary class="hd" style="cursor:pointer;list-style:none"><h3>Évaluation théorique (D)</h3><span class="small muted">note /20 · 12 minimum · rattrapage 10-11</span></summary>
@@ -1094,7 +1095,7 @@ function viewSettings(){
       <button class="btn" data-act="restore">Restaurer les grilles PSE1 et PSE2 d’origine</button>
       <button class="btn" data-act="del-samples">Supprimer les exemples</button>
       <button class="btn danger" data-act="wipe">${I.trash}Tout effacer</button></div></section>
-    <p class="small muted" style="margin:0">Évaluations PSE · UDPS 28 · version 2.4 · données stockées uniquement sur cet appareil.</p>
+    <p class="small muted" style="margin:0">Évaluations PSE · UDPS 28 · version 2.4.1 · données stockées uniquement sur cet appareil.</p>
   </div>`;
 }
 
@@ -1713,6 +1714,9 @@ const A={
     c.overrides[d.k]=c.overrides[d.k]||{};if(next===auto)delete c.overrides[d.k][p];else c.overrides[d.k][p]=next;touch(c);render()},
   extra:d=>{const c=curEval(),G=certGrid(c,curSess());if(+d.v>0&&G.P>=c.tpl.passages.max)return;c.extra=Math.max(0,(c.extra||0)+ +d.v);touch(c);render()},
   cond:(d,ev,el)=>{const c=curEval();c.condOk=c.condOk||{};if(el.checked)c.condOk[d.k]=true;else delete c.condOk[d.k];touch(c);render()},
+  'presence-all':d=>{const s=curSess(),parts=s.participants.filter(p=>!p.archived);s.presence=s.presence||{};
+    const all=parts.every(p=>(s.presence[p.id]||{})[d.d]);parts.forEach(p=>{const pr=s.presence[p.id]=s.presence[p.id]||{};if(all)delete pr[d.d];else pr[d.d]=true});
+    s.updatedAt=Date.now();save();render();toast(all?`Présence retirée pour tous en ${d.d}`:`Tous les participants pointés présents en ${d.d}`)},
   presence:d=>{const s=curSess();s.presence=s.presence||{};const pr=s.presence[d.pid]=s.presence[d.pid]||{};if(pr[d.d])delete pr[d.d];else pr[d.d]=true;s.updatedAt=Date.now();save();render()},
   'case':(d,ev,el)=>{const e=curEval();e.cases=e.cases||{};if(el.checked)e.cases[d.c]=true;else delete e.cases[d.c];touch(e)},
   valid:d=>{const c=curEval();if(c.valid[d.k]===d.v)delete c.valid[d.k];else c.valid[d.k]=d.v;touch(c);render()},
