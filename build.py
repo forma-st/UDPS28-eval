@@ -57,7 +57,8 @@ sw_reg = '''
 <script>
 if('serviceWorker' in navigator && location.protocol.startsWith('http') && !(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())){
   window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(function(r){r.update()}).catch(function(){})});
-  var reloaded=false;navigator.serviceWorker.addEventListener('controllerchange',function(){if(!reloaded){reloaded=true;location.reload()}});
+  var hadSW=!!navigator.serviceWorker.controller,reloaded=false;
+  navigator.serviceWorker.addEventListener('controllerchange',function(){if(hadSW&&!reloaded){reloaded=true;location.reload()}});
 }
 </script>'''
 html = page(body, head, sw_reg)
