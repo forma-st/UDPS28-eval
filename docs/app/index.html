@@ -111,6 +111,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-o
 
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;min-height:40px;padding:0 14px;font-weight:600;font-size:.86rem;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.chip svg{width:18px;height:18px;flex:none}
 .chip.on{background:var(--brand-soft);border-color:var(--brand);color:var(--brand)}
 .pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:2px 10px;font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;border:1px solid currentColor}
 .pill.ok{color:var(--t-vert)} .pill.ko{color:var(--t-rouge)} .pill.wait{color:var(--t-orange)} .pill.neutral{color:var(--muted)} .pill.ex{color:var(--t-bleu)}
@@ -178,7 +179,7 @@ button.line:hover{background:var(--surface-2)}
 /* Certificative */
 .comp{padding:14px;border-top:1px solid var(--line);display:grid;gap:10px}
 .comp:first-child{border-top:0}
-.comp .n{font-weight:800;font-size:1.15rem;color:var(--brand);min-width:22px}
+.comp .cn{font-weight:800;font-size:1.15rem;color:var(--brand);min-width:22px}
 .exp{font-weight:700;font-size:.78rem;border:1px solid var(--line);border-radius:6px;padding:2px 8px;color:var(--muted);white-space:nowrap}
 .pass{display:flex;gap:6px;flex-wrap:wrap}
 .pc{position:relative;width:62px;height:56px;border-radius:8px;border:1.5px dashed var(--line);background:var(--surface-2);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;color:var(--muted);font-size:.68rem;font-weight:600}
@@ -294,37 +295,42 @@ const FORMATIVE_SCALE=()=>[
   {code:'C',label:'En cours d’acquisition',desc:'Correspond à des savoirs ou des compétences qui doivent encore être étayés.',tone:'orange',result:'ko'},
   {code:'NE',label:'Non évalué',desc:'',tone:'gris',result:'none'}];
 const CERT_SCALE=()=>[
-  {code:'A',label:'Acquis',desc:'Compétence démontrée lors du passage.',tone:'vert',result:'ok'},
-  {code:'NA',label:'Non acquis',desc:'Compétence non démontrée lors du passage.',tone:'rouge',result:'ko'}];
+  {code:'A',label:'Maîtrisé',desc:'Comportement adapté, action efficace, procédures et gestes conformes au référentiel.',tone:'vertf',result:'ok'},
+  {code:'B',label:'Acquis',desc:'Quelques erreurs sans mise en cause de la sécurité des intervenants, de la victime ou des tiers.',tone:'vert',result:'ok'},
+  {code:'C',label:'En cours d’acquisition',desc:'Procédures ou gestes non conformes ; la sécurité peut être impactée.',tone:'orange',result:'ko'}];
+const SITUATIONS_PSE1=()=>[
+  {id:'ova',label:'4.1 Obstruction des voies aériennes'},{id:'hemo',label:'4.2 Saignement abondant'},{id:'pc',label:'4.3 Perte de connaissance'},
+  {id:'acr',label:'4.4 Arrêt cardiaque'},{id:'detresse',label:'4.5 Détresse respiratoire, circulatoire ou neurologique'},{id:'malaise',label:'4.6 Malaise'},
+  {id:'trauma',label:'4.7 Traumatisme des membres ou de la peau'}];
 const CERT_CHECKS=()=>[
   {id:'A',label:'Avoir réalisé correctement l’ensemble des techniques et des procédures',auto:'tech'},
   {id:'B',label:'Avoir validé l’ensemble des compétences en termes de capacités théorique, pratique et comportementale.',auto:true},
-  {id:'C',label:'Avoir suivi l’ensemble de la formation.',auto:false},
-  {id:'D',label:'Avoir validé l’évaluation théorique.',auto:false}];
+  {id:'C',label:'Avoir suivi l’ensemble de la formation.',auto:'presence'},
+  {id:'D',label:'Avoir validé l’évaluation théorique.',auto:'theory'}];
 const FORM_HEADER=r=>({left:'EPN ANPS',center:'Conception des formations',title:'Evaluation formative',ref:'EVAL/ '+r,maj:'25.02.2023'});
 const g=(title,items)=>({id:slug(title).toLowerCase(),title,items:items.map(l=>({id:slug(title+'-'+l).toLowerCase().slice(0,50),label:l}))});
 function builtinTemplates(){return [
- {id:'pse1-formative',builtin:true,cursus:'PSE1',kind:'formative',name:'PSE1 · Évaluation formative (cas concret)',learners:2,header:FORM_HEADER('PSE1'),
-  scale:FORMATIVE_SCALE(),criteria:[
-   {id:'c1',code:'C1',label:'Possède un comportement adapté à la situation',feeds:'6',children:[]},
+ {id:'pse1-formative',builtin:true,rev:2,cursus:'PSE1',kind:'formative',name:'PSE1 · Évaluation formative (cas concret)',learners:2,header:FORM_HEADER('PSE1'),
+  scale:FORMATIVE_SCALE(),situations:SITUATIONS_PSE1(),criteria:[
+   {id:'c1',code:'C1',label:'Possède un comportement adapté à la situation',feeds:'1',children:[]},
    {id:'c2',code:'C2',label:'Assure ou participe à la sécurité de l’intervention',feeds:'2',children:[]},
    {id:'c3',code:'C3',label:'Réalise un bilan conforme',feeds:'3',subMode:'rated',children:[{id:'c3a',label:'1er REGARD'},{id:'c3b',label:'2ème REGARD'},{id:'c3c',label:'3ème REGARD'},{id:'c3d',label:'4ème REGARD'}]},
    {id:'c4',code:'C4',label:'Réalise des gestes de premiers secours efficaces',feeds:'4',children:[]},
-   {id:'c5',code:'C5',label:'Rend compte au chef d’équipe',feeds:'3',children:[]},
-   {id:'c6',code:'C6',label:'Respecte une conduite à tenir appropriée',feeds:'1',children:[]},
-   {id:'c7',code:'C6',label:'Établit une communication au sein de l’équipe',feeds:'5',children:[]}]},
- {id:'pse1-certif',builtin:true,cursus:'PSE1',kind:'certificative',name:'PSE1 · Fiche de certification individuelle',
+   {id:'c5',code:'C5',label:'Rend compte au chef d’équipe',feeds:'5',children:[]},
+   {id:'c6',code:'C6',label:'Respecte une conduite à tenir appropriée',feeds:'6',children:[]},
+   {id:'c7',code:'C6',label:'Établit une communication au sein de l’équipe',feeds:'6',children:[]}]},
+ {id:'pse1-certif',builtin:true,rev:2,cursus:'PSE1',kind:'certificative',name:'PSE1 · Fiche de certification individuelle',
   header:{title:'FICHE DE CERTIFICATION INDIVIDUELLE « PSE 1 »',ref:'Premier Secours en Equipe de niveau 1 - EPN - Mai 2022'},
   theme:{band:'#4f81bd',light:'#b8cce4'},passages:{min:3,max:6},scale:CERT_SCALE(),
   criteria:[
    {id:'k1',code:'1',label:'Évoluer dans le cadre juridique applicable à son action.',expected:'3B'},
    {id:'k2',code:'2',label:'Assurer une protection immédiate adaptée et permanente.',expected:'2A'},
-   {id:'k3',code:'3',label:'Réaliser le bilan et assurer sa transmission.',expected:'3B'},
-   {id:'k4',code:'4',label:'Réaliser les gestes de premiers secours.',expected:'3B'},
+   {id:'k3',code:'3',label:'Réaliser le bilan et assurer sa transmission.',expected:'3B',cond:{type:'marks',ids:['c3c','c3d'],label:'Dont au moins 1 troisième et quatrième regard'}},
+   {id:'k4',code:'4',label:'Réaliser les gestes de premiers secours.',expected:'3B',cond:{type:'situation',id:'acr',label:'Dont au moins 1 prise en charge d’arrêt cardiaque'}},
    {id:'k5',code:'5',label:'Assister des équipiers secouristes',expected:'1C'},
    {id:'k6',code:'6',label:'Adapter son comportement à la situation ou à l’état de la victime.',expected:'3B'}],
   checks:CERT_CHECKS()},
- {id:'pse1-tech',builtin:true,cursus:'PSE1',kind:'technicite',name:'PSE1 · Suivi de la technicité',
+ {id:'pse1-tech',builtin:true,rev:2,cursus:'PSE1',kind:'technicite',name:'PSE1 · Suivi de la technicité',
   header:{title:'FICHE DE SUIVI DE LA MAITRISE DE LA TECHNICITÉ DE L’APPRENANT PSE 1'},theme:{band:'#4472c4'},
   groups:[
    g('ATTITUDE ET COMPORTEMENT',['Évaluation de l’impact psychologique','Stabiliser l’état psycho-physiologique d’une victime','L’écoute active','La respiration contrôlée','La focalisation / défocalisation attentionnelle','Effectuer l’inventaire du matériel de premiers secours']),
@@ -335,7 +341,7 @@ function builtinTemplates(){return [
    g('MALAISES ET AFFECTIONS SPÉCIFIQUES',['Positions d’attente et de transport','Aide à la prise de médicaments','Manœuvres physiques']),
    g('TRAUMATISMES',['Immobilisation d’un membre au moyen d’une attelle à dépression','Immobilisation d’un membre au moyen d’une attelle modulable','Immobilisation d’un membre supérieur au moyen d’écharpes','Maintien de la tête en position neutre','Pose d’un collier cervical','Retrait d’un casque de protection','Application de froid','Emballage au moyen d’un pansement stérile','Maintien d’un pansement','Pansement','Utilisation d’un lot membre arraché ou sectionné']),
    g('RELEVAGE ET BRANCARDAGE',['Préparation d’un dispositif de portage'])]},
- {id:'pse2-formative',builtin:true,cursus:'PSE2',kind:'formative',name:'PSE2 · Évaluation formative (cas concret)',learners:2,header:FORM_HEADER('PSE2'),
+ {id:'pse2-formative',builtin:true,rev:2,cursus:'PSE2',kind:'formative',name:'PSE2 · Évaluation formative (cas concret)',learners:3,header:FORM_HEADER('PSE2'),
   scale:FORMATIVE_SCALE(),criteria:[
    {id:'d1',code:'C1',label:'Prend en charge une personne',feeds:'1',subMode:'check',children:[{id:'d1a',label:'Présentant une affection spécifique'},{id:'d1b',label:'Victime d’une atteinte circonstancielle'},{id:'d1c',label:'Présentant une souffrance psychique ou comportement inhabituel'}]},
    {id:'d2',code:'C2',label:'Assure au sein d’une équipe',feeds:'2',subMode:'check',children:[{id:'d2a',label:'L’immobilisation d’une victime traumatisée du squelette et pose correctement le matériel'},{id:'d2b',label:'Le relevage et le brancardage d’une victime'}]},
@@ -345,19 +351,19 @@ function builtinTemplates(){return [
    {id:'d6',code:'C6',label:'Réalise un bilan complet et assure sa transmission',feeds:'6',children:[]},
    {id:'d7',code:'C6',label:'Rend compte au chef d’équipe',feeds:'6',children:[]},
    {id:'d8',code:'C7',label:'Possède un comportement adapté à la situation',feeds:'7',children:[]}]},
- {id:'pse2-certif',builtin:true,cursus:'PSE2',kind:'certificative',name:'PSE2 · Fiche de certification individuelle',
+ {id:'pse2-certif',builtin:true,rev:2,cursus:'PSE2',kind:'certificative',name:'PSE2 · Fiche de certification individuelle',
   header:{title:'FICHE DE CERTIFICATION INDIVIDUELLE « PSE 2 »',ref:''},
   theme:{band:'#c0504d',light:'#d99594'},passages:{min:3,max:6},scale:CERT_SCALE(),
   criteria:[
    {id:'m1',code:'1',label:'Prendre en charge une personne.',expected:'1B'},
-   {id:'m2',code:'2',label:'Assurer au sein d’une équipe l’immobilisation, le relevage et le brancardage.',expected:'3B'},
+   {id:'m2',code:'2',label:'Assurer au sein d’une équipe l’immobilisation, le relevage et le brancardage.',expected:'3B',cond:{type:'situation',id:'d2b',label:'Dont au moins un relevage'}},
    {id:'m3',code:'3',label:'Coordonner les actions de secours conduites au sein d’une équipe.',expected:'2B'},
    {id:'m4',code:'4',label:'Évoluer dans le cadre juridique applicable à son autorité d’emploi.',expected:'3B'},
    {id:'m5',code:'5',label:'Assurer une protection immédiate, adaptée et permanente.',expected:'3A'},
-   {id:'m6',code:'6',label:'Réaliser un bilan et assurer sa transmission.',expected:'3B'},
+   {id:'m6',code:'6',label:'Réaliser un bilan et assurer sa transmission.',expected:'3B',cond:{type:'marks',ids:['d6'],label:'Dont au moins 1 bilan complet'}},
    {id:'m7',code:'7',label:'Adapter son comportement à la situation et à la victime.',expected:'2B'}],
   checks:CERT_CHECKS()},
- {id:'pse2-tech',builtin:true,cursus:'PSE2',kind:'technicite',name:'PSE2 · Suivi de la technicité',
+ {id:'pse2-tech',builtin:true,rev:2,cursus:'PSE2',kind:'technicite',name:'PSE2 · Suivi de la technicité',
   header:{title:'FICHE DE SUIVI DE LA MAITRISE DE LA TECHNICITÉ DE L’APPRENANT PSE 2'},theme:{band:'#c00000'},
   groups:[
    g('TRAUMATISMES',['Contention pelvienne','Immobilisation d’un membre inférieur au moyen d’une attelle à traction','Immobilisation générale sur un plan dur (3 possibilités)','Immobilisation générale sur un matelas à dépression','Pose de l’attelle cervico-thoracique','Réalignement de membre']),
@@ -379,7 +385,9 @@ let DB;
 function emptyDB(){return {version:2,templates:builtinTemplates(),sessions:[],evals:[],settings:{trainers:[],useLogo:true}}}
 function load(){
   try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);if(d&&Array.isArray(d.sessions)&&Array.isArray(d.evals)){d.settings=Object.assign({trainers:[],useLogo:true},d.settings||{});
-    builtinTemplates().forEach(b=>{if(!d.templates.some(t=>t.id===b.id)&&!(d.removedBuiltins||[]).includes(b.id))d.templates.push(b)});return d}}}catch(e){}
+    builtinTemplates().forEach(b=>{const i=d.templates.findIndex(t=>t.id===b.id);
+      if(i<0){if(!(d.removedBuiltins||[]).includes(b.id))d.templates.push(b)}
+      else if(!d.templates[i].edited&&(d.templates[i].rev||1)<(b.rev||1))d.templates[i]=b});return d}}}catch(e){}
   const d=emptyDB();seedSamples(d);return d;
 }
 let saveT;
@@ -426,11 +434,34 @@ function techStat(x){const all=techItems(x);const n=all.filter(i=>x.done[i.id]).
 
 /* ---------- Lien cas concrets → certification ---------- */
 function passagesFor(sess,pid){const out=[];sessFormatives(sess.id).forEach(e=>{if(e.counts===false)return;const l=e.learners.find(l=>l.pid===pid);if(l)out.push({e,l})});return out}
+const rankOf=(t,code)=>{const i=t.scale.findIndex(s=>s.code===code);return i<0?99:i};
+function mapLevel(ft,code,ct){const s=scaleOf(ft,code);if(!s||(s.result||'none')==='none')return '';return scaleOf(ct,code)?code:codeFor(ct,s.result)}
+/* niveau d'un passage pour une compétence = le plus faible des critères qui l'alimentent (NE ignoré) */
 function feedValue(pass,code,ct){
-  const ft=pass.e.tpl;const res=[];
-  ft.criteria.filter(c=>String(c.feeds||'')===String(code)).forEach(c=>{[c,...(rated(c)?c.children:[])].forEach(x=>{const r=resultOf(ft,pass.l.marks[x.id]);if(r)res.push(r)})});
-  if(res.includes('ko'))return codeFor(ct,'ko');if(res.includes('ok'))return codeFor(ct,'ok');return '';
+  const ft=pass.e.tpl;let worst='';
+  ft.criteria.filter(c=>String(c.feeds||'')===String(code)).forEach(c=>{[c,...(rated(c)?c.children:[])].forEach(x=>{const v=mapLevel(ft,pass.l.marks[x.id],ct);if(v&&(!worst||rankOf(ct,v)>rankOf(ct,worst)))worst=v})});
+  return worst;
 }
+/* « 3B » = 3 validations au niveau B ou mieux (tableau des niveaux d'acquisition du référentiel) */
+const parseReq=s=>{const m=/^\s*(\d+)\s*([A-Za-z]{1,3})\s*$/.exec(s||'');return m?{n:+m[1],lvl:m[2].toUpperCase()}:null};
+function condMet(cond,auto){
+  if(cond.type==='situation')return auto.some(a=>(a.e.cases||{})[cond.id]||(a.e.situations||{})[cond.id]);
+  if(cond.type==='marks')return auto.some(a=>cond.ids.every(id=>resultOf(a.e.tpl,a.l.marks[id])==='ok'));
+  return false;
+}
+function compStatus(c,G,k){
+  const t=c.tpl,req=parseReq(k.expected),cells=G.cells[k.id]||[];
+  const st={req,count:0,rated:cells.filter(Boolean).length,condOk:true,condTxt:'',condManual:false,auto:''};
+  if(k.cond){st.condTxt=k.cond.label;st.condManual=!!(c.condOk||{})[k.id];st.condOk=st.condManual||condMet(k.cond,G.auto)}
+  if(!req)return st;
+  const lim=rankOf(t,req.lvl);st.count=lim>=99?0:cells.filter(v=>v&&rankOf(t,v)<=lim).length;
+  st.auto=st.count>=req.n&&st.condOk?'oui':'';return st;
+}
+function validOf(c,k,G){const m=c.valid[k.id];if(m)return m;const s=sessById(c.sessionId);if(!s)return '';return compStatus(c,G||certGrid(c,s),k).auto}
+function sessDays(s){if(!s||!s.start)return [];const out=[];const d=new Date(s.start+'T12:00:00'),e=new Date((s.end||s.start)+'T12:00:00');
+  while(d<=e&&out.length<21){out.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1)}return out}
+const presenceOf=(s,pid)=>((s.presence||{})[pid])||{};
+const theoryNote=c=>{const n=parseFloat(String((c.theory||{}).score??'').replace(',','.'));return isNaN(n)?null:n};
 function certGrid(c,sess){
   const t=c.tpl;let auto=passagesFor(sess,c.pid);const over=Math.max(0,auto.length-t.passages.max);if(over)auto=auto.slice(over);
   const P=Math.min(t.passages.max,Math.max(t.passages.min,auto.length+(c.extra||0)));
@@ -441,9 +472,13 @@ function certGrid(c,sess){
   return {P,auto,cells,manual,dropped:over};
 }
 function checkVal(c,ch){
+  if(ch.auto==='presence'){const s=sessById(c.sessionId),days=sessDays(s);if(!days.length)return c.checks[ch.id]||'';
+    const pr=presenceOf(s,c.pid);if(days.every(d=>pr[d]))return 'oui';return c.checks[ch.id]==='non'?'non':''}
+  if(ch.auto==='theory'){const n=theoryNote(c);if(n===null)return c.checks[ch.id]||'';if(n>=12)return 'oui';
+    if(n>=10){const r=(c.theory||{}).retake;return r==='ok'?'oui':r==='ko'?'non':''}return 'non'}
   if(ch.auto==='tech'){const s=sessById(c.sessionId);const x=s&&techOf(s.id,c.pid);
     if(x&&techStat(x).ok)return 'oui';return c.checks[ch.id]==='non'?'non':(x?'':(c.checks[ch.id]||''))}
-  if(ch.auto){const v=c.tpl.criteria.map(k=>c.valid[k.id]);if(v.some(x=>x==='non'))return 'non';if(v.length&&v.every(x=>x==='oui'))return 'oui';return ''}
+  if(ch.auto){const s=sessById(c.sessionId),G=s?certGrid(c,s):null;const v=c.tpl.criteria.map(k=>G?validOf(c,k,G):c.valid[k.id]);if(v.some(x=>x==='non'))return 'non';if(v.length&&v.every(x=>x==='oui'))return 'oui';return ''}
   return c.checks[ch.id]||'';
 }
 function verdict(c){const v=c.tpl.checks.map(ch=>checkVal(c,ch));if(v.includes('non'))return 'inapte';if(v.length&&v.every(x=>x==='oui'))return 'apte';return ''}
@@ -458,21 +493,22 @@ function seedSamples(d){
   d.settings.trainers.push({id:'t-ex1',nom:'Exemple',prenom:'Formateur',sample:true},{id:'t-ex2',nom:'Démo',prenom:'Formatrice',sample:true});
   const s={id:'s-ex1',sample:true,cursus:'PSE1',title:'PSE1 · Session exemple',start:'2026-11-09',end:'2026-11-14',lieu:'Chartres',trainerIds:['t-ex1','t-ex2'],
     participants:[{id:'p1',nom:'Exemple',prenom:'Camille'},{id:'p2',nom:'Exemple',prenom:'Louis'},{id:'p3',nom:'Démo',prenom:'Inès'},{id:'p4',nom:'Démo',prenom:'Hugo'}],createdAt:Date.now(),updatedAt:Date.now()};
+  s.presence={p1:{'2026-11-09':true,'2026-11-10':true,'2026-11-11':true,'2026-11-12':true,'2026-11-13':true,'2026-11-14':true},p2:{'2026-11-09':true,'2026-11-10':true}};
   d.sessions.push(s);
   const f=T.find(t=>t.id==='pse1-formative');
-  const mk=(date,theme,ev,learners,done)=>({id:uid(),sessionId:s.id,kind:'formative',tpl:clone(f),date,theme,evaluatorIds:ev,learners,situations:{},done,counts:true,createdAt:Date.now(),updatedAt:Date.now()});
+  const mk=(date,theme,ev,learners,done)=>({id:uid(),sessionId:s.id,kind:'formative',tpl:clone(f),date,theme,evaluatorIds:ev,learners,situations:{},cases:/Arrêt/.test(theme)?{acr:true}:/Malaise/.test(theme)?{malaise:true}:{trauma:true},done,counts:true,createdAt:Date.now(),updatedAt:Date.now()});
   d.evals.push(
     mk('2026-11-11','Malaise sur la voie publique, victime consciente',['t-ex1',''],[
       {pid:'p1',caseNo:'3',obs:'Bilan incomplet au 2e regard. Bonne gestion de la sécurité.',marks:{c1:'B',c2:'B',c3:'C',c3a:'B',c3b:'C',c3c:'B',c3d:'B',c4:'B',c5:'C',c6:'B',c7:'B'}},
       {pid:'p2',caseNo:'3',obs:'Très bon leadership, communication à travailler.',marks:{c1:'A',c2:'B',c3:'B',c3a:'A',c3b:'B',c3c:'B',c3d:'B',c4:'B',c5:'B',c6:'B',c7:'C'}}],true),
-    mk('2026-11-12','Hémorragie externe sur un lieu de travail',['t-ex2','t-ex1'],[
+    mk('2026-11-12','Arrêt cardiaque dans un hall de gare',['t-ex2','t-ex1'],[
       {pid:'p1',caseNo:'5',obs:'Compression efficace. Transmission claire et structurée.',marks:{c1:'B',c2:'A',c3:'B',c3a:'A',c3b:'B',c3c:'B',c3d:'B',c4:'B',c5:'B',c6:'B',c7:'B'}},
       {pid:'p3',caseNo:'5',obs:'Garrot posé tardivement.',marks:{c1:'B',c2:'B',c3:'B',c4:'C',c5:'B',c6:'C',c7:'B'}}],true),
     mk('2026-11-13','Chute d’un escabeau, suspicion de traumatisme',['t-ex1',''],[
       {pid:'p1',caseNo:'8',obs:'',marks:{c1:'A',c2:'B',c3:'B',c3a:'B',c3b:'B',c3c:'B',c3d:'B',c4:'A',c5:'B',c6:'B',c7:'B'}},
       {pid:'p4',caseNo:'8',obs:'',marks:{c1:'B',c2:'B'}}],false));
   const ct=T.find(t=>t.id==='pse1-certif'),tt=T.find(t=>t.id==='pse1-tech');
-  d.evals.push({id:uid(),sessionId:s.id,kind:'certificative',pid:'p1',tpl:clone(ct),overrides:{},extra:0,valid:{k1:'oui',k2:'oui',k3:'oui',k4:'oui',k5:'oui',k6:'oui'},checks:{C:'oui'},observations:'Évaluation théorique prévue le 14/11.',createdAt:Date.now(),updatedAt:Date.now()});
+  d.evals.push({id:uid(),sessionId:s.id,kind:'certificative',pid:'p1',tpl:clone(ct),overrides:{},extra:0,valid:{},checks:{},theory:{score:'15,5'},observations:'',createdAt:Date.now(),updatedAt:Date.now()});
   const done={};tt.groups.flatMap(g=>g.items).forEach((it,i)=>{if(i<58)done[it.id]=i<30?'2026-11-10':'2026-11-12'});
   d.evals.push({id:uid(),sessionId:s.id,kind:'technicite',pid:'p1',tpl:clone(tt),done,start:s.start,end:s.end,createdAt:Date.now(),updatedAt:Date.now()});
 }
@@ -481,7 +517,7 @@ function seedSamples(d){
    État de l'interface
    ========================================================= */
 DB=load();
-const S={view:'sessions',tab:'sessions',sid:null,pid:null,eid:null,lt:0,q:'',cur:'all',draft:null,draftNew:false,tdraft:null,tdraftNew:false,tplCur:'all'};
+const S={expMode:(()=>{try{return localStorage.getItem('eval-pse-expmode')||'save'}catch(e){return 'save'}})(),view:'sessions',tab:'sessions',sid:null,pid:null,eid:null,lt:0,q:'',cur:'all',draft:null,draftNew:false,tdraft:null,tdraftNew:false,tplCur:'all'};
 const curSess=()=>sessById(S.sid);
 const curEval=()=>evalById(S.eid);
 function go(view,opts={}){Object.assign(S,opts);S.view=view;render();window.scrollTo(0,0)}
@@ -506,7 +542,7 @@ function renderTop(){
   else if(v==='settings'){left=markImg();title='Réglages<small>Formateurs, sauvegarde, transfert</small>'}
   else if(v==='session'){left=back('sessions');title=`${esc(s.title||s.cursus)}<small>${esc(s.cursus)} · ${s.participants.filter(p=>!p.archived).length} participants</small>`;
     right=`<button class="ibtn" data-act="export-menu" aria-label="Exporter et envoyer">${I.share}<span class="lbl small">Envoyer</span></button><button class="ibtn" data-act="edit-session" aria-label="Modifier la formation">${I.edit}</button>`}
-  else if(v==='person'){left=back('session');title=`${esc(pName(s,S.pid))}<small>${esc(s.title||s.cursus)}</small>`;right=pdfBtn('pdf-dossier','Dossier')}
+  else if(v==='person'){left=back('session');title=`${esc(pName(s,S.pid))}<small>${esc(s.title||s.cursus)}</small>`;right=pdfBtn('pick-export','Exporter')}
   else if(v==='sessionEdit'){left=`<button class="ibtn" data-act="session-cancel" aria-label="Annuler">${I.x}</button>`;title=`${S.draftNew?'Nouvelle formation':'Modifier la formation'}<small>Participants et formateurs</small>`;right=`<button class="ibtn solid" data-act="session-save">Enregistrer</button>`}
   else if(v==='formative'){const e=curEval();left=back(S.pid?'person':'session');title=`Cas concret · ${esc(fmtDate(e.date))}<small>${esc(e.learners.map(l=>pName(s,l.pid)).join(' · '))}</small>`;right=pdfBtn('pdf-formative')}
   else if(v==='cert'){const c=curEval();left=back('person');title=`Certification · ${esc(pName(s,c.pid))}<small>${esc(c.tpl.name)}</small>`;right=pdfBtn('pdf-cert')}
@@ -562,7 +598,7 @@ function viewSession(){
   const parts=s.participants.filter(p=>!p.archived),ct=certTpl(s.cursus),tt=techTpl(s.cursus);
   const plines=parts.map(p=>{const st=personStatus(s,p);
     return `<button class="line" data-act="open-person" data-pid="${p.id}"><span class="av">${esc(initials(p).toUpperCase())}</span><span class="grow"><b>${esc(fullName(p))}</b>
-      <span class="small muted num" style="display:block">${st.n} cas concret${st.n>1?'s':''}${ct?` / ${ct.passages.min} min.`:''}${tt?` · technicité ${st.ts?st.ts.n:0}/${st.ts?st.ts.tot:techTpl(s.cursus).groups.flatMap(g=>g.items).length}`:''}</span></span>${st.pill}${I.chev}</button>`}).join('');
+      <span class="small muted num" style="display:block">${st.n} cas concret${st.n>1?'s':''}${ct?` / ${ct.passages.min} min. · compétences ${(compSummary(s,p.id)||{}).n||0}/${ct.criteria.length}`:''}${tt?` · technicité ${st.ts?st.ts.n:0}/${st.ts?st.ts.tot:techTpl(s.cursus).groups.flatMap(g=>g.items).length}`:''}</span></span>${st.pill}${I.chev}</button>`}).join('');
   const F=sessFormatives(s.id);
   const flines=F.slice().reverse().map(e=>{const p=Math.round(formProgress(e)*100);
     return `<button class="line" data-act="open-formative" data-id="${e.id}"><span class="grow"><b>${esc(fmtDate(e.date))}</b> · ${esc(e.theme||'Thème non renseigné')}
@@ -576,24 +612,41 @@ function viewSession(){
     <div class="row"><button class="btn red grow" data-act="new-formative">${I.plus}Nouveau cas concret</button><button class="btn" data-act="export-menu">${I.share}Exporter / envoyer</button></div>
     <section class="panel"><div class="hd"><h3>Participants</h3><button class="btn sm" data-act="edit-session">${I.edit}Gérer</button></div>
       <div class="lines">${plines||`<div class="empty" style="margin:14px">Aucun participant. Touchez « Gérer » pour saisir la liste.</div>`}</div></section>
+    ${sessDays(s).length&&parts.length?`<details class="panel"><summary class="hd" style="cursor:pointer;list-style:none"><h3>Feuille de présence</h3><span class="small muted">${sessDays(s).length} jour${sessDays(s).length>1?'s':''} · touchez pour pointer</span></summary>
+      <div style="overflow-x:auto"><table style="border-collapse:collapse;min-width:100%;font-size:.85rem">
+        <tr><th style="text-align:left;padding:8px 14px">Participant</th>${sessDays(s).map(d=>`<th style="padding:8px 4px" class="num">${esc(fmtDate(d).slice(0,5))}</th>`).join('')}</tr>
+        ${parts.map(p=>{const pr=presenceOf(s,p.id);return `<tr style="border-top:1px solid var(--line)"><td style="padding:6px 14px;white-space:nowrap;font-weight:600">${esc(fullName(p))}</td>${sessDays(s).map(d=>`<td style="text-align:center;padding:4px"><button class="chip ${pr[d]?'on':''}" style="min-width:44px;justify-content:center" data-act="presence" data-pid="${p.id}" data-d="${d}" aria-label="${esc(fullName(p))} le ${esc(fmtDate(d))}" aria-pressed="${!!pr[d]}">${pr[d]?'✓':'·'}</button></td>`).join('')}</tr>`}).join('')}
+      </table></div></details>`:''}
     <section class="panel"><div class="hd"><h3>Cas concrets (fiches formatives)</h3><span class="small muted num">${F.length}</span></div>
       <div class="lines">${flines||`<div class="empty" style="margin:14px">Aucun cas concret. Chaque fiche enregistrée alimente la certification des participants évalués.</div>`}</div></section>
   </div>`;
 }
 
 /* ---------- Un participant : technicité, certification, cas concrets ---------- */
+/* certification « virtuelle » pour calculer l'avancement sans créer de fiche */
+function certFor(s,pid){const c=certOf(s.id,pid);if(c)return c;const t=certTpl(s.cursus);return t?{id:'',sessionId:s.id,kind:'certificative',pid,tpl:t,overrides:{},extra:0,valid:{},checks:{},condOk:{}}:null}
+function compSummary(s,pid){const c=certFor(s,pid);if(!c)return null;const G=certGrid(c,s);const n=c.tpl.criteria.filter(k=>validOf(c,k,G)==='oui').length;return {n,tot:c.tpl.criteria.length,c,G}}
 function viewPerson(){
   const s=curSess(),p=participant(s,S.pid);if(!s||!p)return viewSession();
-  const c=certOf(s.id,p.id),x=techOf(s.id,p.id),tt=techTpl(s.cursus),ct=certTpl(s.cursus);
+  const x=techOf(s.id,p.id),tt=techTpl(s.cursus),ct=certTpl(s.cursus);
   const ts=x?techStat(x):{n:0,tot:tt?tt.groups.flatMap(g=>g.items).length:0,ok:false};
-  const pass=passagesFor(s,p.id),v=c?verdict(c):'';
+  const pass=passagesFor(s,p.id),cs=compSummary(s,p.id),c=cs&&cs.c,v=c&&c.id?verdict(c):'';
   const F=sessFormatives(s.id).filter(e=>e.learners.some(l=>l.pid===p.id)).reverse();
+  const days=sessDays(s),pr=presenceOf(s,p.id);
+  const sits=formTpls(s.cursus).flatMap(t=>t.situations||[]).filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i);
+  const seen=id=>pass.some(a=>(a.e.cases||{})[id]);
+  const compRows=cs?cs.c.tpl.criteria.map(k=>{const st=compStatus(cs.c,cs.G,k),val=validOf(cs.c,k,cs.G);
+    return `<div class="line" style="min-height:48px"><span class="code">${esc(k.code)}</span><span class="grow small">${esc(k.label)}${st.condTxt&&!st.condOk?`<span class="feeds" style="color:var(--t-orange)">${esc(st.condTxt)} : à faire</span>`:''}</span>
+      <span class="small num muted">${st.req?`${Math.min(st.count,st.req.n)}/${st.req.n} ${esc(st.req.lvl)}`:''}</span>${val==='oui'?'<span class="pill ok">Validée</span>':val==='non'?'<span class="pill ko">Non</span>':'<span class="pill wait">En cours</span>'}</div>`}).join(''):'';
   return `<div class="stack">
     <div class="tiles">
-      ${tt?`<button class="tile" data-act="open-tech"><span class="eyebrow">Fiche de technicité</span><span class="big">${ts.n}/${ts.tot}</span><span class="small muted">${ts.ok?'Toutes les techniques sont faites : ligne A validée':'techniques faites'}</span><div class="bar"><i style="width:${ts.tot?Math.round(ts.n/ts.tot*100):0}%"></i></div></button>`:''}
-      ${ct?`<button class="tile" data-act="open-cert"><span class="eyebrow">Certification individuelle</span><span class="big" style="color:${v==='apte'?'var(--t-vert)':v==='inapte'?'var(--t-rouge)':'var(--brand)'}">${v==='apte'?'APTE':v==='inapte'?'INAPTE':'En cours'}</span><span class="small muted num">${Math.min(pass.length,ct.passages.max)} passage${pass.length>1?'s issus':' issu'} des cas concrets (min. ${ct.passages.min})</span></button>`:''}
+      ${tt?`<button class="tile" data-act="open-tech"><span class="eyebrow">A · Fiche de technicité</span><span class="big">${ts.n}/${ts.tot}</span><span class="small muted">${ts.ok?'Toutes les techniques sont faites : ligne A validée':'techniques faites'}</span><div class="bar"><i style="width:${ts.tot?Math.round(ts.n/ts.tot*100):0}%"></i></div></button>`:''}
+      ${ct?`<button class="tile" data-act="open-cert"><span class="eyebrow">Certification individuelle</span><span class="big" style="color:${v==='apte'?'var(--t-vert)':v==='inapte'?'var(--t-rouge)':'var(--brand)'}">${v==='apte'?'APTE':v==='inapte'?'INAPTE':'En cours'}</span><span class="small muted num">${cs.n}/${cs.tot} compétences validées · ${Math.min(pass.length,ct.passages.max)} passage${pass.length>1?'s':''} (${ct.passages.min} à ${ct.passages.max})</span></button>`:''}
     </div>
-    <div class="row"><button class="btn red grow" data-act="new-formative" data-pid="${p.id}">${I.plus}Nouveau cas concret avec ${esc(p.prenom||fullName(p))}</button>${EMBED?'':`<button class="btn" data-act="pdf-dossier">${I.pdf}Dossier PDF</button>`}</div>
+    <div class="row"><button class="btn red grow" data-act="new-formative" data-pid="${p.id}">${I.plus}Nouveau cas concret avec ${esc(p.prenom||fullName(p))}</button>${EMBED?'':`<button class="btn primary" data-act="pick-export">${I.pdf}Exporter des fiches</button>`}</div>
+    ${cs?`<section class="panel"><div class="hd"><h3>B · Compétences (référentiel)</h3><span class="small muted num">${cs.n}/${cs.tot}</span></div><div class="lines">${compRows}</div></section>`:''}
+    ${sits.length?`<section class="panel"><div class="hd"><h3>Situations rencontrées</h3><span class="small muted num">${sits.filter(x=>seen(x.id)).length}/${sits.length}</span></div><div class="bd chips">${sits.map(x=>`<span class="chip ${seen(x.id)?'on':''}" style="cursor:default">${seen(x.id)?'✓ ':''}${esc(x.label)}</span>`).join('')}</div></section>`:''}
+    ${days.length?`<section class="panel"><div class="hd"><h3>C · Présence</h3><span class="small muted num">${days.filter(d=>pr[d]).length}/${days.length} jours</span></div><div class="bd chips">${days.map(d=>`<button class="chip ${pr[d]?'on':''}" data-act="presence" data-pid="${p.id}" data-d="${d}" aria-pressed="${!!pr[d]}">${pr[d]?'✓ ':''}${esc(fmtDate(d).slice(0,5))}</button>`).join('')}</div></section>`:''}
     <section class="panel"><div class="hd"><h3>Cas concrets</h3><span class="small muted num">${F.length}</span></div><div class="lines">
       ${F.map(e=>{const l=e.learners.find(l=>l.pid===p.id);return `<button class="line" data-act="open-formative" data-id="${e.id}"><span class="grow"><b>${esc(fmtDate(e.date))}</b> · ${esc(e.theme||'Thème non renseigné')}<span class="small muted" style="display:block">Cas n°${esc(l.caseNo||'—')}${evaluatorNames(e)?' · '+esc(evaluatorNames(e)):''}</span></span>${e.counts===false?'<span class="pill neutral">Hors certif.</span>':''}${I.chev}</button>`}).join('')||'<div class="empty" style="margin:14px">Aucun cas concret pour ce participant.</div>'}
     </div></section>
@@ -691,6 +744,8 @@ function viewFormative(){
         <div class="gh"><span>Critère</span>${e.learners.map((l,i)=>`<span>${esc(l.pid?pName(s,l.pid):'Apprenant '+(i+1))}</span>`).join('')}</div>
         ${rows}
       </div></section>
+    ${(t.situations||[]).length?`<section class="panel"><div class="hd"><h3>Situations travaillées dans ce cas</h3><span class="small muted">Compétence 4 du référentiel</span></div><div class="bd" style="display:grid;gap:2px;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))">
+      ${t.situations.map(x=>`<label class="cb" style="font-weight:500"><input type="checkbox" data-act="case" data-c="${x.id}" ${(e.cases||{})[x.id]?'checked':''}>${esc(x.label)}</label>`).join('')}</div></section>`:''}
     <section class="panel"><div class="hd"><h3>Observations</h3></div><div class="bd stack">
       ${e.learners.map((l,i)=>`<label class="f">${esc(l.pid?pName(s,l.pid):'Apprenant '+(i+1))}<textarea id="f-obs-${i}" placeholder="Points forts, axes de progression…" ${bind('learners.'+i+'.obs')}>${esc(l.obs||'')}</textarea></label>`).join('')}
     </div></section>
@@ -711,18 +766,31 @@ function viewCert(){
   const yn=(act,key,val,lock)=>`<div class="yn" role="group">
      <button class="y ${val==='oui'?'on':''}" ${lock==='all'||lock==='oui'?'disabled':`data-act="${act}" data-k="${key}" data-v="oui"`} aria-pressed="${val==='oui'}">OUI</button>
      <button class="n ${val==='non'?'on':''}" ${lock==='all'?'disabled':`data-act="${act}" data-k="${key}" data-v="non"`} aria-pressed="${val==='non'}">NON</button></div>`;
-  const comps=t.criteria.map(k=>{const cells=G.cells[k.id];const done=cells.filter(Boolean).length;const pos=cells.filter(v=>resultOf(t,v)==='ok').length;
+  const comps=t.criteria.map(k=>{const cells=G.cells[k.id];const st=compStatus(c,G,k);const val=validOf(c,k,G);const manual=!!c.valid[k.id];
+    const lvl=st.req?scaleOf(t,st.req.lvl):null;
+    const prog=st.req?`<b class="num" style="color:${st.count>=st.req.n?'var(--t-vert)':'var(--ink)'}">${Math.min(st.count,st.req.n)}/${st.req.n}</b> validation${st.req.n>1?'s':''} au niveau ${esc(st.req.lvl)}${st.req.lvl!==t.scale[0].code?' ou mieux':''}`:'Niveau d’acquisition non défini';
+    const cond=st.condTxt?`<label class="cb small" style="min-height:34px;font-weight:500;color:${st.condOk?'var(--t-vert)':'var(--t-orange)'}"><input type="checkbox" data-act="cond" data-k="${k.id}" ${st.condOk?'checked':''} ${st.condOk&&!st.condManual?'disabled':''}>${esc(st.condTxt)}${st.condOk&&!st.condManual?' : constaté sur un cas concret':st.condManual?' : confirmé par le formateur':' : pas encore constaté'}</label>`:'';
     return `<div class="comp">
-      <div class="row" style="align-items:flex-start;flex-wrap:nowrap"><span class="n">${esc(k.code)}</span><div class="grow" style="font-weight:600">${esc(k.label)}</div>${k.expected?`<span class="exp" title="Niveau d’acquisition">${esc(k.expected)}</span>`:''}</div>
+      <div class="row" style="align-items:flex-start;flex-wrap:nowrap"><span class="cn">${esc(k.code)}</span><div class="grow" style="font-weight:600">${esc(k.label)}</div>${k.expected?`<span class="exp" title="Nombre de validations et niveau requis">${esc(k.expected)}</span>`:''}</div>
       <div class="pass">${cells.map((v,i)=>{const sc=scaleOf(t,v);
         return `<button class="pc ${sc?'set t-'+sc.tone:''} ${G.manual[k.id][i]?'man':''}" data-act="cell" data-k="${k.id}" data-p="${i}" aria-label="Passage ${i+1} : ${sc?esc(sc.label):'non renseigné'}">N°${String(i+1).padStart(2,'0')}<b>${sc?esc(sc.code):''}</b></button>`}).join('')}</div>
-      <div class="row"><span class="small muted hint num">${done?`${pos} acquis sur ${done} passage${done>1?'s':''}`:'Aucun passage renseigné'}</span><span class="small" style="font-weight:600">Validée</span>${yn('valid',k.id,c.valid[k.id]||'')}</div>
+      ${cond}
+      <div class="row"><span class="small hint">${prog}</span><span class="small" style="font-weight:600">${manual?'Validée (saisie)':'Validée (auto)'}</span>${yn('valid',k.id,val)}</div>
     </div>`}).join('');
   const plist=G.auto.map((a,i)=>`<div>N°${String(i+1).padStart(2,'0')} : <b>${esc(fmtDate(a.e.date))}</b>${a.l.caseNo?' · cas n°'+esc(a.l.caseNo):''} · ${esc(a.e.theme||'')}</div>`).join('');
-  const checks=t.checks.map(ch=>{const v=checkVal(c,ch);let note='',lock='';
-    if(ch.auto==='tech'){const st=x?techStat(x):null;note=st?`Fiche de technicité : ${st.n}/${st.tot} techniques faites${st.ok?'':' — OUI automatique quand tout est coché'}`:'Fiche de technicité non commencée';lock=st&&st.ok?'all':'oui';if(!x)lock=''}
-    else if(ch.auto){note='Calculé à partir des compétences validées';lock='all'}
-    return `<div class="check"><span class="letter">${esc(ch.id)}</span><div><div style="font-weight:600">${esc(ch.label)}</div>${note?`<div class="small muted">${esc(note)}</div>`:''}</div>${yn('check',ch.id,v,lock)}</div>`}).join('');
+  const days=sessDays(s),pr=presenceOf(s,c.pid),th=c.theory||{},note=theoryNote(c);
+  const checks=t.checks.map(ch=>{const v=checkVal(c,ch);let note2='',lock='',extra='';
+    if(ch.auto==='tech'){const st=x?techStat(x):null;note2=st?`Fiche de technicité : ${st.n}/${st.tot} techniques faites${st.ok?'':' — OUI automatique quand tout est coché'}`:'Fiche de technicité non commencée';lock=st&&st.ok?'all':'oui';if(!x)lock=''}
+    else if(ch.auto==='presence'){if(days.length){const n=days.filter(d=>pr[d]).length;note2=`Présence : ${n}/${days.length} jour${days.length>1?'s':''} — OUI automatique quand toutes les journées sont pointées`;lock=n===days.length?'all':'oui';
+        extra=`<div class="chips" style="margin-top:6px">${days.map(d=>`<button class="chip ${pr[d]?'on':''}" data-act="presence" data-pid="${c.pid}" data-d="${d}" aria-pressed="${!!pr[d]}">${esc(fmtDate(d).slice(0,5))}</button>`).join('')}</div>`}
+      else note2='Renseignez les dates de la formation pour pointer la présence'}
+    else if(ch.auto==='theory'){note2=note===null?'Saisissez la note du questionnaire (QCM/QROC) : 12/20 minimum':note>=12?'Note ≥ 12/20 : validé':note>=10?'Note de 10 ou 11 : entretien de rattrapage avec le responsable pédagogique':'Note < 10 : pas de rattrapage possible pendant la session';
+      lock=note===null?'':'all';
+      extra=`<div class="row" style="margin-top:6px"><label class="f" style="width:130px">Note /20<input type="text" inputmode="decimal" id="c-score" value="${esc(th.score??'')}" placeholder="ex. 14,5" ${bind('theory.score')}></label>
+        <label class="f" style="width:150px">ou bonnes réponses /40<input type="number" min="0" max="40" id="c-qcm" value="" placeholder="ex. 31" data-act-input="qcm"></label>
+        ${note!==null&&note>=10&&note<12?`<label class="f" style="min-width:200px">Entretien de rattrapage<select id="c-retake" ${bind('theory.retake')}><option value="">— À faire —</option><option value="ok" ${th.retake==='ok'?'selected':''}>Connaissances suffisantes</option><option value="ko" ${th.retake==='ko'?'selected':''}>Insuffisantes</option></select></label>`:''}</div>`}
+    else if(ch.auto){note2='Calculé : toutes les compétences validées';lock='all'}
+    return `<div class="check"><span class="letter">${esc(ch.id)}</span><div><div style="font-weight:600">${esc(ch.label)}</div>${note2?`<div class="small muted">${esc(note2)}</div>`:''}${extra}</div>${yn('check',ch.id,v,lock)}</div>`}).join('');
   const v=verdict(c);const vt=v==='apte'?'t-vert':v==='inapte'?'t-rouge':'t-gris';
   const vtext=v==='apte'?'Toutes les conditions sont remplies.':v==='inapte'?'Condition non remplie : '+t.checks.filter(ch=>checkVal(c,ch)==='non').map(ch=>ch.id).join(', ')+'.':'Conditions à renseigner : '+t.checks.filter(ch=>!checkVal(c,ch)).map(ch=>ch.id).join(', ')+'.';
   return `<div class="stack">
@@ -736,8 +804,7 @@ function viewCert(){
         <span class="stepper"><button class="btn sm" data-act="extra" data-v="-1" ${(c.extra||0)<=0?'disabled':''} aria-label="Retirer un passage manuel">−</button><output class="num">${G.P}</output><button class="btn sm" data-act="extra" data-v="1" ${G.P>=t.passages.max?'disabled':''} aria-label="Ajouter un passage manuel">+</button></span></div>
       <div class="bd stack" style="padding-bottom:0;gap:8px">
         <div class="plist">${plist||'<div>Aucun cas concret enregistré pour ce participant : les passages se rempliront automatiquement.</div>'}${G.dropped?`<div>${G.dropped} cas concret(s) plus ancien(s) non repris (maximum ${t.passages.max} passages).</div>`:''}</div>
-        <div class="small muted">Les cases se remplissent depuis les fiches formatives (A ou B = acquis, C = non acquis). Touchez une case pour la corriger : un point blanc signale une correction manuelle.</div>
-        <div><button class="btn sm" data-act="suggest">Proposer la validation d’après les passages</button></div>
+        <div class="small muted">Chaque cas concret enregistré devient un passage : le niveau reporté (A, B ou C) est le plus faible des critères liés à la compétence. Une compétence est validée automatiquement quand le nombre de validations du référentiel est atteint au niveau requis (ex. 3B = 3 passages en B ou A). Touchez une case pour la corriger : un point blanc signale une correction.</div>
       </div>
       <div>${comps}</div></section>
     <section class="panel"><div class="hd"><h3>Conditions de validation</h3></div><div>${checks}</div></section>
@@ -829,7 +896,7 @@ function viewTplEdit(){
       ${tools('criteria',i)}</div>`).join('');
   const checks=F?'':d.checks.map((c,i)=>`<div class="ed-item">
       <div class="ed-row"><input type="text" id="k-${i}-id" value="${esc(c.id)}" placeholder="Lettre" aria-label="Lettre" ${db('checks.'+i+'.id')}><input type="text" id="k-${i}-label" value="${esc(c.label)}" placeholder="Condition" aria-label="Condition" ${db('checks.'+i+'.label')}></div>
-      <div class="row"><label class="f grow">Mode<select id="k-${i}-auto" ${db('checks.'+i+'.auto')}><option value="false" ${!c.auto?'selected':''}>Saisie OUI / NON</option><option value="true" ${c.auto===true?'selected':''}>Calculée : toutes les compétences validées</option><option value="tech" ${c.auto==='tech'?'selected':''}>Calculée : fiche de technicité complète</option></select></label>${tools('checks',i)}</div></div>`).join('');
+      <div class="row"><label class="f grow">Mode<select id="k-${i}-auto" ${db('checks.'+i+'.auto')}><option value="false" ${!c.auto?'selected':''}>Saisie OUI / NON</option><option value="true" ${c.auto===true?'selected':''}>Calculée : toutes les compétences validées</option><option value="tech" ${c.auto==='tech'?'selected':''}>Calculée : fiche de technicité complète</option><option value="presence" ${c.auto==='presence'?'selected':''}>Calculée : présence à toutes les journées</option><option value="theory" ${c.auto==='theory'?'selected':''}>Calculée : note du questionnaire (12/20, rattrapage 10-11)</option></select></label>${tools('checks',i)}</div></div>`).join('');
   return `<div class="stack">${ident}${headerP}
     <section class="panel"><div class="hd"><h3>${F?'Échelle de niveaux':'Résultats possibles par passage'}</h3><button class="btn sm" data-act="add" data-l="scale">${I.plus}Niveau</button></div><div class="bd stack">${scale}</div></section>
     <section class="panel"><div class="hd"><h3>${F?'Critères d’évaluation':'Compétences'}</h3><button class="btn sm" data-act="add" data-l="criteria">${I.plus}${F?'Critère':'Compétence'}</button></div><div class="bd stack">
@@ -1002,7 +1069,7 @@ function drawCert(doc,c,sess){
   t.criteria.forEach(k=>{const ls=P.lines(k.label,lbW-4,8.5);const rh=Math.max(6.5,Math.min(11,ls.length*3.8+2.6,avail/t.criteria.length+2));
     P.cell(k.code,M,y,nW,rh,{s:9,a:'center'});P.cell(k.label,M+nW,y,lbW,rh,{s:8.5,a:'center'});P.cell(k.expected||'',M+nW+lbW,y,lvW,rh,{s:9,a:'center',fill:LIGHT});
     for(let i=0;i<cols;i++){const v=i<G.P?G.cells[k.id][i]:'';P.cell(v,px+i*pW,y,pW,rh,{b:true,s:9,a:'center',c:resultOf(t,v)==='ko'?[180,20,30]:BLACK})}
-    yesNo(px+pW*cols,y,rh,c.valid[k.id]||'',9,false);y+=rh});
+    yesNo(px+pW*cols,y,rh,validOf(c,k,G),9,false);y+=rh});
   after.forEach(band);
   y+=2;const obsW=W-80,oh=Math.max(22,PH-y-14);
   P.rect(M,y,obsW,oh);P.text('Observations :',M+2,y+4,{s:9});P.font(false,8.5);doc.splitTextToSize(PT(c.observations||''),obsW-4).slice(0,Math.floor((oh-8)/3.8)).forEach((ln,i)=>doc.text(ln,M+2,y+9+i*3.8,{baseline:'middle'}));
@@ -1055,8 +1122,8 @@ function buildPdf(pages){
 const pdfFile=(name,pages)=>({name:name+'.pdf',mime:'application/pdf',data:buildPdf(pages)});
 const pslug=(s,pid)=>{const p=participant(s,pid)||{};return slug(p.nom)+'_'+slug(p.prenom)};
 function dossierPages(s,pid){
-  const pages=sessFormatives(s.id).filter(e=>e.learners.some(l=>l.pid===pid)).flatMap(e=>formativePages(e,s,pid));
-  const x=techOf(s.id,pid)||ensureTech(s,pid);if(x)pages.push(...techPages(x,s));
+  const pages=[];const x=techOf(s.id,pid)||ensureTech(s,pid);if(x)pages.push(...techPages(x,s));
+  pages.push(...sessFormatives(s.id).filter(e=>e.learners.some(l=>l.pid===pid)).flatMap(e=>formativePages(e,s,pid)));
   const c=ensureCert(s,pid);if(c)pages.push(...certPages(c,s));return pages;
 }
 
@@ -1074,21 +1141,48 @@ async function shareFiles(files,title){
   }
   const fl=files.map(f=>new File([f.data],f.name,{type:f.mime}));
   if(navigator.canShare&&navigator.share){try{if(navigator.canShare({files:fl})){await navigator.share({files:fl,title});return}}catch(err){if(err&&err.name==='AbortError')return}}
-  fl.forEach((f,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)},i*350));
-  toast(fl.length>1?`${fl.length} fichiers téléchargés`:'Fichier téléchargé : '+fl[0].name);
+  downloadFiles(fl);
 }
-async function runExport(label,make){
+function downloadFiles(fl){
+  fl.forEach((f,i)=>setTimeout(()=>{const a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)},i*350));
+  toast(fl.length>1?`${fl.length} fichiers enregistrés dans Téléchargements`:'Enregistré dans Téléchargements : '+fl[0].name);
+}
+/* Enregistrement sur l'appareil : Documents/Eval-PSE/<formation>/ (Android) ou Téléchargements (navigateur) */
+async function saveFiles(files,folder){
+  if(!NATIVE){downloadFiles(files.map(f=>new File([f.data],f.name,{type:f.mime})));return}
+  const Pl=window.Capacitor.Plugins;const dir='Eval-PSE/'+slug(folder||'exports');
+  try{try{await Pl.Filesystem.requestPermissions()}catch(e){}
+    for(const f of files){const txt=typeof f.data==='string';
+      await Pl.Filesystem.writeFile({path:dir+'/'+f.name,data:txt?f.data:b64(f.data),directory:'DOCUMENTS',recursive:true,...(txt?{encoding:'utf8'}:{})})}
+    toast(`${files.length>1?files.length+' fichiers enregistrés':'Enregistré'} dans Documents/${dir}`);
+  }catch(err){console.error(err);toast('Enregistrement direct impossible : choisissez « Enregistrer » ou « Fichiers » dans le menu');await shareFiles(files,'Enregistrer')}
+}
+async function runExport(label,make,mode){
   if(EMBED){toast('L’export est disponible dans l’application installée.');return}
   busy(true,label);await new Promise(r=>setTimeout(r,30));
-  try{const {files,title}=make();await shareFiles(files,title)}catch(err){console.error(err);toast('Export impossible : '+(err&&err.message||err))}
+  try{const {files,title}=make();if((mode||S.expMode)==='save')await saveFiles(files,title);else await shareFiles(files,title)}catch(err){console.error(err);toast('Export impossible : '+(err&&err.message||err))}
   finally{busy(false)}
+}
+const modeChips=()=>`<div class="chips" role="radiogroup" aria-label="Destination">${chip('expmode','save',S.expMode,I.pdf+'Enregistrer sur l’appareil')}${chip('expmode','share',S.expMode,I.share+'Envoyer (mail, Bluetooth…)')}</div>
+  <p class="small muted" style="margin:0">${S.expMode==='save'?(NATIVE?'Les PDF sont rangés dans Documents/Eval-PSE, par formation.':'Les PDF sont enregistrés dans le dossier Téléchargements.'):'Le menu de partage propose mail, Bluetooth, Quick Share, Drive, WhatsApp… Tout est créé sur l’appareil, sans réseau.'}</p>`;
+function pickExport(){
+  const s=curSess(),p=participant(s,S.pid),tt=techTpl(s.cursus),ct=certTpl(s.cursus);
+  const F=sessFormatives(s.id).filter(e=>e.learners.some(l=>l.pid===p.id));
+  const row=(id,t,sub)=>`<label class="cb" style="font-weight:500;align-items:flex-start;padding:4px 0"><input type="checkbox" class="xp" value="${id}" checked><span><b>${t}</b>${sub?`<span class="small muted" style="display:block">${sub}</span>`:''}</span></label>`;
+  modal(`${head('Exporter les fiches de '+esc(fullName(p)))}
+    <p class="small muted" style="margin:0">Ordre du dossier selon le référentiel : technicité, fiches d’évaluation, certification individuelle.</p>
+    <div class="row"><button class="btn sm" data-act="xp-all" data-v="1">Tout cocher</button><button class="btn sm" data-act="xp-all" data-v="0">Tout décocher</button></div>
+    <div style="display:grid">${tt?row('tech','Fiche de technicité',''):''}${F.map((e,i)=>row('f:'+e.id,'Cas concret n°'+(i+1)+' · '+esc(fmtDate(e.date)),esc(e.theme||''))).join('')}${ct?row('cert','Fiche de certification individuelle',''):''}</div>
+    <label class="cb"><input type="checkbox" id="xp-sep">Un fichier PDF par fiche (sinon un seul PDF)</label>
+    ${modeChips()}
+    <button class="btn primary" data-act="xp-go">${S.expMode==='save'?I.pdf+'Enregistrer':I.share+'Envoyer'}</button>`);
 }
 function exportMenu(){
   const s=curSess();const n=s.participants.filter(p=>!p.archived).length;
   modal(`${head('Exporter et envoyer')}
-    <p class="small muted" style="margin:0">Les fichiers sont créés sur la tablette, sans réseau. Le menu de partage propose ensuite mail, Bluetooth, Quick Share, Drive, WhatsApp ou l’enregistrement dans Fichiers.</p>
+    ${modeChips()}
     <button class="pick" data-act="exp" data-v="dossiers"><b>Un dossier PDF par participant</b><span class="small muted">${n} fichiers : cas concrets, technicité et certification.</span></button>
-    <button class="pick" data-act="exp" data-v="all"><b>Toutes les fiches de la formation (1 PDF)</b><span class="small muted">Cas concrets, puis technicité et certification de chaque participant.</span></button>
+    <button class="pick" data-act="exp" data-v="all"><b>Tous les dossiers dans un seul PDF</b><span class="small muted">Classés par participant : technicité, cas concrets, certification.</span></button>
     <button class="pick" data-act="exp" data-v="forms"><b>Fiches formatives (1 PDF)</b><span class="small muted">Tous les cas concrets.</span></button>
     <button class="pick" data-act="exp" data-v="techs"><b>Fiches de technicité (1 PDF)</b><span class="small muted">Une page par participant.</span></button>
     <button class="pick" data-act="exp" data-v="certs"><b>Fiches de certification (1 PDF)</b><span class="small muted">Une page par participant.</span></button>
@@ -1098,7 +1192,7 @@ function exportMenu(){
 function sessionExport(kind){
   const s=curSess(),F=sessFormatives(s.id),parts=s.participants.filter(p=>!p.archived);
   const base=`${s.cursus}_${slug(s.title||'formation')}`;const one=(n,pages,msg)=>{if(!pages.length)throw new Error(msg);return {files:[pdfFile(base+'_'+n,pages)],title:s.title}};
-  if(kind==='all')return one('toutes-les-fiches',[...F.flatMap(e=>formativePages(e,s)),...parts.flatMap(p=>{const x=ensureTech(s,p.id),c=ensureCert(s,p.id);return [...(x?techPages(x,s):[]),...(c?certPages(c,s):[])]})],'aucune fiche');
+  if(kind==='all')return one('dossiers-complets',parts.flatMap(p=>dossierPages(s,p.id)),'aucune fiche');
   if(kind==='forms')return one('cas-concrets',F.flatMap(e=>formativePages(e,s)),'aucun cas concret');
   if(kind==='techs')return one('technicite',parts.map(p=>ensureTech(s,p.id)).filter(Boolean).flatMap(x=>techPages(x,s)),'aucune fiche de technicité');
   if(kind==='certs')return one('certifications',parts.map(p=>ensureCert(s,p.id)).filter(Boolean).flatMap(c=>certPages(c,s)),'aucune fiche de certification');
@@ -1119,8 +1213,9 @@ function csv(sids){
     s.participants.filter(p=>!p.archived).forEach(p=>{const who=fullName(p);
       const x=techOf(s.id,p.id);if(x)x.tpl.groups.forEach(g=>g.items.forEach(it=>rows.push([s.title,s.cursus,s.id,x.done[it.id]||'','technicite',who,'','',g.title,it.label,x.done[it.id]?'FAIT':''])));
       const c=certOf(s.id,p.id);if(!c)return;const G=certGrid(c,s);
-      c.tpl.criteria.forEach(k=>{G.cells[k.id].forEach((v,i)=>rows.push([s.title,s.cursus,s.id,'','certificative',who,'','',k.code,k.label+' - passage '+(i+1),v]));rows.push([s.title,s.cursus,s.id,'','certificative',who,'','',k.code,k.label+' - validée',c.valid[k.id]||''])});
+      c.tpl.criteria.forEach(k=>{G.cells[k.id].forEach((v,i)=>rows.push([s.title,s.cursus,s.id,'','certificative',who,'','',k.code,k.label+' - passage '+(i+1),v]));rows.push([s.title,s.cursus,s.id,'','certificative',who,'','',k.code,k.label+' - validée',validOf(c,k,G)])});
       c.tpl.checks.forEach(ch=>rows.push([s.title,s.cursus,s.id,'','certificative',who,'','',ch.id,ch.label,checkVal(c,ch)]));
+      if(theoryNote(c)!==null)rows.push([s.title,s.cursus,s.id,'','certificative',who,'','','QCM','Note évaluation théorique /20',(c.theory||{}).score]);
       rows.push([s.title,s.cursus,s.id,'','certificative',who,'','','FINAL','Validation finale',verdict(c)])});
   });
   return '﻿'+rows.map(r=>r.map(q).join(';')).join('\r\n');
@@ -1198,11 +1293,12 @@ const A={
     const next=codes[(codes.indexOf(cur)+1)%codes.length];const auto=G.auto[p]?feedValue(G.auto[p],t.criteria.find(k=>k.id===d.k).code,t):'';
     c.overrides[d.k]=c.overrides[d.k]||{};if(next===auto)delete c.overrides[d.k][p];else c.overrides[d.k][p]=next;touch(c);render()},
   extra:d=>{const c=curEval(),G=certGrid(c,curSess());if(+d.v>0&&G.P>=c.tpl.passages.max)return;c.extra=Math.max(0,(c.extra||0)+ +d.v);touch(c);render()},
-  suggest:()=>{const c=curEval(),G=certGrid(c,curSess());let n=0;c.tpl.criteria.forEach(k=>{const vals=G.cells[k.id].filter(Boolean);if(!vals.length)return;const r=resultOf(c.tpl,vals[vals.length-1]);
-      const v=r==='ok'&&vals.length>=c.tpl.passages.min?'oui':r==='ko'?'non':'';if(v){c.valid[k.id]=v;n++}});touch(c);render();toast(n?`${n} compétence(s) proposée(s) d’après le dernier passage : vérifiez avant de valider`:`Pas assez de passages (minimum ${c.tpl.passages.min})`)},
-  valid:d=>{const c=curEval();c.valid[d.k]=c.valid[d.k]===d.v?'':d.v;touch(c);render()},
+  cond:(d,ev,el)=>{const c=curEval();c.condOk=c.condOk||{};if(el.checked)c.condOk[d.k]=true;else delete c.condOk[d.k];touch(c);render()},
+  presence:d=>{const s=curSess();s.presence=s.presence||{};const pr=s.presence[d.pid]=s.presence[d.pid]||{};if(pr[d.d])delete pr[d.d];else pr[d.d]=true;s.updatedAt=Date.now();save();render()},
+  'case':(d,ev,el)=>{const e=curEval();e.cases=e.cases||{};if(el.checked)e.cases[d.c]=true;else delete e.cases[d.c];touch(e)},
+  valid:d=>{const c=curEval();if(c.valid[d.k]===d.v)delete c.valid[d.k];else c.valid[d.k]=d.v;touch(c);render()},
   check:d=>{const c=curEval();c.checks[d.k]=c.checks[d.k]===d.v?'':d.v;touch(c);render()},
-  'reset-cert':()=>confirmBox('Effacer les corrections manuelles, validations et conditions de cette fiche ? Les passages issus des cas concrets restent.','Réinitialiser',()=>{const c=curEval();Object.assign(c,{overrides:{},extra:0,valid:{},checks:{}});touch(c);render()}),
+  'reset-cert':()=>confirmBox('Effacer les corrections manuelles, validations et conditions de cette fiche ? Les passages issus des cas concrets restent.','Réinitialiser',()=>{const c=curEval();Object.assign(c,{overrides:{},extra:0,valid:{},checks:{},condOk:{}});touch(c);render()}),
   tech:(d,ev,el)=>{const x=curEval();if(el.checked)x.done[d.i]=today();else delete x.done[d.i];touch(x);render()},
   'tech-all':d=>{const x=curEval(),gr=x.tpl.groups[+d.g];const all=gr.items.every(i=>x.done[i.id]);gr.items.forEach(i=>{if(all)delete x.done[i.id];else if(!x.done[i.id])x.done[i.id]=today()});touch(x);render()},
   'pdf-formative':()=>{const e=curEval(),s=curSess();runExport('Création du PDF…',()=>({files:[pdfFile(`${s.cursus}_cas-concret_${e.date}_${slug(e.learners.map(l=>(participant(s,l.pid)||{}).nom||'').join('-'))}`,formativePages(e,s))],title:'Fiche formative'}))},
@@ -1210,6 +1306,18 @@ const A={
   'pdf-tech':()=>{const x=curEval(),s=curSess();runExport('Création du PDF…',()=>({files:[pdfFile(`${s.cursus}_technicite_${pslug(s,x.pid)}`,techPages(x,s))],title:'Fiche de technicité'}))},
   'pdf-dossier':()=>{const s=curSess();runExport('Création du dossier…',()=>({files:[pdfFile(`${s.cursus}_dossier_${pslug(s,S.pid)}`,dossierPages(s,S.pid))],title:'Dossier '+pName(s,S.pid)}))},
   'export-menu':()=>exportMenu(),
+  'pick-export':()=>pickExport(),
+  expmode:d=>{S.expMode=d.v;try{localStorage.setItem('eval-pse-expmode',d.v)}catch(e){}const b=$('.box');if(b&&b.querySelector('.xp')){const sel=[...document.querySelectorAll('.xp')].map(x=>x.checked);const sep=$('#xp-sep').checked;pickExport();document.querySelectorAll('.xp').forEach((x,i)=>x.checked=sel[i]);$('#xp-sep').checked=sep}else exportMenu()},
+  'xp-all':d=>document.querySelectorAll('.xp').forEach(x=>x.checked=d.v==='1'),
+  'xp-go':()=>{const s=curSess(),pid=S.pid,ids=[...document.querySelectorAll('.xp:checked')].map(x=>x.value),sep=$('#xp-sep').checked;
+    if(!ids.length){toast('Cochez au moins une fiche');return}closeModal();
+    runExport('Création des PDF…',()=>{const parts=ids.map(id=>{
+        if(id==='tech'){const x=ensureTech(s,pid);return {n:'technicite',pages:techPages(x,s)}}
+        if(id==='cert'){const c=ensureCert(s,pid);return {n:'certification',pages:certPages(c,s)}}
+        const e=evalById(id.slice(2));return {n:'cas-concret_'+e.date,pages:formativePages(e,s,pid)}});
+      const base=`${s.cursus}_${pslug(s,pid)}`;
+      const files=sep?parts.map((x,i)=>pdfFile(`${base}_${String(i+1).padStart(2,'0')}_${x.n}`,x.pages)):[pdfFile(ids.length===parts.length&&ids.includes('cert')&&ids.includes('tech')&&ids.length>2?`${base}_dossier`:`${base}_fiches`,parts.flatMap(x=>x.pages))];
+      return {files,title:'Fiches '+pName(s,pid)}})},
   exp:d=>{closeModal();runExport(d.v==='dossiers'?'Création des dossiers…':'Préparation…',()=>sessionExport(d.v))},
   /* grilles */
   'new-tpl':()=>modal(`${head('Nouvelle grille')}
@@ -1238,6 +1346,7 @@ const A={
         if(!d.scale.some(s=>s.result==='ok')||!d.scale.some(s=>s.result==='ko')){toast('Il faut un résultat « Acquis » et un « Non acquis »');return}
         if(!d.checks.length){toast('Ajoutez au moins une condition');return}
         if(new Set(d.checks.map(c=>c.id)).size!==d.checks.length){toast('Deux conditions ont la même lettre');return}}}
+    if(d.builtin)d.edited=true;
     const i=DB.templates.findIndex(t=>t.id===d.id);if(i>=0)DB.templates[i]=d;else DB.templates.push(d);
     save(true);S.tdraft=null;go('tpls');toast('Grille enregistrée')},
   add:d=>{const L=S.tdraft[d.l];
@@ -1278,7 +1387,7 @@ function applyBind(el){
   if(sc==='settings'){setPath(DB.settings,p,v);save();return}
   if(sc==='sdraft'){setPath(S.draft,p,v);return}
   if(sc==='tdraft'){if(el.type==='number')v=v===''?'':Number(v);setPath(S.tdraft,p,v);return}
-  const e=curEval();if(!e)return;setPath(e,p,v);touch(e);
+  const e=curEval();if(!e)return;if(p.startsWith('theory.'))e.theory=e.theory||{};setPath(e,p,v);touch(e);
 }
 document.addEventListener('input',ev=>{
   const el=ev.target;if(!el.dataset||!el.dataset.bind||el.tagName==='SELECT'||el.type==='checkbox')return;
@@ -1286,8 +1395,10 @@ document.addEventListener('input',ev=>{
 });
 document.addEventListener('change',ev=>{
   const el=ev.target;if(!el.dataset)return;
+  if(el.dataset.actInput==='qcm'){const n=parseInt(el.value,10);if(!isNaN(n)){const c=curEval();c.theory=c.theory||{};c.theory.score=String(Math.max(0,Math.min(40,n))/2).replace('.',',');touch(c);render();toast(`${n}/40 bonnes réponses = ${c.theory.score}/20`)}return}
   if(el.dataset.act&&el.type==='checkbox'){const f=A[el.dataset.act];if(f)f(el.dataset,ev,el);return}
   if(!el.dataset.bind)return;
+  if(el.id==='c-score'){render();return}
   if(el.tagName==='SELECT'||el.type==='checkbox'){applyBind(el);if(el.dataset.scope==='eval'||(el.dataset.scope==='tdraft'&&/subMode|auto/.test(el.dataset.bind)))render()}
   else if(el.dataset.scope==='tdraft'&&el.dataset.bind==='cursus')render();
 });

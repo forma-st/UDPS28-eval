@@ -14,18 +14,29 @@ Application de terrain pour les formations PSE1 et PSE2. Elle fonctionne **enti�
 5. **Réglages** : liste des formateurs, logo sur les PDF, sauvegarde complète, import sur une autre tablette.
 6. **Grilles** : toutes les grilles sont modifiables. Pour ajouter une formation (SST, PSC…), dupliquer les trois grilles PSE1 et changer le nom de formation.
 
-## Correspondance cas concret → compétence de certification (modifiable dans Grilles)
-| PSE1 formative | Compétence certif. PSE1 |
-|---|---|
-| C1 Comportement adapté | 6 Adapter son comportement |
-| C2 Sécurité de l'intervention | 2 Protection immédiate |
-| C3 Bilan conforme (+ 4 regards) | 3 Bilan et transmission |
-| C4 Gestes de premiers secours | 4 Gestes de premiers secours |
-| C5 Rend compte au chef d'équipe | 3 Bilan et transmission |
-| C6 Conduite à tenir appropriée | 1 Cadre juridique |
-| C6 Communication au sein de l'équipe | 5 Assister des équipiers |
+## Règles des référentiels ANPS 2025 appliquées automatiquement
+- **Passages** : chaque cas concret enregistré devient un passage (3 minimum, 6 maximum). Le niveau reporté (A, B ou C) est le plus faible des critères liés à la compétence ; NE est ignoré.
+- **Niveau d'acquisition** : « 3B » signifie 3 validations au niveau B ou mieux, « 2A » 2 validations au niveau A. La compétence passe à OUI dès que le compte est atteint. Le formateur peut toujours forcer OUI ou NON.
+- **Conditions particulières**
+  - PSE1, compétence 3 : au moins un passage avec le 3e et le 4e regard acquis.
+  - PSE1, compétence 4 : au moins une prise en charge d'arrêt cardiaque (situation cochée sur le cas concret).
+  - PSE2, compétence 2 : au moins un relevage.
+  - PSE2, compétence 6 : au moins un bilan complet.
+- **A** : OUI quand toutes les techniques de la fiche de technicité sont cochées « Fait ».
+- **B** : OUI quand toutes les compétences sont validées.
+- **C** : OUI quand le participant est pointé présent à toutes les journées (feuille de présence).
+- **D** : OUI à partir de 12/20 au questionnaire. Entre 10 et 11 : entretien de rattrapage avec le responsable pédagogique. Sous 10 : NON.
+- **Dossier** par participant, dans l'ordre du référentiel : technicité, fiches d'évaluation, certification.
 
-PSE2 : C1 → 1, C2 → 2, C3 → 3, C4 → 4, C5 → 5, C6 → 6, C7 → 7 (même numérotation sur les deux fiches).
+| Cas concret PSE1 | Compétence | Cas concret PSE2 | Compétence |
+|---|---|---|---|
+| C1 Comportement adapté | 1 | C1 Prise en charge | 1 |
+| C2 Sécurité | 2 | C2 Immobilisation / relevage / brancardage | 2 |
+| C3 Bilan (+ 4 regards) | 3 | C3 Coordination | 3 |
+| C4 Gestes de premiers secours | 4 | C4 Conduite à tenir | 4 |
+| C5 Rend compte au chef d'équipe | 5 | C5 Sécurité | 5 |
+| C6 Conduite à tenir / communication | 6 | C6 Bilan / rend compte | 6 |
+| | | C7 Comportement | 7 |
 
 ## Lien à ouvrir sur les téléphones
 **https://forma-st.github.io/UDPS28-eval/**
