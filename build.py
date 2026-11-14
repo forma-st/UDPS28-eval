@@ -56,7 +56,8 @@ head = '''<link rel="manifest" href="manifest.webmanifest">
 sw_reg = '''
 <script>
 if('serviceWorker' in navigator && location.protocol.startsWith('http') && !(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())){
-  window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})});
+  window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(function(r){r.update()}).catch(function(){})});
+  var reloaded=false;navigator.serviceWorker.addEventListener('controllerchange',function(){if(!reloaded){reloaded=true;location.reload()}});
 }
 </script>'''
 html = page(body, head, sw_reg)
@@ -70,8 +71,12 @@ const CACHE='eval-pse-{version}';
 const ASSETS={assets!r};
 self.addEventListener('install',e=>{{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))}});
 self.addEventListener('activate',e=>{{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(n=>n!==CACHE).map(n=>caches.delete(n)))).then(()=>self.clients.claim()))}});
+// Page : réseau d'abord (nouvelle version dès qu'il y a du réseau), cache sinon (terrain sans réseau).
+// Autres fichiers : cache d'abord.
 self.addEventListener('fetch',e=>{{
   if(e.request.method!=='GET')return;
+  const u=new URL(e.request.url);const page=e.request.mode==='navigate'||u.pathname.endsWith('/')||u.pathname.endsWith('index.html');
+  if(page){{e.respondWith(fetch(e.request,{{cache:'no-store'}}).then(r=>{{const c=r.clone();caches.open(CACHE).then(ca=>ca.put('index.html',c));return r}}).catch(()=>caches.match('index.html')));return}}
   e.respondWith(caches.match(e.request,{{ignoreSearch:true}}).then(r=>r||fetch(e.request).catch(()=>caches.match('index.html'))));
 }});
 ''')

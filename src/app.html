@@ -236,6 +236,7 @@ input[type=color]{width:52px;height:40px;border:1px solid var(--line);border-rad
    Constantes et utilitaires
    ========================================================= */
 const KEY='evaluations-pse-v2';
+const APP_VERSION='2.4.2';
 const LOGO='__LOGO__', MARK='__MARK__';
 const EMBED=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -547,7 +548,7 @@ function seedSamples(d){
    État de l'interface
    ========================================================= */
 DB=load();
-const S={open:{},expMode:(()=>{try{return localStorage.getItem('eval-pse-expmode')||'save'}catch(e){return 'save'}})(),view:'sessions',tab:'sessions',sid:null,pid:null,eid:null,lt:0,q:'',cur:'all',draft:null,draftNew:false,tdraft:null,tdraftNew:false,tplCur:'all'};
+const S={open:{pres:true},expMode:(()=>{try{return localStorage.getItem('eval-pse-expmode')||'save'}catch(e){return 'save'}})(),view:'sessions',tab:'sessions',sid:null,pid:null,eid:null,lt:0,q:'',cur:'all',draft:null,draftNew:false,tdraft:null,tdraftNew:false,tplCur:'all'};
 const curSess=()=>sessById(S.sid);
 const curEval=()=>evalById(S.eid);
 function go(view,opts={}){Object.assign(S,opts);S.view=view;render();window.scrollTo(0,0)}
@@ -567,7 +568,7 @@ function renderTop(){
   const v=S.view;let left='',title='',right='';
   const back=to=>`<button class="ibtn" data-act="back" data-v="${to}" aria-label="Retour">${I.back}</button>`;
   const s=curSess();
-  if(v==='sessions'){left=markImg();title='Évaluations PSE<small>UDPS 28 · formations</small>'}
+  if(v==='sessions'){left=markImg();title=`Évaluations PSE<small>UDPS 28 · version ${APP_VERSION}</small>`}
   else if(v==='tpls'){left=markImg();title='Grilles<small>PSE1, PSE2 et grilles ajoutées</small>'}
   else if(v==='settings'){left=markImg();title='Réglages<small>Formateurs, sauvegarde, transfert</small>'}
   else if(v==='session'){left=back('sessions');title=`${esc(s.title||s.cursus)}<small>${esc(s.cursus)} · ${s.participants.filter(p=>!p.archived).length} participants</small>`;
@@ -644,6 +645,8 @@ function viewSession(){
       <div class="small"><span class="muted">Formateurs :</span> <b>${esc(sessTrainers(s)||'—')}</b></div>
     </div></div>
     <div class="row"><button class="btn red grow" data-act="new-formative">${I.plus}Nouveau cas concret</button>${techTpl(s.cursus)?`<button class="btn" data-act="go" data-v="techs">Fiches de technicité</button>`:''}<button class="btn" data-act="export-menu">${I.share}Exporter / envoyer</button></div>
+    ${(()=>{const dj=ensureDays(s).find(x=>x.date===today());if(!dj||!parts.length)return '';const all=parts.every(p=>presenceOf(s,p.id)[dj.id]);
+      return `<div class="panel"><div class="bd row"><span class="grow"><b>Présence du jour · ${esc(dj.id)}</b> <span class="small muted">${esc(fmtDate(dj.date))} · ${parts.filter(p=>presenceOf(s,p.id)[dj.id]).length}/${parts.length} présents</span></span><button class="btn ${all?'primary':'red'}" data-act="presence-all" data-d="${dj.id}">${all?'✓ Tous présents (annuler)':'Pointer tout le groupe présent'}</button></div></div>`})()}
     <section class="panel"><div class="hd"><h3>Participants</h3><button class="btn sm" data-act="edit-session">${I.edit}Gérer</button></div>
       <div class="lines">${plines||`<div class="empty" style="margin:14px">Aucun participant. Touchez « Gérer » pour saisir la liste.</div>`}</div></section>
     ${sessDays(s).length&&parts.length?`<details class="panel" data-panel="pres" ${S.open.pres?'open':''}><summary class="hd" style="cursor:pointer;list-style:none"><h3>Feuille de présence</h3><span class="small muted">${sessDays(s).length} jour${sessDays(s).length>1?'s':''} · ${hoursOf(s,sessDays(s))} h · touchez pour pointer</span></summary>
@@ -1095,7 +1098,7 @@ function viewSettings(){
       <button class="btn" data-act="restore">Restaurer les grilles PSE1 et PSE2 d’origine</button>
       <button class="btn" data-act="del-samples">Supprimer les exemples</button>
       <button class="btn danger" data-act="wipe">${I.trash}Tout effacer</button></div></section>
-    <p class="small muted" style="margin:0">Évaluations PSE · UDPS 28 · version 2.4.1 · données stockées uniquement sur cet appareil.</p>
+    <p class="small muted" style="margin:0">Évaluations PSE · UDPS 28 · version ${APP_VERSION} · données stockées uniquement sur cet appareil.</p>
   </div>`;
 }
 
