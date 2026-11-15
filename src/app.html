@@ -247,7 +247,7 @@ input[type=color]{width:52px;height:40px;border:1px solid var(--line);border-rad
    Constantes et utilitaires
    ========================================================= */
 const KEY='evaluations-pse-v2';
-const APP_VERSION='2.11.0';
+const APP_VERSION='2.12.0';
 const LOGO='__LOGO__', MARK='__MARK__';
 const EMBED=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -636,6 +636,7 @@ function render(){
   const v=S.view,m=$('#main');
   const views={sessions:viewSessions,session:viewSession,person:viewPerson,sessionEdit:viewSessionEdit,formative:viewFormative,cert:viewCert,tech:viewTech,techs:viewTechs,suivi:viewSuivi,scenarios:viewScenarios,scenario:viewScenario,scEdit:viewScEdit,call:viewCall,qcm:viewQcm,survey:viewSurvey,satis:viewSatis,tpls:viewTpls,tpl:viewTplEdit,settings:viewSettings};
   m.innerHTML=(views[v]||viewSessions)();
+  if(v==='call'&&S.call&&S.call.debrief)loadCallAudio();
   $('#fabslot').innerHTML=v==='sessions'?`<button class="fab" data-act="new-session">${I.plus}Nouvelle formation</button>`:v==='tpls'?`<button class="fab" data-act="new-tpl">${I.plus}Nouvelle grille</button>`:'';
 }
 const markImg=()=>MARK.startsWith('data:')?`<span class="mark"><img src="${MARK}" alt=""></span>`:'';
@@ -2386,6 +2387,35 @@ function say(t){const g=sayGen;sayChain=sayChain.then(()=>g===sayGen?speakNow(t)
 const speech=()=>sayChain;
 function hush(){sayGen++;sayChain=Promise.resolve();const P=capPlug('TextToSpeech');if(P){try{P.stop()}catch(e){}}if(window.speechSynthesis)speechSynthesis.cancel()}
 const speak=t=>say(t);
+/* ---- enregistrement de l'appel pour le réécouter : sur l'appareil seulement, effacé au bout de 30 minutes ---- */
+const REC_TTL=30*60*1000;
+function recDB(){return new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error('stockage indisponible'));const r=indexedDB.open('eval-audio',1);
+  r.onupgradeneeded=()=>r.result.createObjectStore('calls');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function recPut(id,blob){const db=await recDB();return new Promise(res=>{const tx=db.transaction('calls','readwrite');tx.objectStore('calls').put({blob,at:Date.now()},id);tx.oncomplete=()=>res(true);tx.onerror=()=>res(false)})}
+async function recGet(id){try{const db=await recDB();return await new Promise(res=>{const q=db.transaction('calls').objectStore('calls').get(id);q.onsuccess=()=>{const v=q.result;res(v&&Date.now()-v.at<REC_TTL?v:null)};q.onerror=()=>res(null)})}catch(e){return null}}
+async function recPurge(){try{const db=await recDB();await new Promise(res=>{const tx=db.transaction('calls','readwrite');const c=tx.objectStore('calls').openCursor();
+  c.onsuccess=()=>{const cur=c.result;if(!cur)return;if(!cur.value||Date.now()-cur.value.at>=REC_TTL)cur.delete();cur.continue()};tx.oncomplete=res;tx.onerror=res})}catch(e){}}
+recPurge();setInterval(recPurge,60000);
+const recCan=()=>!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder);
+async function recStart(K){if(aiCfg().record===false||!recCan())return;
+  try{const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:true,autoGainControl:true}});
+    const type=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'].find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||'';
+    const mr=new MediaRecorder(stream,type?{mimeType:type}:undefined);const R={stream,mr,chunks:[],loud:0,on:true};
+    mr.ondataavailable=e=>{if(e.data&&e.data.size)R.chunks.push(e.data)};mr.start(1000);
+    /* niveau sonore : sert à repérer un téléphone qui ne peut pas écouter et enregistrer en même temps */
+    try{const AC=window.AudioContext||window.webkitAudioContext;const ac=new AC();const an=ac.createAnalyser();an.fftSize=1024;ac.createMediaStreamSource(stream).connect(an);
+      const buf=new Float32Array(an.fftSize);R.ac=ac;R.meter=setInterval(()=>{an.getFloatTimeDomainData(buf);let s=0;for(const v of buf)s+=v*v;if(Math.sqrt(s/buf.length)>0.04)R.loud+=100},100)}catch(e){}
+    K.rec=R}catch(e){K.recErr='Enregistrement impossible : '+(e&&e.message||e)}}
+function recStop(K){const R=K&&K.rec;if(!R||!R.on)return Promise.resolve(false);R.on=false;clearInterval(R.meter);try{R.ac&&R.ac.close()}catch(e){}
+  return new Promise(res=>{const done=async()=>{R.stream.getTracks().forEach(t=>t.stop());if(!R.chunks.length)return res(false);
+      const blob=new Blob(R.chunks,{type:R.mr.mimeType||'audio/webm'});const ok=await recPut(K.id,blob).catch(()=>false);if(ok){K.audioAt=Date.now()}res(ok)};
+    if(R.mr.state==='inactive')done();else{R.mr.onstop=done;try{R.mr.stop()}catch(e){done()}}})}
+async function loadCallAudio(){const K=S.call;const box=$('#call-audio');if(!K||!box||box.dataset.loaded===K.id)return;box.dataset.loaded=K.id;
+  const v=await recGet(K.id);if(!v){box.innerHTML='<p class="small muted" style="margin:0">Pas d’enregistrement disponible : il est effacé 30 minutes après l’appel, ou l’appel n’a pas été enregistré.</p>';return}
+  const left=Math.max(1,Math.round((REC_TTL-(Date.now()-v.at))/60000));const url=URL.createObjectURL(v.blob);
+  box.innerHTML=`<audio controls preload="metadata" src="${url}" style="width:100%"></audio><p class="small muted" style="margin:0">Enregistrement gardé sur cet appareil seulement, effacé automatiquement dans ${left} min.</p>`
+  /* les enregistrements WebM n'annoncent pas leur durée : on la fait calculer pour que la barre de lecture fonctionne */
+  const au=box.querySelector('audio');au.addEventListener('loadedmetadata',()=>{if(au.duration===Infinity){const fix=()=>{au.removeEventListener('timeupdate',fix);au.currentTime=0};au.addEventListener('timeupdate',fix);au.currentTime=1e101}})}
 /* ---- écrans ---- */
 function viewAiSettings(){const a=aiCfg();
   return `<section class="panel"><div class="hd"><h3>Régulation SAMU simulée (IA)</h3><span class="pill ${aiReady()?'ok':'neutral'}">${aiReady()?'Prête':'À configurer'}</span></div><div class="bd stack">
@@ -2397,6 +2427,7 @@ function viewAiSettings(){const a=aiCfg();
       <label class="f">Code d’accès<input type="password" id="ai-code" autocomplete="off" value="${esc(a.code)}" ${bind('ai.code','settings')}></label>
       <p class="small muted" style="margin:0">Le serveur relais garde la clé API ; les tablettes n’ont que le code d’accès (voir le dossier relay du projet).</p>`}
     <label class="cb"><input type="checkbox" id="ai-voice" ${a.voice?'checked':''} ${bind('ai.voice','settings')}>Le régulateur répond à voix haute</label>
+    <label class="cb"><input type="checkbox" id="ai-record" ${a.record!==false?'checked':''} ${bind('ai.record','settings')}>Enregistrer l’appel pour le réécouter après (son gardé sur l’appareil, effacé au bout de 30 minutes)</label>
     <label class="f">Pause avant que le régulateur réponde<select id="ai-pause" ${bind('ai.pause','settings')}>${Object.entries(PAUSES).map(([k,[,l]])=>`<option value="${k}" ${(a.pause||'normal')===k?'selected':''}>${l}</option>`).join('')}</select></label>
     ${EMBED?'':`<div><button class="btn sm" data-act="ai-test">Tester la connexion</button></div>`}</div></section>`}
 function viewCallList(c){const L=(DB.calls||[]).filter(x=>x.scId===c.id&&x.debrief).slice(-5).reverse();if(!L.length)return '';
@@ -2412,6 +2443,7 @@ function viewCall(){const K=S.call;if(!K)return viewScenarios();const c=scById(K
       <label class="f">Pause avant que le régulateur réponde<select id="call-pause" ${bind('ai.pause','settings')}>${Object.entries(PAUSES).map(([k,[,l]])=>`<option value="${k}" ${(aiCfg().pause||'normal')===k?'selected':''}>${l}</option>`).join('')}</select></label>
       <label class="f">Niveau du régulateur<select id="call-level" ${bind('level','call')}>${Object.entries(CALL_LEVELS).map(([k,l])=>`<option value="${k}" ${K.level===k?'selected':''}>${l}</option>`).join('')}</select></label>
       ${voiceIn()?'<p class="small muted" style="margin:0">Conseil : téléphone ou tablette sur haut-parleur, dans un endroit calme ; parlez normalement : les hésitations courtes ne coupent pas la parole ; si l’apprenant est souvent coupé, choisissez une pause plus longue.</p>':'<p class="small" style="color:var(--t-orange);margin:0">Pas de reconnaissance vocale sur ce navigateur : l’appel se fera par écrit (Chrome ou l’application Android permettent la voix).</p>'}
+      ${aiCfg().record!==false&&recCan()?'<p class="small" style="margin:0">● L’appel à la voix est <b>enregistré</b> pour être réécouté au débriefing : le son reste sur cet appareil et s’efface automatiquement au bout de 30 minutes. Prévenez l’apprenant.</p>':''}
       ${aiReady()?'':`<div class="small" style="color:var(--t-orange)">L’IA n’est pas configurée : renseignez l’accès dans Réglages › Régulation SAMU simulée.</div>`}
       <button class="btn red" data-act="call-go" ${aiReady()?'':'disabled'}>${I.phone}Composer le 15</button></div></section></div>`;
   const st={talking:'Vous parlez…',listening:'À vous, parlez…',thinking:'Le régulateur réfléchit…',speaking:'Le régulateur parle…',muted:'Micro coupé',text:'Appel par écrit'}[K.phase]||'En ligne';
@@ -2420,7 +2452,7 @@ function viewCall(){const K=S.call;if(!K)return viewScenarios();const c=scById(K
   return `<div class="stack">
     <div class="panel callhead"><div class="bd" style="display:grid;justify-items:center;gap:8px;text-align:center">
       <div class="ring ${esc(K.phase||'')}"><span>15</span></div>
-      <b id="call-st">${st}</b><span class="small muted num" id="call-clock">${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')} · ${esc(CALL_LEVELS[K.level])}</span>
+      <b id="call-st">${st}</b>${K.rec&&K.rec.on?'<span class="pill ko">● Enregistrement</span>':''}<span class="small muted num" id="call-clock">${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')} · ${esc(CALL_LEVELS[K.level])}</span>
       ${K.err?`<div class="small" style="color:var(--t-rouge)">${esc(K.err)}</div>`:''}
       <div class="row" style="justify-content:center">
         ${K.mode==='voice'?`<button class="btn ${K.muted?'red':''}" data-act="call-mute">${I.mic}${K.muted?'Rouvrir le micro':'Couper le micro'}</button>
@@ -2438,6 +2470,7 @@ function viewDebrief(K,c){const D=K.debrief;const col={acquis:'ok',partiel:'wait
     <div class="tiles"><section class="panel"><div class="hd"><h3>Points forts</h3></div><div class="bd">${ul(D.points_forts)}</div></section>
       <section class="panel"><div class="hd"><h3>À améliorer</h3></div><div class="bd">${ul(D.a_ameliorer)}</div></section></div>
     <section class="panel"><div class="hd"><h3>Exemple de bilan bien transmis</h3></div><div class="bd">${esc(D.bilan_modele)}</div></section>
+    <section class="panel"><div class="hd"><h3>Réécouter l’appel</h3></div><div class="bd" id="call-audio"><span class="small muted">Chargement…</span></div></section>
     <details class="panel"><summary class="hd" style="cursor:pointer;list-style:none"><h3>Transcription de l’appel</h3></summary><div class="bd calllog">${[{r:'a',t:AI_GREETING},...K.msgs].filter(m=>!m.hidden).map(m=>`<div class="bub ${m.r==='u'?'me':''}"><span class="small muted">${m.r==='u'?'Secouriste':'Régulateur'}</span>${esc(m.t)}</div>`).join('')}</div></details>
     <div class="row"><button class="btn primary" data-act="call-again">${I.phone}Nouvel appel sur ce scénario</button><button class="btn" data-act="call-exit">Retour au scénario</button></div></div>`}
 
@@ -2470,8 +2503,10 @@ async function callLoop(K){if(K.looping)return;K.looping=true;
   try{while(S.call===K&&K.started&&!K.debrief&&!K.ending&&K.mode==='voice'&&!K.muted){
     await speech();if(S.call!==K||K.muted||K.ending||K.mode!=='voice')break;
     setPhase(K,'listening');K.live='';
-    const t0=Date.now();let t='';try{t=await listenTurn(()=>{if(K.phase!=='talking'){K.phase='talking';const n=$('#call-st'),r=$('.ring');if(n)n.textContent='Vous parlez…';if(r)r.className='ring talking'}})}catch(e){K.err=String(e.message||e);K.muted=true;setPhase(K,'muted');break}
+    if(K.rec)K.rec.loud=0;const t0=Date.now();let t='';try{t=await listenTurn(()=>{if(K.phase!=='talking'){K.phase='talking';const n=$('#call-st'),r=$('.ring');if(n)n.textContent='Vous parlez…';if(r)r.className='ring talking'}})}catch(e){K.err=String(e.message||e);K.muted=true;setPhase(K,'muted');break}
     if(S.call!==K||K.muted||K.ending||K.mode!=='voice')break;
+    if(t)K.heardOnce=true;
+    if(!t&&K.rec&&K.rec.on&&!K.heardOnce&&K.rec.loud>1500){K.recConflict=(K.recConflict||0)+1;if(K.recConflict>=2){await recStop(K);K.rec=null;toast('Ce téléphone ne peut pas écouter et enregistrer en même temps : l’enregistrement est arrêté, l’appel continue.')}}
     if(!t){K.silent=(K.silent||0)+1;if(Date.now()-t0<800)await new Promise(r=>setTimeout(r,600));
       if(K.silent===3){setPhase(K,'speaking');say('Allô ? Vous m’entendez ?')}
       if(K.silent>=8){K.muted=true;K.err='Micro coupé après un long silence : touchez « Rouvrir le micro » pour reprendre.';setPhase(K,'muted');break}continue}
@@ -2479,13 +2514,13 @@ async function callLoop(K){if(K.looping)return;K.looping=true;
   finally{K.looping=false}}
 let callTimer=null;
 function startCall(c,opts={}){hush();stopListen();const s=scS();S.call={id:uid(),scId:c.id,sid:s&&s.cursus===c.cur?s.id:'',eid:opts.eid||'',who:opts.who||'',level:opts.level||'standard',date:today(),msgs:[],started:false,t0:0,mode:voiceIn()?'voice':'text',phase:''};go('call')}
-function endCallMedia(K){if(K){K.ending=true;K.cut=true;if(K.stream){try{K.stream.abort()}catch(e){}}}hush();stopListen();clearInterval(callTimer)}
+function endCallMedia(K){if(K){K.ending=true;K.cut=true;if(K.stream){try{K.stream.abort()}catch(e){}}recStop(K)}hush();stopListen();clearInterval(callTimer)}
 Object.assign(A,{
   'ai-test':async()=>{if(!aiReady()){toast('Renseignez d’abord la clé ou le serveur relais');return}busy(true,'Test de la connexion…');
     try{const r=await aiAsk({system:'Tu réponds en français, en quelques mots.',messages:[{role:'user',content:'Réponds seulement : connexion établie.'}],max_tokens:500});busy(false);toast('IA disponible : '+r.slice(0,60))}
     catch(e){busy(false);toast(aiErr(e))}},
   'call-start':d=>{const c=scById(d.id||S.scid);if(!c)return;if(d.from==='formative'){S.scFrom='formative'}S.scid=c.id;const e=d.from==='formative'?curEval():null;startCall(c,{eid:e?e.id:''})},
-  'call-go':()=>{const K=S.call;K.started=true;K.t0=Date.now();K.phase=K.mode==='voice'?'speaking':'text';render();say(AI_GREETING);
+  'call-go':async()=>{const K=S.call;if(K.mode==='voice')await recStart(K);K.started=true;K.t0=Date.now();K.phase=K.mode==='voice'?'speaking':'text';render();say(AI_GREETING);
     clearInterval(callTimer);callTimer=setInterval(()=>{const n=$('#call-clock');if(n&&S.call&&S.call.started){const sec=Math.floor((Date.now()-S.call.t0)/1000);n.textContent=`${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')} · ${CALL_LEVELS[S.call.level]}`}},1000);
     if(K.mode==='voice')callLoop(K)},
   'call-send':()=>{const n=$('#call-in');callTurn(n?n.value:'')},
@@ -2493,7 +2528,7 @@ Object.assign(A,{
   'call-interrupt':()=>{const K=S.call;K.cut=true;if(K.stream){try{K.stream.abort()}catch(e){}}hush();K.muted=false;if(!K.looping)callLoop(K);else setPhase(K,'listening')},
   'call-kb':()=>{const K=S.call;if(K.mode==='voice'){K.mode='text';stopListen();setPhase(K,'text')}else{K.mode='voice';K.muted=false;setPhase(K,'listening');callLoop(K)}},
   'call-recall':()=>{const K=S.call;stopListen();callTurn('[Quelques minutes plus tard, l’équipe rappelle le 15 pour transmettre le bilan de surveillance.] Allô le 15, c’est l’équipe de secouristes, je vous rappelle pour le bilan de surveillance.').then(()=>{if(K.mode==='voice'&&!K.muted)callLoop(K)})},
-  'call-end':async()=>{const K=S.call,c=scById(K.scId);endCallMedia(K);busy(true,'Correction du bilan…');
+  'call-end':async()=>{const K=S.call,c=scById(K.scId);const rs=recStop(K);endCallMedia(K);await rs;busy(true,'Correction du bilan…');
     try{const txt=await aiAsk({system:debriefSystem(c),messages:[{role:'user',content:'Transcription de l’appel :\n'+callTranscript([{r:'a',t:AI_GREETING},...K.msgs])}],effort:'medium',max_tokens:16000,format:DEBRIEF_FORMAT});
       K.debrief=JSON.parse(txt);callSave(K);busy(false);render();window.scrollTo(0,0)}
     catch(e){busy(false);K.ending=false;K.cut=false;K.muted=true;K.phase='muted';render();toast('Correction impossible : '+aiErr(e))}},
@@ -2537,7 +2572,7 @@ if(NATIVE&&window.Capacitor.Plugins.App){window.Capacitor.Plugins.App.addListene
   if(m[S.view])go(m[S.view]);else if(S.view!=='sessions'){S.tab='sessions';go('sessions')}else window.Capacitor.Plugins.App.exitApp();
 })}
 window.__loadForms=loadForms;
-window.__app={DB:()=>DB,S,A,go,ensureSuivi,suiviPages,suiviGrid,suiviVerdict,ensureCert,qcmState,pvPages,certificatePages,notifPages,attestationPages,satPages,qcmPages,buildPdf,formativePages,certPages,techPages,dossierPages,sessionExport,certGrid};
+window.__app={DB:()=>DB,S,recGet,recPurge,A,go,ensureSuivi,suiviPages,suiviGrid,suiviVerdict,ensureCert,qcmState,pvPages,certificatePages,notifPages,attestationPages,satPages,qcmPages,buildPdf,formativePages,certPages,techPages,dossierPages,sessionExport,certGrid};
 render();
 })();
 </script>

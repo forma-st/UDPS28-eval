@@ -1,4 +1,4 @@
-# Eval · UDPS 28 (version 2.11)
+# Eval · UDPS 28 (version 2.12)
 
 Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d'équipe (CE). Elle fonctionne **entièrement sans réseau**.
 
@@ -27,6 +27,12 @@ Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d
 - **C** : OUI quand le participant est pointé présent à toutes les journées (feuille de présence).
 - **D** : OUI à partir de 12/20 au questionnaire. Entre 10 et 11 : entretien de rattrapage avec le responsable pédagogique. Sous 10 : NON.
 - **Dossier** par participant, dans l'ordre du référentiel : technicité, fiches d'évaluation, certification.
+
+## Version 2.12 : réécouter l'appel
+- L'appel à la voix est **enregistré** (voix de l'apprenant et du régulateur sur le haut-parleur) et se **réécoute** dans l'écran de correction.
+- Le son reste **sur l'appareil**, n'est jamais envoyé, et est **effacé automatiquement au bout de 30 minutes**. Un badge « ● Enregistrement » est visible pendant l'appel ; l'écran d'avant l'appel rappelle de prévenir l'apprenant.
+- Certains téléphones ne peuvent pas écouter (reconnaissance vocale) et enregistrer en même temps : l'application le détecte, arrête l'enregistrement et l'appel continue normalement.
+- Désactivable dans Réglages › Régulation SAMU simulée.
 
 ## Version 2.11 : appel plus fluide, régulation médicale approfondie
 - **Rien à lire pendant l'appel** : écran de téléphone seulement (qui parle, durée, boutons). La transcription complète s'affiche à la fin, avec la correction.
