@@ -132,6 +132,13 @@ button.line:hover{background:var(--surface-2)}
 .crit.sub .cl::before{content:"";position:absolute;left:4px;top:.6em;width:7px;height:7px;border-radius:50%;background:var(--muted)}
 .cl{font-weight:600;min-width:0}
 .code{display:inline-block;font-weight:800;font-size:.75rem;color:var(--brand);background:var(--brand-soft);border-radius:5px;padding:1px 6px;margin-right:6px;vertical-align:1px}
+.ring{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;background:var(--brand);color:var(--brand-ink);font-weight:800;font-size:1.8rem;box-shadow:0 0 0 0 color-mix(in srgb,var(--brand) 45%,transparent)}
+.ring.listening{background:var(--t-vert);animation:pulse 1.4s infinite}
+.ring.speaking{animation:pulse 1s infinite}
+.ring.thinking{opacity:.75}
+.ring.muted{background:var(--muted)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,currentColor 35%,transparent)}100%{box-shadow:0 0 0 22px transparent}}
+@media (prefers-reduced-motion:reduce){.ring{animation:none!important}}
 .calllog{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;padding:4px 2px}
 .bub{align-self:flex-start;max-width:85%;background:var(--surface);border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:8px 12px;display:grid;gap:2px}
 .bub.me{align-self:flex-end;background:var(--brand-soft);border-color:var(--brand);border-radius:14px 14px 4px 14px}
@@ -239,7 +246,7 @@ input[type=color]{width:52px;height:40px;border:1px solid var(--line);border-rad
    Constantes et utilitaires
    ========================================================= */
 const KEY='evaluations-pse-v2';
-const APP_VERSION='2.9.0';
+const APP_VERSION='2.10.0';
 const LOGO='__LOGO__', MARK='__MARK__';
 const EMBED=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2251,7 +2258,8 @@ Object.assign(A,{
    Accès : clé API sur l'appareil, ou serveur relais (relay/) qui garde la clé. Rien n'est envoyé hors appel.
    Aucun nom de participant n'est transmis : seulement le scénario et ce qui est dit pendant l'appel.
    ========================================================= */
-const AI_MODEL='claude-opus-5-5';
+const AI_MODEL='claude-opus-5-5';        // correction du bilan : le plus fiable
+const AI_CALL_MODEL='claude-sonnet-5-5';  // conversation : réponse la plus rapide, sans réflexion préalable
 const AI_GREETING='SAMU, centre 15, j’écoute.';
 const CALL_LEVELS={debutant:'Débutant (régulateur patient qui guide)',standard:'Standard',certif:'Certification (régulateur exigeant)'};
 function aiCfg(){return DB.settings.ai=Object.assign({mode:'key',key:'',relay:'',code:'',voice:true},DB.settings.ai||{})}
@@ -2287,7 +2295,9 @@ function callSystem(c,level){
 
 Tu as décroché en disant « ${AI_GREETING} ». Tu es d’abord l’assistant de régulation médicale qui prend l’appel (identité de l’appelant, adresse, motif), puis tu passes l’appel au médecin régulateur pour le bilan, en une phrase (« Je vous passe le médecin régulateur. » puis « Médecin régulateur, je vous écoute. »).
 
-Ce que tu réponds est lu à voix haute : une à trois phrases courtes, à l’oral, le plus souvent une seule question à la fois. Jamais de liste, de titre, de mise en forme ni d’émoji.
+C’est une conversation téléphonique en direct : ce que tu réponds est lu à voix haute aussitôt. Une ou deux phrases courtes, à l’oral, une seule question à la fois. Jamais de liste, de titre, de mise en forme ni d’émoji.
+
+Ce que dit l’appelant arrive par reconnaissance vocale, découpé à chaque pause : il peut contenir des erreurs de transcription. Interprète au mieux ; fais répéter seulement une information essentielle incompréhensible (adresse, chiffre). Si son message semble coupé au milieu d’une phrase, réponds seulement « Oui ? » ou « Je vous écoute » pour qu’il continue. Ne répète pas ce qu’il vient de dire.
 
 Tu ne connais de la situation que ce que l’appelant te dit. Le scénario ci-dessous est confidentiel : ne le révèle jamais et n’invente pas d’informations à la place de l’appelant. Il te sert à savoir ce qu’un bon bilan devrait contenir, à poser les bonnes questions et à prendre une décision cohérente.
 
@@ -2325,20 +2335,35 @@ const callTranscript=m=>m.map(x=>(x.r==='u'?'Secouriste : ':'Régulateur : ')+x.
 /* ---- voix : reconnaissance et synthèse (plugins Capacitor sur Android, API du navigateur sinon) ---- */
 const capPlug=n=>NATIVE&&window.Capacitor.Plugins&&window.Capacitor.Plugins[n];
 const voiceIn=()=>!!(capPlug('SpeechRecognition')||window.SpeechRecognition||window.webkitSpeechRecognition);
-let recog=null;
+const SILENCE_MS=1400;   // fin de phrase : silence après la dernière parole reconnue
+let listenStop=null;
+/* écoute une prise de parole ; se termine seule après un silence ; '' si personne n'a parlé */
 async function listenOnce(onPartial){
   const P=capPlug('SpeechRecognition');
-  if(P){try{await P.requestPermissions()}catch(e){}const r=await P.start({language:'fr-FR',maxResults:1,partialResults:false,popup:false});return ((r&&r.matches)||[])[0]||''}
+  if(P){try{await P.requestPermissions()}catch(e){}
+    listenStop=()=>{try{P.stop()}catch(e){}};
+    try{const r=await P.start({language:'fr-FR',maxResults:1,partialResults:false,popup:false});return ((r&&r.matches)||[])[0]||''}
+    catch(e){if(/permission/i.test(String(e&&e.message||e)))throw new Error('autorisez le micro pour Eval');return ''}finally{listenStop=null}}
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)throw new Error('reconnaissance vocale indisponible');
-  return new Promise((res,rej)=>{const r=recog=new SR();r.lang='fr-FR';r.interimResults=true;r.continuous=false;let fin='';
-    r.onresult=ev=>{let tmp='';for(const x of ev.results){if(x.isFinal)fin=x[0].transcript;else tmp+=x[0].transcript}onPartial&&onPartial(fin||tmp)};
-    r.onerror=ev=>{recog=null;ev.error==='no-speech'?res(''):rej(new Error('micro : '+ev.error))};r.onend=()=>{recog=null;res(fin)};r.start()})}
-async function stopListen(){const P=capPlug('SpeechRecognition');if(P){try{await P.stop()}catch(e){}}if(recog){try{recog.stop()}catch(e){}}}
-async function speak(t){if(!aiCfg().voice||!t)return;const P=capPlug('TextToSpeech');
-  if(P){try{await P.speak({text:t,lang:'fr-FR',rate:1.0})}catch(e){}return}
-  if(window.speechSynthesis){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='fr-FR';const v=speechSynthesis.getVoices().find(x=>/^fr/i.test(x.lang));if(v)u.voice=v;speechSynthesis.speak(u)}}
-function hush(){const P=capPlug('TextToSpeech');if(P){try{P.stop()}catch(e){}}if(window.speechSynthesis)speechSynthesis.cancel()}
-
+  return new Promise((res,rej)=>{const r=new SR();r.lang='fr-FR';r.interimResults=true;r.continuous=true;let fin='',tmp='',timer=null,done=false;
+    const finish=()=>{if(done)return;done=true;clearTimeout(timer);clearTimeout(idle);listenStop=null;try{r.stop()}catch(e){}res((fin+' '+tmp).replace(/\s+/g,' ').trim())};
+    const idle=setTimeout(()=>{if(!fin&&!tmp)finish()},9000);
+    r.onresult=ev=>{fin='';tmp='';for(const x of ev.results){if(x.isFinal)fin+=x[0].transcript+' ';else tmp+=x[0].transcript}
+      onPartial&&onPartial((fin+tmp).trim());clearTimeout(timer);timer=setTimeout(finish,SILENCE_MS)};
+    r.onerror=ev=>{if(ev.error==='no-speech'||ev.error==='aborted')finish();else{done=true;listenStop=null;rej(new Error(ev.error==='not-allowed'?'autorisez le micro pour cette page':'micro : '+ev.error))}};
+    r.onend=()=>finish();listenStop=finish;r.start()})}
+function stopListen(){if(listenStop)listenStop()}
+/* file de phrases à dire : le régulateur parle pendant que la suite de sa réponse arrive */
+let sayChain=Promise.resolve(),sayGen=0;
+function speakNow(t){if(!aiCfg().voice||!t)return Promise.resolve();const P=capPlug('TextToSpeech');
+  if(P)return P.speak({text:t,lang:'fr-FR',rate:1.05}).catch(()=>{});
+  if(!window.speechSynthesis)return Promise.resolve();
+  return new Promise(res=>{const u=new SpeechSynthesisUtterance(t);u.lang='fr-FR';u.rate=1.05;const v=speechSynthesis.getVoices().find(x=>/^fr/i.test(x.lang));if(v)u.voice=v;
+    let ok=false;const end=()=>{if(!ok){ok=true;res()}};u.onend=end;u.onerror=end;setTimeout(end,2500+t.length*90);speechSynthesis.speak(u)})}
+function say(t){const g=sayGen;sayChain=sayChain.then(()=>g===sayGen?speakNow(t):null);return sayChain}
+const speech=()=>sayChain;
+function hush(){sayGen++;sayChain=Promise.resolve();const P=capPlug('TextToSpeech');if(P){try{P.stop()}catch(e){}}if(window.speechSynthesis)speechSynthesis.cancel()}
+const speak=t=>say(t);
 /* ---- écrans ---- */
 function viewAiSettings(){const a=aiCfg();
   return `<section class="panel"><div class="hd"><h3>Régulation SAMU simulée (IA)</h3><span class="pill ${aiReady()?'ok':'neutral'}">${aiReady()?'Prête':'À configurer'}</span></div><div class="bd stack">
@@ -2355,26 +2380,32 @@ function viewCallList(c){const L=(DB.calls||[]).filter(x=>x.scId===c.id&&x.debri
   return `<div class="small"><b>Appels d’entraînement :</b> ${L.map(x=>`<button class="chip" style="min-height:32px" data-act="call-open" data-id="${x.id}">${esc(fmtDate(x.date))}${x.who?' · '+esc(x.who):''} · ${x.debrief.note}/10</button>`).join(' ')}</div>`}
 function viewCall(){const K=S.call;if(!K)return viewScenarios();const c=scById(K.scId);if(!c)return viewScenarios();
   const s=K.sid?DB.sessions.find(x=>x.id===K.sid):null;const parts=s?s.participants.filter(p=>!p.archived):[];
-  const bubbles=[{r:'a',t:AI_GREETING},...K.msgs].filter(m=>!m.hidden).map(m=>`<div class="bub ${m.r==='u'?'me':''}"><span class="small muted">${m.r==='u'?'Secouriste':'Régulateur'}</span>${esc(m.t.replace(/^\[[^\]]*\]\s*/,''))}</div>`).join('');
   if(K.debrief)return viewDebrief(K,c);
   if(!K.started)return `<div class="stack">
     <section class="panel"><div class="hd"><h3>Avant l’appel</h3></div><div class="bd stack">
-      <p style="margin:0">L’apprenant appelle le 15 pour transmettre son bilan, comme sur le terrain. À la fin, touchez « Raccrocher » : l’IA corrige la transmission.</p>
+      <p style="margin:0">L’apprenant appelle le 15 et parle comme au téléphone : pas de bouton à toucher entre les phrases. Le régulateur répond à voix haute dès que l’apprenant se tait. À la fin, « Raccrocher » : l’IA corrige la transmission.</p>
       ${parts.length?`<label class="f">Apprenant qui appelle (reste sur cet appareil)<select id="call-who" ${bind('who','call')}><option value="">—</option>${parts.map(p=>`<option value="${esc(fullName(p))}" ${K.who===fullName(p)?'selected':''}>${esc(fullName(p))}</option>`).join('')}</select></label>`:''}
       <label class="f">Niveau du régulateur<select id="call-level" ${bind('level','call')}>${Object.entries(CALL_LEVELS).map(([k,l])=>`<option value="${k}" ${K.level===k?'selected':''}>${l}</option>`).join('')}</select></label>
+      ${voiceIn()?'<p class="small muted" style="margin:0">Conseil : téléphone ou tablette sur haut-parleur, dans un endroit calme ; parlez normalement, une courte pause suffit pour que le régulateur réponde.</p>':'<p class="small" style="color:var(--t-orange);margin:0">Pas de reconnaissance vocale sur ce navigateur : l’appel se fera par écrit (Chrome ou l’application Android permettent la voix).</p>'}
       ${aiReady()?'':`<div class="small" style="color:var(--t-orange)">L’IA n’est pas configurée : renseignez l’accès dans Réglages › Régulation SAMU simulée.</div>`}
       <button class="btn red" data-act="call-go" ${aiReady()?'':'disabled'}>${I.phone}Composer le 15</button></div></section></div>`;
+  const st={listening:'À vous, parlez…',thinking:'Le régulateur réfléchit…',speaking:'Le régulateur parle…',muted:'Micro coupé',text:'Appel par écrit'}[K.phase]||'En ligne';
   const sec=Math.floor((Date.now()-K.t0)/1000);
+  const bubbles=[{r:'a',t:AI_GREETING},...K.msgs].filter(m=>!m.hidden).map(m=>`<div class="bub ${m.r==='u'?'me':''}"><span class="small muted">${m.r==='u'?'Secouriste':'Régulateur'}</span>${esc(m.t.replace(/^\[[^\]]*\]\s*/,''))}</div>`).join('');
   return `<div class="stack">
-    <div class="panel"><div class="bd row"><span class="pill ok">En ligne</span><span class="small muted grow num">${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')} · ${esc(CALL_LEVELS[K.level])}</span><button class="btn sm" data-act="call-recall">Rappel : bilan de surveillance</button></div></div>
-    <div class="calllog" id="calllog">${bubbles}${K.busy?'<div class="bub"><span class="small muted">Régulateur</span>…</div>':''}</div>
-    ${K.err?`<div class="small" style="color:var(--t-rouge)">${esc(K.err)}</div>`:''}
-    <div class="row" style="align-items:stretch">
-      ${voiceIn()?`<button class="btn ${K.listening?'red':'primary'}" style="min-width:150px" data-act="call-mic" ${K.busy?'disabled':''}>${I.mic}${K.listening?'J’écoute… (toucher pour envoyer)':'Parler'}</button>`:''}
-      <input type="text" id="call-in" class="grow" style="min-height:48px" placeholder="${voiceIn()?'…ou écrire le message':'Écrire le message au régulateur'}" value="${esc(K.draft||'')}" ${K.busy?'disabled':''}>
-      <button class="btn" data-act="call-send" ${K.busy?'disabled':''}>Envoyer</button></div>
-    <button class="btn danger" data-act="call-end" ${K.busy||!K.msgs.length?'disabled':''}>Raccrocher et corriger le bilan</button>
-    ${voiceIn()?'':'<p class="small muted" style="margin:0">La reconnaissance vocale n’est pas disponible sur ce navigateur : utilisez la dictée du clavier ou écrivez.</p>'}</div>`}
+    <div class="panel callhead"><div class="bd" style="display:grid;justify-items:center;gap:8px;text-align:center">
+      <div class="ring ${esc(K.phase||'')}"><span>15</span></div>
+      <b id="call-st">${st}</b><span class="small muted num" id="call-clock">${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')} · ${esc(CALL_LEVELS[K.level])}</span>
+      <div class="small" id="call-live" style="min-height:1.3em;color:var(--brand)">${esc(K.live||'')}</div>
+      ${K.err?`<div class="small" style="color:var(--t-rouge)">${esc(K.err)}</div>`:''}
+      <div class="row" style="justify-content:center">
+        ${K.mode==='voice'?`<button class="btn ${K.muted?'red':''}" data-act="call-mute">${I.mic}${K.muted?'Rouvrir le micro':'Couper le micro'}</button>
+        <button class="btn" data-act="call-interrupt" ${K.phase==='speaking'||K.phase==='thinking'?'':'disabled'}>Interrompre le régulateur</button>`:''}
+        ${voiceIn()?`<button class="btn" data-act="call-kb">${K.mode==='voice'?'Passer à l’écrit':'Repasser à la voix'}</button>`:''}
+        <button class="btn" data-act="call-recall" ${K.busy?'disabled':''}>Rappel : bilan de surveillance</button></div>
+      <button class="btn red" style="min-width:240px" data-act="call-end" ${!K.msgs.length?'disabled':''}>${I.phone}Raccrocher et corriger</button></div></div>
+    ${K.mode==='text'?`<div class="row" style="align-items:stretch"><input type="text" id="call-in" class="grow" style="min-height:48px" placeholder="Votre message au régulateur" value="${esc(K.draft||'')}" ${K.busy?'disabled':''}><button class="btn primary" data-act="call-send" ${K.busy?'disabled':''}>Envoyer</button></div>`:''}
+    <div class="calllog" id="calllog">${bubbles}</div></div>`}
 function viewDebrief(K,c){const D=K.debrief;const col={acquis:'ok',partiel:'wait',absent:'ko','sans objet':'neutral'};
   const ul=a=>`<ul style="margin:0;padding-left:20px;display:grid;gap:4px">${(a||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
   return `<div class="stack">
@@ -2384,38 +2415,67 @@ function viewDebrief(K,c){const D=K.debrief;const col={acquis:'ok',partiel:'wait
     <div class="tiles"><section class="panel"><div class="hd"><h3>Points forts</h3></div><div class="bd">${ul(D.points_forts)}</div></section>
       <section class="panel"><div class="hd"><h3>À améliorer</h3></div><div class="bd">${ul(D.a_ameliorer)}</div></section></div>
     <section class="panel"><div class="hd"><h3>Exemple de bilan bien transmis</h3></div><div class="bd">${esc(D.bilan_modele)}</div></section>
-    <details class="panel"><summary class="hd" style="cursor:pointer;list-style:none"><h3>Transcription de l’appel</h3></summary><div class="bd calllog">${[{r:'a',t:AI_GREETING},...K.msgs].filter(m=>!m.hidden).map(m=>`<div class="bub ${m.r==='u'?'me':''}"><span class="small muted">${m.r==='u'?'Secouriste':'Régulateur'}</span>${esc(m.t.replace(/^\[[^\]]*\]\s*/,''))}</div>`).join('')}</div></details>
+    <details class="panel"><summary class="hd" style="cursor:pointer;list-style:none"><h3>Transcription de l’appel</h3></summary><div class="bd calllog">${[{r:'a',t:AI_GREETING},...K.msgs].filter(m=>!m.hidden).map(m=>`<div class="bub ${m.r==='u'?'me':''}"><span class="small muted">${m.r==='u'?'Secouriste':'Régulateur'}</span>${esc(m.t)}</div>`).join('')}</div></details>
     <div class="row"><button class="btn primary" data-act="call-again">${I.phone}Nouvel appel sur ce scénario</button><button class="btn" data-act="call-exit">Retour au scénario</button></div></div>`}
 
-/* ---- déroulement de l'appel ---- */
+/* ---- déroulement de l'appel : boucle « écoute → réponse en continu → écoute » ---- */
 function callSave(K){DB.calls=DB.calls||[];const i=DB.calls.findIndex(x=>x.id===K.id);const rec={id:K.id,scId:K.scId,sid:K.sid||'',eid:K.eid||'',who:K.who||'',level:K.level,date:K.date,msgs:K.msgs,debrief:K.debrief||null};
   if(i>=0)DB.calls[i]=rec;else DB.calls.push(rec);save()}
-const callScroll=()=>{const n=$('#calllog');if(n)n.scrollTop=n.scrollHeight;window.scrollTo(0,document.body.scrollHeight)};
+const callScroll=()=>{const n=$('#calllog');if(n)n.scrollTop=n.scrollHeight};
+function setPhase(K,ph){K.phase=ph;if(S.call===K&&S.view==='call')render();callScroll()}
+/* un tour : la réponse arrive en continu, chaque phrase est dite dès qu'elle est complète */
 async function callTurn(text,hidden){const K=S.call;const c=scById(K.scId);text=String(text||'').trim();if(!text||K.busy)return;
-  K.msgs.push({r:'u',t:text,hidden:!!hidden});K.draft='';K.busy=true;K.err='';render();callScroll();
-  try{const reply=await aiAsk({system:callSystem(c,K.level),messages:K.msgs.map(m=>({role:m.r==='u'?'user':'assistant',content:m.t})),effort:'low'});
-    if(S.call!==K)return;K.msgs.push({r:'a',t:reply||'…'});K.busy=false;callSave(K);render();callScroll();speak(reply)}
-  catch(e){if(S.call!==K)return;K.msgs.pop();K.draft=text;K.busy=false;K.err=aiErr(e);render()}}
+  K.msgs.push({r:'u',t:text,hidden:!!hidden});K.draft='';K.live='';K.busy=true;K.err='';K.cut=false;setPhase(K,'thinking');
+  const msg={r:'a',t:''};let said=0;
+  const flush=all=>{const rest=msg.t.slice(said);const m=all?(rest.trim()?[rest]:null):rest.match(/^[\s\S]*?[.!?…](?=\s)/);if(m){said+=m[0].length;if(K.phase!=='speaking'){K.phase='speaking';const n=$('#call-st');if(n)n.textContent='Le régulateur parle…'}say(m[0].trim())}};
+  try{const stream=aiClient().beta.messages.stream({model:AI_CALL_MODEL,max_tokens:2000,thinking:{type:'between_tools'},output_config:{effort:'low'},
+      betas:['server-side-fallback-2026-07-01'],fallbacks:'default',system:[{type:'text',text:callSystem(c,K.level),cache_control:{type:'ephemeral'}}],
+      messages:K.msgs.map(m=>({role:m.r==='u'?'user':'assistant',content:m.t}))});
+    K.stream=stream;
+    for await(const ev of stream){if(S.call!==K||K.cut)break;
+      if(ev.type==='content_block_delta'&&ev.delta.type==='text_delta'){if(!msg.t){K.msgs.push(msg);render()}msg.t+=ev.delta.text;
+        const b=$('#calllog .bub:last-child');if(b)b.lastChild.textContent=msg.t;callScroll();let before;do{before=said;flush(false)}while(said!==before)}}
+    if(!K.cut){const fin=await stream.finalMessage();if(fin.stop_reason==='refusal')throw new Error('Le régulateur simulé n’a pas pu répondre');
+      const full=fin.content.filter(b=>b.type==='text').map(b=>b.text).join('').trim();if(full&&full!==msg.t.trim()){if(!msg.t)K.msgs.push(msg);msg.t=full}flush(true)}
+    K.stream=null;K.busy=false;callSave(K);if(S.call!==K)return;
+    if(!msg.t)msg.t='…';if(K.phase!=='speaking')setPhase(K,'speaking');else render();
+    await speech();}
+  catch(e){K.stream=null;K.busy=false;if(S.call!==K)return;if(K.cut){callSave(K);return}
+    if(!msg.t){K.msgs.pop();K.draft=text}K.err=aiErr(e);setPhase(K,K.mode==='voice'?'muted':'text');if(K.mode==='voice')K.muted=true;render()}}
+/* boucle vocale : écoute, envoie seul après un silence, parle, réécoute */
+async function callLoop(K){if(K.looping)return;K.looping=true;
+  try{while(S.call===K&&K.started&&!K.debrief&&!K.ending&&K.mode==='voice'&&!K.muted){
+    await speech();if(S.call!==K||K.muted||K.ending||K.mode!=='voice')break;
+    setPhase(K,'listening');K.live='';
+    const t0=Date.now();let t='';try{t=await listenOnce(p=>{K.live=p;const n=$('#call-live');if(n)n.textContent=p})}catch(e){K.err=String(e.message||e);K.muted=true;setPhase(K,'muted');break}
+    if(S.call!==K||K.muted||K.ending||K.mode!=='voice')break;
+    if(!t){K.silent=(K.silent||0)+1;if(Date.now()-t0<800)await new Promise(r=>setTimeout(r,600));
+      if(K.silent===3){setPhase(K,'speaking');say('Allô ? Vous m’entendez ?')}
+      if(K.silent>=8){K.muted=true;K.err='Micro coupé après un long silence : touchez « Rouvrir le micro » pour reprendre.';setPhase(K,'muted');break}continue}
+    K.silent=0;await callTurn(t)}}
+  finally{K.looping=false}}
 let callTimer=null;
-function startCall(c,opts={}){hush();const s=scS();S.call={id:uid(),scId:c.id,sid:s&&s.cursus===c.cur?s.id:'',eid:opts.eid||'',who:opts.who||'',level:opts.level||'standard',date:today(),msgs:[],started:false,t0:0};go('call')}
+function startCall(c,opts={}){hush();stopListen();const s=scS();S.call={id:uid(),scId:c.id,sid:s&&s.cursus===c.cur?s.id:'',eid:opts.eid||'',who:opts.who||'',level:opts.level||'standard',date:today(),msgs:[],started:false,t0:0,mode:voiceIn()?'voice':'text',phase:''};go('call')}
+function endCallMedia(K){if(K){K.ending=true;K.cut=true;if(K.stream){try{K.stream.abort()}catch(e){}}}hush();stopListen();clearInterval(callTimer)}
 Object.assign(A,{
   'ai-test':async()=>{if(!aiReady()){toast('Renseignez d’abord la clé ou le serveur relais');return}busy(true,'Test de la connexion…');
     try{const r=await aiAsk({system:'Tu réponds en français, en quelques mots.',messages:[{role:'user',content:'Réponds seulement : connexion établie.'}],max_tokens:500});busy(false);toast('IA disponible : '+r.slice(0,60))}
     catch(e){busy(false);toast(aiErr(e))}},
   'call-start':d=>{const c=scById(d.id||S.scid);if(!c)return;if(d.from==='formative'){S.scFrom='formative'}S.scid=c.id;const e=d.from==='formative'?curEval():null;startCall(c,{eid:e?e.id:''})},
-  'call-go':()=>{const K=S.call;K.started=true;K.t0=Date.now();render();speak(AI_GREETING);clearInterval(callTimer);callTimer=setInterval(()=>{if(S.view==='call'&&S.call&&S.call.started&&!S.call.debrief&&!S.call.busy&&!S.call.listening&&document.activeElement!==$('#call-in')){const n=$('.panel .num');if(n){const sec=Math.floor((Date.now()-S.call.t0)/1000);n.textContent=`${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')} · ${CALL_LEVELS[S.call.level]}`}}},1000)},
+  'call-go':()=>{const K=S.call;K.started=true;K.t0=Date.now();K.phase=K.mode==='voice'?'speaking':'text';render();say(AI_GREETING);
+    clearInterval(callTimer);callTimer=setInterval(()=>{const n=$('#call-clock');if(n&&S.call&&S.call.started){const sec=Math.floor((Date.now()-S.call.t0)/1000);n.textContent=`${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')} · ${CALL_LEVELS[S.call.level]}`}},1000);
+    if(K.mode==='voice')callLoop(K)},
   'call-send':()=>{const n=$('#call-in');callTurn(n?n.value:'')},
-  'call-mic':async()=>{const K=S.call;if(K.listening){K.listening=false;await stopListen();return}
-    hush();K.listening=true;K.err='';render();
-    try{const t=await listenOnce(p=>{const n=$('#call-in');if(n)n.value=p});K.listening=false;if(S.call!==K)return;if(t)callTurn(t);else{render();toast('Je n’ai rien entendu')}}
-    catch(e){K.listening=false;K.err=String(e.message||e);render()}},
-  'call-recall':()=>callTurn('[Quelques minutes plus tard, l’équipe rappelle le 15 pour transmettre le bilan de surveillance.] Allô le 15, c’est l’équipe de secouristes, je vous rappelle pour le bilan de surveillance.'),
-  'call-end':async()=>{const K=S.call,c=scById(K.scId);hush();await stopListen();clearInterval(callTimer);busy(true,'Correction du bilan…');
+  'call-mute':()=>{const K=S.call;K.muted=!K.muted;K.err='';if(K.muted){stopListen();setPhase(K,'muted')}else{setPhase(K,'listening');callLoop(K)}},
+  'call-interrupt':()=>{const K=S.call;K.cut=true;if(K.stream){try{K.stream.abort()}catch(e){}}hush();K.muted=false;if(!K.looping)callLoop(K);else setPhase(K,'listening')},
+  'call-kb':()=>{const K=S.call;if(K.mode==='voice'){K.mode='text';stopListen();setPhase(K,'text')}else{K.mode='voice';K.muted=false;setPhase(K,'listening');callLoop(K)}},
+  'call-recall':()=>{const K=S.call;stopListen();callTurn('[Quelques minutes plus tard, l’équipe rappelle le 15 pour transmettre le bilan de surveillance.] Allô le 15, c’est l’équipe de secouristes, je vous rappelle pour le bilan de surveillance.').then(()=>{if(K.mode==='voice'&&!K.muted)callLoop(K)})},
+  'call-end':async()=>{const K=S.call,c=scById(K.scId);endCallMedia(K);busy(true,'Correction du bilan…');
     try{const txt=await aiAsk({system:debriefSystem(c),messages:[{role:'user',content:'Transcription de l’appel :\n'+callTranscript([{r:'a',t:AI_GREETING},...K.msgs])}],effort:'medium',max_tokens:16000,format:DEBRIEF_FORMAT});
       K.debrief=JSON.parse(txt);callSave(K);busy(false);render();window.scrollTo(0,0)}
-    catch(e){busy(false);toast('Correction impossible : '+aiErr(e))}},
+    catch(e){busy(false);K.ending=false;K.cut=false;K.muted=true;K.phase='muted';render();toast('Correction impossible : '+aiErr(e))}},
   'call-again':()=>{const K=S.call;startCall(scById(K.scId),{eid:K.eid,who:K.who,level:K.level})},
-  'call-exit':()=>{hush();stopListen();clearInterval(callTimer);const K=S.call;S.call=null;if(K&&K.eid&&S.scFrom==='formative'){go('formative',{eid:K.eid})}else go('scenario',{scid:K?K.scId:S.scid})},
+  'call-exit':()=>{const K=S.call;endCallMedia(K);S.call=null;if(K&&K.eid&&S.scFrom==='formative'){go('formative',{eid:K.eid})}else go('scenario',{scid:K?K.scId:S.scid})},
   'call-open':d=>{const x=(DB.calls||[]).find(y=>y.id===d.id);if(!x)return;S.call=Object.assign({started:true,t0:0},clone(x));go('call')},
   'pdf-call':()=>{const K=S.call,c=scById(K.scId);runExport('Création du PDF…',()=>({files:[pdfFile(`${c.cur}_appel-15_${String(c.n).padStart(2,'0')}_${slug(K.who||'apprenant')}_${K.date}`,callPages(K,c))],title:'Appel au 15'}))}
 });

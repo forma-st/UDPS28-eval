@@ -3,7 +3,7 @@
 // des réponses, puis transmet la demande à l'API Claude avec le SDK officiel.
 import Anthropic from "@anthropic-ai/sdk";
 
-const ALLOWED_MODELS = ["claude-opus-5-5"];
+const ALLOWED_MODELS = ["claude-opus-5-5", "claude-sonnet-5-5"];
 const ALLOWED_BETAS = ["server-side-fallback-2026-07-01"];
 const MAX_TOKENS = 16000;
 
@@ -45,15 +45,25 @@ export default {
       .split(",").map((s) => s.trim()).filter((b) => ALLOWED_BETAS.includes(b));
     const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, baseURL: env.ANTHROPIC_BASE_URL || undefined });
     try {
-      const message = await client.beta.messages.create({
+      const params = {
         model: body.model,
         max_tokens: Math.min(Number(body.max_tokens) || 4000, MAX_TOKENS),
         system: body.system,
         messages: body.messages,
+        ...(body.thinking ? { thinking: body.thinking } : {}),
         ...(body.output_config ? { output_config: body.output_config } : {}),
         ...(body.fallbacks ? { fallbacks: body.fallbacks } : {}),
         ...(betas.length ? { betas } : {}),
-      });
+      };
+      if (body.stream === true) {
+        // Réponse en continu (appel vocal) : le flux d'événements est transmis tel quel.
+        const upstream = await client.beta.messages.create({ ...params, stream: true }).asResponse();
+        return new Response(upstream.body, {
+          status: upstream.status,
+          headers: { ...cors, "content-type": "text/event-stream", "cache-control": "no-cache" },
+        });
+      }
+      const message = await client.beta.messages.create(params);
       return reply(message, 200);
     } catch (err) {
       if (err instanceof Anthropic.APIError && err.status) {

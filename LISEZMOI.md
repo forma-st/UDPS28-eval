@@ -1,4 +1,4 @@
-# Eval · UDPS 28 (version 2.9)
+# Eval · UDPS 28 (version 2.10)
 
 Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d'équipe (CE). Elle fonctionne **entièrement sans réseau**.
 
@@ -27,6 +27,12 @@ Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d
 - **C** : OUI quand le participant est pointé présent à toutes les journées (feuille de présence).
 - **D** : OUI à partir de 12/20 au questionnaire. Entre 10 et 11 : entretien de rattrapage avec le responsable pédagogique. Sous 10 : NON.
 - **Dossier** par participant, dans l'ordre du référentiel : technicité, fiches d'évaluation, certification.
+
+## Version 2.10 : appel au 15 en conversation continue
+- **Comme un vrai appel** : plus de bouton entre les phrases. L'application écoute, détecte la fin de la prise de parole (courte pause), envoie seule, le régulateur répond à voix haute, puis l'écoute reprend.
+- Le régulateur commence à parler dès sa première phrase, sans attendre la fin de sa réponse.
+- Boutons pendant l'appel : couper / rouvrir le micro, interrompre le régulateur, passer à l'écrit, rappel pour le bilan de surveillance, raccrocher et corriger. Après un long silence, le régulateur demande « Allô ? Vous m'entendez ? », puis le micro se coupe.
+- Modèles : Claude Sonnet 5.5 sans réflexion préalable pour la conversation (réponse la plus rapide), Claude Opus 5.5 pour la correction du bilan (la plus fiable). Le serveur relais accepte les deux et transmet la réponse en continu.
 
 ## Version 2.9 : appel au 15 avec un régulateur simulé par l'IA
 - Sur chaque scénario (et sur la fiche d'évaluation créée depuis un scénario) : **« Appeler le 15 »**. L'apprenant parle au micro de la tablette ou du téléphone (ou écrit) ; un régulateur simulé par l'IA Claude décroche, pose les questions d'un vrai régulateur et donne une décision cohérente avec le scénario. Le scénario sert à l'IA pour savoir ce qu'un bon bilan doit contenir ; elle ne le révèle pas.
