@@ -1,4 +1,4 @@
-# Eval · UDPS 28 (version 2.10)
+# Eval · UDPS 28 (version 2.11)
 
 Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d'équipe (CE). Elle fonctionne **entièrement sans réseau**.
 
@@ -27,6 +27,12 @@ Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d
 - **C** : OUI quand le participant est pointé présent à toutes les journées (feuille de présence).
 - **D** : OUI à partir de 12/20 au questionnaire. Entre 10 et 11 : entretien de rattrapage avec le responsable pédagogique. Sous 10 : NON.
 - **Dossier** par participant, dans l'ordre du référentiel : technicité, fiches d'évaluation, certification.
+
+## Version 2.11 : appel plus fluide, régulation médicale approfondie
+- **Rien à lire pendant l'appel** : écran de téléphone seulement (qui parle, durée, boutons). La transcription complète s'affiche à la fin, avec la correction.
+- **L'apprenant n'est plus coupé à la moindre hésitation** : les morceaux de phrase sont recollés et le message ne part qu'après une vraie pause. Durée réglable : courte (1,5 s), normale (2,3 s), longue (3,2 s), dans Réglages ou avant l'appel.
+- **Régulation plus réaliste** : l'assistant de régulation prend l'appelant, le numéro de rappel, l'adresse complète et le motif, puis passe le médecin régulateur. Le médecin mène un interrogatoire médical complet (circonstances, urgence vitale chiffrée, douleur, examen, antécédents, traitements, allergies, gestes et leur effet, évolution), fait préciser, demande de nouvelles mesures, relève les incohérences, puis donne sa décision (moyen engagé, consignes précises, délai de rappel). En niveau certification, il exige le collationnement des consignes.
+- Mode écrit toujours possible, choisi avant l'appel (salle bruyante, pas de micro).
 
 ## Version 2.10 : appel au 15 en conversation continue
 - **Comme un vrai appel** : plus de bouton entre les phrases. L'application écoute, détecte la fin de la prise de parole (courte pause), envoie seule, le régulateur répond à voix haute, puis l'écoute reprend.

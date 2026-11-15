@@ -134,6 +134,7 @@ button.line:hover{background:var(--surface-2)}
 .code{display:inline-block;font-weight:800;font-size:.75rem;color:var(--brand);background:var(--brand-soft);border-radius:5px;padding:1px 6px;margin-right:6px;vertical-align:1px}
 .ring{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;background:var(--brand);color:var(--brand-ink);font-weight:800;font-size:1.8rem;box-shadow:0 0 0 0 color-mix(in srgb,var(--brand) 45%,transparent)}
 .ring.listening{background:var(--t-vert);animation:pulse 1.4s infinite}
+.ring.talking{background:var(--t-vert);animation:pulse .6s infinite}
 .ring.speaking{animation:pulse 1s infinite}
 .ring.thinking{opacity:.75}
 .ring.muted{background:var(--muted)}
@@ -246,7 +247,7 @@ input[type=color]{width:52px;height:40px;border:1px solid var(--line);border-rad
    Constantes et utilitaires
    ========================================================= */
 const KEY='evaluations-pse-v2';
-const APP_VERSION='2.10.0';
+const APP_VERSION='2.11.0';
 const LOGO='__LOGO__', MARK='__MARK__';
 const EMBED=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2261,7 +2262,7 @@ Object.assign(A,{
 const AI_MODEL='claude-opus-5-5';        // correction du bilan : le plus fiable
 const AI_CALL_MODEL='claude-sonnet-5-5';  // conversation : réponse la plus rapide, sans réflexion préalable
 const AI_GREETING='SAMU, centre 15, j’écoute.';
-const CALL_LEVELS={debutant:'Débutant (régulateur patient qui guide)',standard:'Standard',certif:'Certification (régulateur exigeant)'};
+const CALL_LEVELS={debutant:'Débutant (régulateur patient qui guide)',standard:'Standard (médecin régulateur réaliste)',certif:'Certification (médecin régulateur exigeant)'};
 function aiCfg(){return DB.settings.ai=Object.assign({mode:'key',key:'',relay:'',code:'',voice:true},DB.settings.ai||{})}
 const aiReady=()=>{const a=aiCfg();return a.mode==='relay'?!!(a.relay.trim()&&a.code.trim()):!!a.key.trim()};
 function aiClient(){const a=aiCfg(),AN=window.Anthropic;if(!AN)throw new Error('module IA indisponible');
@@ -2288,24 +2289,34 @@ function scPromptData(c){
   if((c.attendus||[]).length)L.push('Gestes attendus des secouristes : '+c.attendus.join(' ; '));
   return L.join('\n')}
 function callSystem(c,level){
-  const lv={debutant:'Niveau débutant : sois patient et bienveillant, aide l’appelant à structurer son bilan par des questions simples et guidées.',
-    standard:'Niveau standard : comporte-toi comme un régulateur réel, efficace et courtois ; pose les questions qui manquent.',
-    certif:'Niveau certification : sois exigeant et bref. Dis seulement « Je vous écoute » et attends un bilan structuré ; ne pose que les questions indispensables, interromps poliment un message désordonné.'}[level]||'';
-  return `Tu joues le rôle du centre de réception et de régulation des appels du SAMU (le « 15 ») dans un exercice de formation aux premiers secours en équipe (PSE1 / PSE2), organisé par une association agréée de sécurité civile. Les personnes qui t’appellent sont des apprenants secouristes qui s’entraînent à transmettre un bilan. Tout est fictif.
+  const lv={debutant:`Niveau débutant. Tu es bienveillant et pédagogue dans ta façon de questionner : tu guides l’appelant pas à pas (« Commencez par la conscience. », « Et sa respiration ? »), tu reformules ce qu’il dit pour l’aider à structurer, tu ne relèves que les oublis importants.`,
+    standard:`Niveau standard. Tu te comportes exactement comme un médecin régulateur réel : courtois, efficace, précis. Tu laisses l’appelant donner son bilan, puis tu relances sur tout ce qui manque ou reste flou, tu fais préciser les chiffres, tu demandes les mesures qui manquent.`,
+    certif:`Niveau certification. Tu es exigeant. Tu dis « Je vous écoute » et tu attends un bilan complet et ordonné sans aide. Tu ne guides pas, tu poses tes questions de manière ouverte (« Autre chose ? », « Et sur le plan circulatoire ? »), tu relèves les incohérences, tu exiges des chiffres précis, et à la fin tu demandes à l’appelant de te répéter tes consignes (collationnement).`}[level]||'';
+  return `Tu joues la régulation médicale du SAMU (le « 15 ») dans un exercice de formation aux premiers secours en équipe (PSE1 / PSE2), organisé par une association agréée de sécurité civile. L’appelant est un apprenant secouriste qui s’entraîne à transmettre un bilan et à travailler avec la régulation. Tout est fictif, mais tu dois être aussi crédible qu’une vraie régulation française.
 
-Tu as décroché en disant « ${AI_GREETING} ». Tu es d’abord l’assistant de régulation médicale qui prend l’appel (identité de l’appelant, adresse, motif), puis tu passes l’appel au médecin régulateur pour le bilan, en une phrase (« Je vous passe le médecin régulateur. » puis « Médecin régulateur, je vous écoute. »).
+LA CONVERSATION
+C’est un appel téléphonique en direct : tout ce que tu écris est lu à voix haute aussitôt. Parle comme au téléphone : une à deux phrases courtes, sans liste, sans titre, sans mise en forme, sans émoji. Pose une question à la fois, ou deux questions liées (« Quelle est sa fréquence respiratoire et sa saturation ? »). Ne répète pas ce que l’appelant vient de dire, n’annonce pas ce que tu vas faire : avance. Ce que dit l’appelant arrive par reconnaissance vocale : il peut y avoir des erreurs de transcription ; interprète au mieux et ne fais répéter que ce qui est essentiel et incompréhensible (adresse, chiffre, nom de médicament). Si son message semble coupé au milieu d’une phrase, dis seulement « Oui ? » ou « Je vous écoute. ».
 
-C’est une conversation téléphonique en direct : ce que tu réponds est lu à voix haute aussitôt. Une ou deux phrases courtes, à l’oral, une seule question à la fois. Jamais de liste, de titre, de mise en forme ni d’émoji.
+TU AS DEUX RÔLES SUCCESSIFS
+1. L’assistant de régulation médicale (ARM). Tu as décroché en disant « ${AI_GREETING} ». En quelques échanges rapides, tu obtiens : qui appelle et en quelle qualité (équipe de secouristes, organisme), un numéro de rappel, l’adresse exacte (commune, rue, numéro, étage, code, accès, point de rendez-vous pour les secours), le motif en une phrase et le nombre de victimes. Puis tu dis : « Je vous passe le médecin régulateur, ne quittez pas. »
+2. Le médecin régulateur. Tu te présentes en une phrase (« Docteur Martin, médecin régulateur, je vous écoute. ») et tu mènes un véritable interrogatoire médical, thème par thème, en t’adaptant à chaque réponse :
+- circonstances et mécanisme : ce qui s’est passé, heure de début, cinétique ou hauteur de chute, témoin, perte de connaissance initiale ;
+- urgence vitale : conscience (réponse, orientation, agitation), ventilation (fréquence, amplitude, bruits, saturation, cyanose, sueurs), circulation (pouls radial, fréquence, tension, coloration, temps de recoloration), hémorragie et ce qui a été fait ;
+- plaintes : douleur (siège, type, intensité sur 10, irradiation, depuis quand), autres signes ;
+- examen : lésions de la tête aux pieds, sensibilité et motricité si traumatisme ;
+- antécédents, traitements (en particulier anticoagulants, insuline, traitements du cœur), allergies, grossesse si c’est une femme en âge de l’être, dernier repas, prise d’alcool ou de toxiques si pertinent ;
+- gestes réalisés et leur effet : position, oxygène et débit, pansement ou garrot (avec l’heure), immobilisations, RCP et nombre de chocs ;
+- évolution depuis l’arrivée de l’équipe.
+Tu creuses ce qui compte pour ce cas : si une réponse est vague (« il respire mal »), tu fais préciser (« Combien de mouvements par minute ? Il parle normalement ? »). Si un chiffre manque, tu le demandes ; si une mesure n’a pas été faite, tu demandes de la faire (« Faites-moi une glycémie et rappelez-moi le chiffre », « Reprenez la tension »). Si deux informations se contredisent, tu le dis et tu fais vérifier. Si un signe de gravité apparaît, tu le traites en priorité et tu donnes aussitôt la consigne utile.
 
-Ce que dit l’appelant arrive par reconnaissance vocale, découpé à chaque pause : il peut contenir des erreurs de transcription. Interprète au mieux ; fais répéter seulement une information essentielle incompréhensible (adresse, chiffre). Si son message semble coupé au milieu d’une phrase, réponds seulement « Oui ? » ou « Je vous écoute » pour qu’il continue. Ne répète pas ce qu’il vient de dire.
+TA DÉCISION
+Quand tu as ce qu’il te faut, tu annonces une décision réaliste et cohérente avec ce cas : moyen engagé (équipe médicale du SMUR, ambulance, transport par l’équipe, ou maintien sur place avec conseils), délai approximatif, orientation si utile, puis des consignes précises et réalisables par des secouristes PSE, conformes aux recommandations françaises de premiers secours : position, oxygène et débit, surveillance (quoi et toutes les combien de minutes), ce qu’il ne faut pas faire (rien à boire par exemple), éléments à préparer (ordonnances, traitements, papiers), et quand rappeler (bilan de surveillance ou aggravation). Tu ne prescris rien en dehors de ce que des secouristes peuvent faire. Si l’appelant annonce une aggravation, tu réagis immédiatement et brièvement.
 
-Tu ne connais de la situation que ce que l’appelant te dit. Le scénario ci-dessous est confidentiel : ne le révèle jamais et n’invente pas d’informations à la place de l’appelant. Il te sert à savoir ce qu’un bon bilan devrait contenir, à poser les bonnes questions et à prendre une décision cohérente.
+CE QUE TU SAIS ET NE SAIS PAS
+Tu ne connais de la situation que ce que l’appelant te dit. Le scénario ci-dessous est confidentiel : ne le révèle jamais, ne suggère pas les réponses, n’invente aucune information sur la victime. Il te sert uniquement à savoir ce qu’un bon bilan doit contenir, à poser les bonnes questions et à prendre une décision cohérente. Si l’appelant donne des valeurs différentes de celles du scénario, ce sont les siennes qui comptent (le formateur peut avoir fait évoluer le cas).
 
-Laisse l’appelant dérouler son bilan. S’il manque des éléments, demande-les comme un vrai régulateur : qualité de l’appelant et numéro de rappel, adresse précise et accès, nature de la situation, nombre de victimes, âge et sexe, conscience, ventilation, circulation, hémorragie, paramètres chiffrés, plaintes, antécédents, traitements, allergies, gestes réalisés et leur effet. Si l’appelant se perd, recentre-le poliment.
-
-Quand le bilan est suffisant, annonce une décision réaliste et cohérente avec le scénario (par exemple envoi d’une ambulance ou d’une équipe médicale, consignes de surveillance, demande de rappel pour le bilan de surveillance). Tes consignes restent dans le cadre des gestes des secouristes PSE et des recommandations françaises de premiers secours. Si l’appelant annonce une aggravation (perte de connaissance, arrêt cardiaque…), réagis aussitôt et brièvement.
-
-Pendant l’appel, ne donne aucune note ni aucun conseil pédagogique : la correction est faite après. Si l’appelant sort de l’exercice, rappelle en une phrase que tu es le 15 dans l’exercice. Si l’appelant met fin à l’appel, conclus en une phrase.
+PENDANT L’APPEL
+Aucune note, aucun conseil pédagogique, aucun commentaire sur la qualité du bilan : la correction est faite après l’appel. Si l’appelant sort de l’exercice, rappelle en une phrase que tu es le 15 dans l’exercice. S’il rappelle pour un bilan de surveillance, c’est l’assistant qui décroche puis te le repasse ; tu demandes ce qui a changé et tu ajustes ta décision. S’il met fin à l’appel, conclus en une phrase.
 
 ${lv}
 
@@ -2316,7 +2327,7 @@ const DEBRIEF_FORMAT={type:'json_schema',schema:{type:'object',additionalPropert
   properties:{note:{type:'integer',description:'Note sur 10'},appreciation:{type:'string'},suggestion_fiche:{type:'string',enum:['A','B','C']},justification:{type:'string'},
     criteres:{type:'array',items:{type:'object',additionalProperties:false,required:['critere','niveau','commentaire'],properties:{critere:{type:'string'},niveau:{type:'string',enum:['acquis','partiel','absent','sans objet']},commentaire:{type:'string'}}}},
     points_forts:{type:'array',items:{type:'string'}},a_ameliorer:{type:'array',items:{type:'string'}},bilan_modele:{type:'string'}}}};
-const DEBRIEF_CRIT=['Présentation de l’appelant (qui appelle, en quelle qualité, numéro de rappel)','Localisation précise et accès','Motif et circonstances','Nombre de victimes, âge et sexe','Bilan d’urgence vitale (hémorragie, conscience, ventilation, circulation)','Paramètres chiffrés','Bilan complémentaire (plaintes, examen, antécédents, traitements, allergies)','Gestes réalisés et leur effet','Demande et besoins exprimés','Clarté, ordre et concision du message','Prise en compte des questions et consignes du régulateur'];
+const DEBRIEF_CRIT=['Présentation de l’appelant (qui appelle, en quelle qualité, numéro de rappel)','Localisation précise et accès','Motif et circonstances','Nombre de victimes, âge et sexe','Bilan d’urgence vitale (hémorragie, conscience, ventilation, circulation)','Paramètres chiffrés','Bilan complémentaire (plaintes, examen, antécédents, traitements, allergies)','Gestes réalisés et leur effet','Demande et besoins exprimés','Clarté, ordre et concision du message','Réponses aux questions du médecin régulateur et collationnement des consignes reçues'];
 function debriefSystem(c){return `Tu es formateur de formateurs en premiers secours (PSE1 / PSE2) en France. Tu corriges la transmission d’un bilan au 15 réalisée par un apprenant secouriste pendant un exercice, à partir de la transcription de l’appel et du scénario joué.
 
 Évalue chacun de ces critères, dans cet ordre, avec le niveau acquis, partiel, absent ou sans objet, et un commentaire court qui cite si possible les mots de l’apprenant :
@@ -2335,23 +2346,34 @@ const callTranscript=m=>m.map(x=>(x.r==='u'?'Secouriste : ':'Régulateur : ')+x.
 /* ---- voix : reconnaissance et synthèse (plugins Capacitor sur Android, API du navigateur sinon) ---- */
 const capPlug=n=>NATIVE&&window.Capacitor.Plugins&&window.Capacitor.Plugins[n];
 const voiceIn=()=>!!(capPlug('SpeechRecognition')||window.SpeechRecognition||window.webkitSpeechRecognition);
-const SILENCE_MS=1400;   // fin de phrase : silence après la dernière parole reconnue
+const PAUSES={court:[1500,'Courte (1,5 s)'],normal:[2300,'Normale (2,3 s)'],long:[3200,'Longue (3,2 s)']};
+const pauseMs=()=>(PAUSES[aiCfg().pause]||PAUSES.normal)[0];
 let listenStop=null;
-/* écoute une prise de parole ; se termine seule après un silence ; '' si personne n'a parlé */
-async function listenOnce(onPartial){
-  const P=capPlug('SpeechRecognition');
-  if(P){try{await P.requestPermissions()}catch(e){}
-    listenStop=()=>{try{P.stop()}catch(e){}};
-    try{const r=await P.start({language:'fr-FR',maxResults:1,partialResults:false,popup:false});return ((r&&r.matches)||[])[0]||''}
-    catch(e){if(/permission/i.test(String(e&&e.message||e)))throw new Error('autorisez le micro pour Eval');return ''}finally{listenStop=null}}
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)throw new Error('reconnaissance vocale indisponible');
-  return new Promise((res,rej)=>{const r=new SR();r.lang='fr-FR';r.interimResults=true;r.continuous=true;let fin='',tmp='',timer=null,done=false;
-    const finish=()=>{if(done)return;done=true;clearTimeout(timer);clearTimeout(idle);listenStop=null;try{r.stop()}catch(e){}res((fin+' '+tmp).replace(/\s+/g,' ').trim())};
-    const idle=setTimeout(()=>{if(!fin&&!tmp)finish()},9000);
-    r.onresult=ev=>{fin='';tmp='';for(const x of ev.results){if(x.isFinal)fin+=x[0].transcript+' ';else tmp+=x[0].transcript}
-      onPartial&&onPartial((fin+tmp).trim());clearTimeout(timer);timer=setTimeout(finish,SILENCE_MS)};
-    r.onerror=ev=>{if(ev.error==='no-speech'||ev.error==='aborted')finish();else{done=true;listenStop=null;rej(new Error(ev.error==='not-allowed'?'autorisez le micro pour cette page':'micro : '+ev.error))}};
-    r.onend=()=>finish();listenStop=finish;r.start()})}
+/* écoute une prise de parole complète : les morceaux sont recollés tant que l'apprenant ne s'est pas tu
+   pendant la durée de pause choisie ; '' si personne n'a parlé */
+function listenTurn(onVoice){const thr=pauseMs(),P=capPlug('SpeechRecognition');return P?listenNative(P,thr,onVoice):listenWeb(thr,onVoice)}
+function listenWeb(thr,onVoice){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return Promise.reject(new Error('reconnaissance vocale indisponible'));
+  return new Promise((res,rej)=>{let acc='',fin='',tmp='',timer=null,done=false,heard=false,r=null;
+    const finish=()=>{if(done)return;done=true;clearTimeout(timer);clearTimeout(idle);listenStop=null;try{r&&r.stop()}catch(e){}res([acc,fin,tmp].join(' ').replace(/\s+/g,' ').trim())};
+    const idle=setTimeout(()=>{if(!heard)finish()},10000);
+    const run=()=>{r=new SR();r.lang='fr-FR';r.interimResults=true;r.continuous=true;fin='';tmp='';
+      r.onresult=ev=>{fin='';tmp='';for(const x of ev.results){if(x.isFinal)fin+=x[0].transcript+' ';else tmp+=x[0].transcript}heard=true;onVoice&&onVoice();clearTimeout(timer);timer=setTimeout(finish,thr)};
+      r.onerror=ev=>{if(ev.error==='not-allowed'||ev.error==='service-not-allowed'){done=true;listenStop=null;rej(new Error('autorisez le micro pour cette page'))}};
+      r.onend=()=>{if(done)return;acc+=' '+fin+' '+tmp;fin='';tmp='';setTimeout(()=>{if(!done)try{run()}catch(e){finish()}},120)};
+      try{r.start()}catch(e){finish()}};
+    listenStop=finish;run()})}
+async function listenNative(P,thr,onVoice){try{await P.requestPermissions()}catch(e){}
+  return new Promise(async(res,rej)=>{let acc='',seg='',timer=null,done=false,heard=false,lastStart=0,restarting=false;const subs=[];
+    const finish=async()=>{if(done)return;done=true;clearTimeout(timer);clearTimeout(idle);clearInterval(dog);listenStop=null;try{await P.stop()}catch(e){}
+      setTimeout(()=>{subs.forEach(h=>{try{h.remove()}catch(e){}});res([acc,seg].join(' ').replace(/\s+/g,' ').trim())},350)};
+    const idle=setTimeout(()=>{if(!heard)finish()},10000);
+    const start=async()=>{if(done)return;lastStart=Date.now();try{await P.start({language:'fr-FR',maxResults:1,partialResults:true,popup:false})}catch(e){if(/permission/i.test(String(e&&e.message||e))){done=true;rej(new Error('autorisez le micro pour Eval'))}}};
+    const restart=()=>{if(done||restarting)return;restarting=true;setTimeout(()=>{acc+=' '+seg;seg='';restarting=false;start()},600)};
+    subs.push(await P.addListener('partialResults',d=>{const m=(d&&d.matches||[])[0];if(!m||done)return;seg=m;heard=true;onVoice&&onVoice();clearTimeout(timer);timer=setTimeout(finish,thr)}));
+    subs.push(await P.addListener('listeningState',d=>{if(d&&d.status==='stopped')restart()}));
+    /* le moteur Android s'arrête parfois sans prévenir (aucune parole) : on le relance */
+    const dog=setInterval(()=>{if(!done&&!restarting&&Date.now()-lastStart>7000){P.isListening?P.isListening().then(x=>{if(!x||!x.listening)restart();else lastStart=Date.now()}).catch(restart):restart()}},1500);
+    listenStop=finish;start()})}
 function stopListen(){if(listenStop)listenStop()}
 /* file de phrases à dire : le régulateur parle pendant que la suite de sa réponse arrive */
 let sayChain=Promise.resolve(),sayGen=0;
@@ -2375,6 +2397,7 @@ function viewAiSettings(){const a=aiCfg();
       <label class="f">Code d’accès<input type="password" id="ai-code" autocomplete="off" value="${esc(a.code)}" ${bind('ai.code','settings')}></label>
       <p class="small muted" style="margin:0">Le serveur relais garde la clé API ; les tablettes n’ont que le code d’accès (voir le dossier relay du projet).</p>`}
     <label class="cb"><input type="checkbox" id="ai-voice" ${a.voice?'checked':''} ${bind('ai.voice','settings')}>Le régulateur répond à voix haute</label>
+    <label class="f">Pause avant que le régulateur réponde<select id="ai-pause" ${bind('ai.pause','settings')}>${Object.entries(PAUSES).map(([k,[,l]])=>`<option value="${k}" ${(a.pause||'normal')===k?'selected':''}>${l}</option>`).join('')}</select></label>
     ${EMBED?'':`<div><button class="btn sm" data-act="ai-test">Tester la connexion</button></div>`}</div></section>`}
 function viewCallList(c){const L=(DB.calls||[]).filter(x=>x.scId===c.id&&x.debrief).slice(-5).reverse();if(!L.length)return '';
   return `<div class="small"><b>Appels d’entraînement :</b> ${L.map(x=>`<button class="chip" style="min-height:32px" data-act="call-open" data-id="${x.id}">${esc(fmtDate(x.date))}${x.who?' · '+esc(x.who):''} · ${x.debrief.note}/10</button>`).join(' ')}</div>`}
@@ -2383,29 +2406,29 @@ function viewCall(){const K=S.call;if(!K)return viewScenarios();const c=scById(K
   if(K.debrief)return viewDebrief(K,c);
   if(!K.started)return `<div class="stack">
     <section class="panel"><div class="hd"><h3>Avant l’appel</h3></div><div class="bd stack">
-      <p style="margin:0">L’apprenant appelle le 15 et parle comme au téléphone : pas de bouton à toucher entre les phrases. Le régulateur répond à voix haute dès que l’apprenant se tait. À la fin, « Raccrocher » : l’IA corrige la transmission.</p>
+      <p style="margin:0">L’apprenant appelle le 15 et parle comme au téléphone : rien à toucher, rien à lire pendant l’appel. Le régulateur répond à voix haute quand l’apprenant marque une vraie pause. À la fin, « Raccrocher » : l’IA corrige la transmission.</p>
       ${parts.length?`<label class="f">Apprenant qui appelle (reste sur cet appareil)<select id="call-who" ${bind('who','call')}><option value="">—</option>${parts.map(p=>`<option value="${esc(fullName(p))}" ${K.who===fullName(p)?'selected':''}>${esc(fullName(p))}</option>`).join('')}</select></label>`:''}
+      ${voiceIn()?`<label class="f">Mode de l’appel<select id="call-mode" ${bind('mode','call')}><option value="voice" ${K.mode==='voice'?'selected':''}>À la voix, comme au téléphone</option><option value="text" ${K.mode==='text'?'selected':''}>Par écrit (salle bruyante, pas de micro)</option></select></label>`:''}
+      <label class="f">Pause avant que le régulateur réponde<select id="call-pause" ${bind('ai.pause','settings')}>${Object.entries(PAUSES).map(([k,[,l]])=>`<option value="${k}" ${(aiCfg().pause||'normal')===k?'selected':''}>${l}</option>`).join('')}</select></label>
       <label class="f">Niveau du régulateur<select id="call-level" ${bind('level','call')}>${Object.entries(CALL_LEVELS).map(([k,l])=>`<option value="${k}" ${K.level===k?'selected':''}>${l}</option>`).join('')}</select></label>
-      ${voiceIn()?'<p class="small muted" style="margin:0">Conseil : téléphone ou tablette sur haut-parleur, dans un endroit calme ; parlez normalement, une courte pause suffit pour que le régulateur réponde.</p>':'<p class="small" style="color:var(--t-orange);margin:0">Pas de reconnaissance vocale sur ce navigateur : l’appel se fera par écrit (Chrome ou l’application Android permettent la voix).</p>'}
+      ${voiceIn()?'<p class="small muted" style="margin:0">Conseil : téléphone ou tablette sur haut-parleur, dans un endroit calme ; parlez normalement : les hésitations courtes ne coupent pas la parole ; si l’apprenant est souvent coupé, choisissez une pause plus longue.</p>':'<p class="small" style="color:var(--t-orange);margin:0">Pas de reconnaissance vocale sur ce navigateur : l’appel se fera par écrit (Chrome ou l’application Android permettent la voix).</p>'}
       ${aiReady()?'':`<div class="small" style="color:var(--t-orange)">L’IA n’est pas configurée : renseignez l’accès dans Réglages › Régulation SAMU simulée.</div>`}
       <button class="btn red" data-act="call-go" ${aiReady()?'':'disabled'}>${I.phone}Composer le 15</button></div></section></div>`;
-  const st={listening:'À vous, parlez…',thinking:'Le régulateur réfléchit…',speaking:'Le régulateur parle…',muted:'Micro coupé',text:'Appel par écrit'}[K.phase]||'En ligne';
+  const st={talking:'Vous parlez…',listening:'À vous, parlez…',thinking:'Le régulateur réfléchit…',speaking:'Le régulateur parle…',muted:'Micro coupé',text:'Appel par écrit'}[K.phase]||'En ligne';
   const sec=Math.floor((Date.now()-K.t0)/1000);
   const bubbles=[{r:'a',t:AI_GREETING},...K.msgs].filter(m=>!m.hidden).map(m=>`<div class="bub ${m.r==='u'?'me':''}"><span class="small muted">${m.r==='u'?'Secouriste':'Régulateur'}</span>${esc(m.t.replace(/^\[[^\]]*\]\s*/,''))}</div>`).join('');
   return `<div class="stack">
     <div class="panel callhead"><div class="bd" style="display:grid;justify-items:center;gap:8px;text-align:center">
       <div class="ring ${esc(K.phase||'')}"><span>15</span></div>
       <b id="call-st">${st}</b><span class="small muted num" id="call-clock">${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')} · ${esc(CALL_LEVELS[K.level])}</span>
-      <div class="small" id="call-live" style="min-height:1.3em;color:var(--brand)">${esc(K.live||'')}</div>
       ${K.err?`<div class="small" style="color:var(--t-rouge)">${esc(K.err)}</div>`:''}
       <div class="row" style="justify-content:center">
         ${K.mode==='voice'?`<button class="btn ${K.muted?'red':''}" data-act="call-mute">${I.mic}${K.muted?'Rouvrir le micro':'Couper le micro'}</button>
         <button class="btn" data-act="call-interrupt" ${K.phase==='speaking'||K.phase==='thinking'?'':'disabled'}>Interrompre le régulateur</button>`:''}
-        ${voiceIn()?`<button class="btn" data-act="call-kb">${K.mode==='voice'?'Passer à l’écrit':'Repasser à la voix'}</button>`:''}
         <button class="btn" data-act="call-recall" ${K.busy?'disabled':''}>Rappel : bilan de surveillance</button></div>
       <button class="btn red" style="min-width:240px" data-act="call-end" ${!K.msgs.length?'disabled':''}>${I.phone}Raccrocher et corriger</button></div></div>
     ${K.mode==='text'?`<div class="row" style="align-items:stretch"><input type="text" id="call-in" class="grow" style="min-height:48px" placeholder="Votre message au régulateur" value="${esc(K.draft||'')}" ${K.busy?'disabled':''}><button class="btn primary" data-act="call-send" ${K.busy?'disabled':''}>Envoyer</button></div>`:''}
-    <div class="calllog" id="calllog">${bubbles}</div></div>`}
+    ${K.mode==='text'?`<div class="calllog" id="calllog">${bubbles}</div>`:`<p class="small muted" style="margin:0;text-align:center">La transcription complète de l’appel s’affichera avec la correction.</p>`}</div>`}
 function viewDebrief(K,c){const D=K.debrief;const col={acquis:'ok',partiel:'wait',absent:'ko','sans objet':'neutral'};
   const ul=a=>`<ul style="margin:0;padding-left:20px;display:grid;gap:4px">${(a||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
   return `<div class="stack">
@@ -2433,7 +2456,7 @@ async function callTurn(text,hidden){const K=S.call;const c=scById(K.scId);text=
       messages:K.msgs.map(m=>({role:m.r==='u'?'user':'assistant',content:m.t}))});
     K.stream=stream;
     for await(const ev of stream){if(S.call!==K||K.cut)break;
-      if(ev.type==='content_block_delta'&&ev.delta.type==='text_delta'){if(!msg.t){K.msgs.push(msg);render()}msg.t+=ev.delta.text;
+      if(ev.type==='content_block_delta'&&ev.delta.type==='text_delta'){if(!msg.t){K.msgs.push(msg);if(K.mode==='text')render()}msg.t+=ev.delta.text;
         const b=$('#calllog .bub:last-child');if(b)b.lastChild.textContent=msg.t;callScroll();let before;do{before=said;flush(false)}while(said!==before)}}
     if(!K.cut){const fin=await stream.finalMessage();if(fin.stop_reason==='refusal')throw new Error('Le régulateur simulé n’a pas pu répondre');
       const full=fin.content.filter(b=>b.type==='text').map(b=>b.text).join('').trim();if(full&&full!==msg.t.trim()){if(!msg.t)K.msgs.push(msg);msg.t=full}flush(true)}
@@ -2447,7 +2470,7 @@ async function callLoop(K){if(K.looping)return;K.looping=true;
   try{while(S.call===K&&K.started&&!K.debrief&&!K.ending&&K.mode==='voice'&&!K.muted){
     await speech();if(S.call!==K||K.muted||K.ending||K.mode!=='voice')break;
     setPhase(K,'listening');K.live='';
-    const t0=Date.now();let t='';try{t=await listenOnce(p=>{K.live=p;const n=$('#call-live');if(n)n.textContent=p})}catch(e){K.err=String(e.message||e);K.muted=true;setPhase(K,'muted');break}
+    const t0=Date.now();let t='';try{t=await listenTurn(()=>{if(K.phase!=='talking'){K.phase='talking';const n=$('#call-st'),r=$('.ring');if(n)n.textContent='Vous parlez…';if(r)r.className='ring talking'}})}catch(e){K.err=String(e.message||e);K.muted=true;setPhase(K,'muted');break}
     if(S.call!==K||K.muted||K.ending||K.mode!=='voice')break;
     if(!t){K.silent=(K.silent||0)+1;if(Date.now()-t0<800)await new Promise(r=>setTimeout(r,600));
       if(K.silent===3){setPhase(K,'speaking');say('Allô ? Vous m’entendez ?')}
