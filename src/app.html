@@ -236,7 +236,7 @@ input[type=color]{width:52px;height:40px;border:1px solid var(--line);border-rad
    Constantes et utilitaires
    ========================================================= */
 const KEY='evaluations-pse-v2';
-const APP_VERSION='2.5.0';
+const APP_VERSION='2.6.0';
 const LOGO='__LOGO__', MARK='__MARK__';
 const EMBED=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -292,6 +292,8 @@ const FORM_HEADER=r=>({left:'EPN ANPS',center:'Conception des formations',title:
 const g=(title,items)=>({id:slug(title).toLowerCase(),title,items:items.map((l,i)=>({id:slug(title).toLowerCase().slice(0,14)+'-'+(i+1),label:l}))});
 /* Fiches d'évaluation des techniques pédagogiques (PIC F, PAE FPSE) extraites des référentiels (tools/fiches.py) */
 const FICHES=__FICHES__;
+/* Scénarios de cas concrets PSE1 / PSE2 (tools/scenarios_pse1.py, scenarios_pse2.py) */
+const SCENARIOS=__SCENARIOS__;
 const SC_AB=()=>[{code:'A',label:'Acquis',desc:'Correspond à une maîtrise particulièrement affirmée des compétences qui permet de valider.',tone:'vert',result:'ok'},{code:'B',label:'En cours d’acquisition',desc:'Correspond à des savoirs ou des compétences qui doivent encore être étayés mais qui permet de valider.',tone:'orange',result:'ok'}];
 const SC_ABC=()=>[{code:'A',label:'Maîtrisé',desc:'Connaissances et compétences attendues pleinement maîtrisées.',tone:'vertf',result:'ok'},{code:'B',label:'Acquis',desc:'Connaissances et compétences acquises, mobilisation perfectible.',tone:'vert',result:'ok'},{code:'C',label:'En cours d’acquisition',desc:'Acquis partiels ou instables.',tone:'orange',result:'ko'},{code:'NO',label:'Non observable',desc:'',tone:'gris',result:'none'}];
 function ficheTemplates(cur){const F=FICHES[cur]||[];return F.map(f=>({id:f.id,builtin:true,rev:1,cursus:cur,kind:'formative',fiche:true,learners:1,
@@ -618,7 +620,7 @@ function go(view,opts={}){Object.assign(S,opts);S.view=view;render();window.scro
 function render(){
   renderTop();renderNav();
   const v=S.view,m=$('#main');
-  const views={sessions:viewSessions,session:viewSession,person:viewPerson,sessionEdit:viewSessionEdit,formative:viewFormative,cert:viewCert,tech:viewTech,techs:viewTechs,suivi:viewSuivi,qcm:viewQcm,survey:viewSurvey,satis:viewSatis,tpls:viewTpls,tpl:viewTplEdit,settings:viewSettings};
+  const views={sessions:viewSessions,session:viewSession,person:viewPerson,sessionEdit:viewSessionEdit,formative:viewFormative,cert:viewCert,tech:viewTech,techs:viewTechs,suivi:viewSuivi,scenarios:viewScenarios,scenario:viewScenario,qcm:viewQcm,survey:viewSurvey,satis:viewSatis,tpls:viewTpls,tpl:viewTplEdit,settings:viewSettings};
   m.innerHTML=(views[v]||viewSessions)();
   $('#fabslot').innerHTML=v==='sessions'?`<button class="fab" data-act="new-session">${I.plus}Nouvelle formation</button>`:v==='tpls'?`<button class="fab" data-act="new-tpl">${I.plus}Nouvelle grille</button>`:'';
 }
@@ -638,6 +640,8 @@ function renderTop(){
   else if(v==='cert'){const c=curEval();left=back('person');title=`Certification · ${esc(pName(s,c.pid))}<small>${esc(c.tpl.name)}</small>`;right=pdfBtn('pdf-cert')}
   else if(v==='tech'){const x=curEval();left=back('person');title=`Technicité · ${esc(pName(s,x.pid))}<small>${esc(x.tpl.name)}</small>`;right=pdfBtn('pdf-tech')}
   else if(v==='suivi'){const x=curEval();left=back('person');title=`Suivi · ${esc(pName(s,x.pid))}<small>${esc(x.tpl.name)}</small>`;right=pdfBtn('pdf-suivi')}
+  else if(v==='scenarios'){left=back('session');title=`Scénarios de cas concrets<small>${esc(s.cursus)} · ${scList(s.cursus).length} fiches</small>`;right=pdfBtn('pdf-sc-mat','Matériel')}
+  else if(v==='scenario'){const c=scById(S.scid);left=back(S.scFrom==='formative'?'formative':'scenarios');title=`${c?esc(c.titre):'Scénario'}<small>${c?esc(c.cur+' · '+c.jour+' · '+c.etape):''}</small>`;right=pdfBtn('pdf-sc','Fiche')}
   else if(v==='techs'){left=back('session');title=`Fiches de technicité<small>${esc(s.title||s.cursus)}</small>`}
   else if(v==='qcm'){const c=curEval();left=back('cert');const st=qcmState(c,s);title=`QCM ${esc(s.cursus)} · ${esc(pName(s,c.pid))}<small>${st.done}/${st.tot} corrigées · ${String(st.score).replace('.',',')}/20</small>`;right=pdfBtn('pdf-qcm')}
   else if(v==='survey'){left=`<button class="ibtn" data-act="survey-exit" aria-label="Quitter le questionnaire">${I.x}</button>`;title=`Évaluation de la formation<small>${esc(s.title||s.cursus)}</small>`}
@@ -708,6 +712,7 @@ function viewSession(){
       <div class="small"><span class="muted">Formateurs :</span> <b>${esc(sessTrainers(s)||'—')}</b></div>
     </div></div>
     <div class="row"><button class="btn red grow" data-act="new-formative">${I.plus}${isFicheCursus(s.cursus)?'Nouvelle fiche d’évaluation':'Nouveau cas concret'}</button>${techTpl(s.cursus)?`<button class="btn" data-act="go" data-v="techs">Fiches de technicité</button>`:''}<button class="btn" data-act="export-menu">${I.share}Exporter / envoyer</button></div>
+    ${scList(s.cursus).length?viewScPanel(s):''}
     ${(()=>{const dj=ensureDays(s).find(x=>x.date===today());if(!dj||!parts.length)return '';const all=parts.every(p=>presenceOf(s,p.id)[dj.id]);
       return `<div class="panel"><div class="bd row"><span class="grow"><b>Présence du jour · ${esc(dj.id)}</b> <span class="small muted">${esc(fmtDate(dj.date))} · ${parts.filter(p=>presenceOf(s,p.id)[dj.id]).length}/${parts.length} présents</span></span><button class="btn ${all?'primary':'red'}" data-act="presence-all" data-d="${dj.id}">${all?'✓ Tous présents (annuler)':'Pointer tout le groupe présent'}</button></div></div>`})()}
     <section class="panel"><div class="hd"><h3>Participants</h3><button class="btn sm" data-act="edit-session">${I.edit}Gérer</button></div>
@@ -887,6 +892,7 @@ function viewFormative(){
         </div>
         ${activeTrainers().length?'':'<p class="small muted" style="margin:0">Ajoutez les formateurs dans Réglages pour les retrouver dans ces listes.</p>'}
       </div></section>
+    ${e.scenarioId&&scById(e.scenarioId)?viewScLink(e):''}
     <section class="panel"><div class="hd"><h3>Apprenants</h3>${n<6?`<button class="btn sm" data-act="add-learner">${I.plus}Ajouter</button>`:''}</div>
       <div class="bd stack">${slots}
         <label class="cb"><input type="checkbox" id="f-counts" ${e.counts!==false?'checked':''} ${bind('counts')}>${t.fiche?'Reportée sur la fiche de suivi (journée de la date ci-dessus)':'Compte comme passage pour la certification'}</label></div></section>
@@ -1843,10 +1849,10 @@ function importData(txt){
    ========================================================= */
 function touch(x){x.updatedAt=Date.now();const s=x.sessionId&&sessById(x.sessionId);if(s)s.updatedAt=Date.now();save()}
 function setPath(o,p,v){const k=p.split('.');const last=k.pop();const t=k.reduce((a,x)=>a[x],o);t[last]=v}
-function newFormative(s,tpl,pid){
+function newFormative(s,tpl,pid,init){
   const e={id:uid(),sessionId:s.id,kind:'formative',tpl:clone(tpl),date:today(),theme:'',evaluatorIds:[(s.trainerIds||[])[0]||'',''],situations:{},
     learners:Array.from({length:Math.max(1,tpl.learners||1)},(_,i)=>({pid:i===0&&pid?pid:'',caseNo:'',obs:'',marks:{}})),done:false,counts:true,createdAt:Date.now(),updatedAt:Date.now()};
-  DB.evals.push(e);save(true);go('formative',{eid:e.id,lt:0});
+  if(init)init(e);DB.evals.push(e);save(true);go('formative',{eid:e.id,lt:0});
 }
 const A={
   tab:d=>{S.tab=d.v;go(d.v)},
@@ -2052,6 +2058,106 @@ function applyBind(el){
   if(sc==='tdraft'){if(el.type==='number')v=v===''?'':Number(v);setPath(S.tdraft,p,v);return}
   const e=curEval();if(!e)return;if(p.startsWith('theory.'))e.theory=e.theory||{};setPath(e,p,v);touch(e);
 }
+
+/* =========================================================
+   Scénarios de cas concrets : bibliothèque, planning, matériel, fiches à imprimer
+   ========================================================= */
+const scList=cur=>SCENARIOS.filter(x=>x.cur===cur);
+const scById=id=>SCENARIOS.find(x=>x.id===id);
+const scPlan=s=>{s.plan=s.plan||[];return s.plan};
+const scPlanned=(s,id)=>scPlan(s).find(p=>p.id===id);
+const scDone=(s,id)=>DB.evals.some(e=>e.sessionId===s.id&&e.scenarioId===id);
+const scObsLabel=(cur,k)=>{const T=formTpls(cur).find(t=>!t.fiche);const c=T&&T.criteria.find(c=>c.id===k);return c?(c.code+' · '+c.label):k};
+const NIV=['','Découverte','Application','Synthèse'];
+const SCTAG={ova:'Obstruction',hemo:'Hémorragie',pc:'Perte de connaissance',acr:'Arrêt cardiaque',detresse:'Détresse',malaise:'Malaise',trauma:'Traumatisme',d1a:'Affection spécifique',d1b:'Atteinte circonstancielle',d1c:'Souffrance psychique',d2a:'Immobilisation',d2b:'Relevage'};
+function scMat(list){const g={lieu:[],maq:[],acc:[],sec:[]};
+  list.forEach(c=>Object.keys(g).forEach(k=>(c.mat[k]||[]).forEach(x=>{let r=g[k].find(y=>y.t===x);if(!r)g[k].push(r={t:x,n:[]});r.n.push(c.n)})));return g}
+const MATLAB={lieu:'Lieu et décor',maq:'Maquillage et simulation de plaies',acc:'Accessoires et matériel de jeu',sec:'Matériel des secouristes'};
+function viewScPanel(s){const P=scPlan(s).map(p=>({p,c:scById(p.id)})).filter(x=>x.c).sort((a,b)=>a.c.n-b.c.n);
+  return `<section class="panel"><div class="hd"><h3>Scénarios de cas concrets</h3><span class="small muted num">${P.length} prévu${P.length>1?'s':''} · ${scList(s.cursus).length} disponibles</span></div>
+   <div class="bd stack" style="gap:8px"><div class="row"><button class="btn primary grow" data-act="go" data-v="scenarios">Choisir et préparer les scénarios</button>${P.length&&!EMBED?`<button class="btn" data-act="pdf-sc-mat">${I.pdf}Matériel</button>`:''}</div></div>
+   ${P.length?`<div class="lines">${P.map(({p,c})=>`<button class="line" data-act="open-sc" data-id="${c.id}"><span class="grow"><b>${c.n}. ${esc(c.titre)}</b><span class="small muted" style="display:block">${esc(c.jour)} · ${esc(c.theme)}</span></span>${scDone(s,c.id)?'<span class="pill ok">Réalisé</span>':'<span class="pill wait">Prévu</span>'}${I.chev}</button>`).join('')}</div>`:''}</section>`}
+function viewScenarios(){const s=curSess();if(!s)return viewSessions();const all=scList(s.cursus);
+  const jours=[...new Set(all.map(x=>x.jour))];const f=S.scj||'all';
+  const L=all.filter(x=>f==='all'?true:f==='plan'?!!scPlanned(s,x.id):x.jour===f);
+  const card=c=>{const pl=scPlanned(s,c.id),dn=scDone(s,c.id);
+    return `<div class="panel"><button class="line" style="align-items:flex-start" data-act="open-sc" data-id="${c.id}"><span class="av">${c.n}</span><span class="grow"><b>${esc(c.titre)}</b>
+      <span class="small muted" style="display:block">${esc(c.theme)}</span>
+      <span class="small muted" style="display:block">${esc(c.jour)} · ${esc(c.etape)} · ${esc(NIV[c.niveau]||'')} · ${esc(c.duree.split('+')[0].trim())}</span>
+      <span class="chips" style="margin-top:6px">${[...c.cases,...c.checks.filter(k=>/^d/.test(k))].map(k=>SCTAG[k]?`<span class="pill neutral">${SCTAG[k]}</span>`:'').join('')}${dn?'<span class="pill ok">Réalisé</span>':pl?'<span class="pill wait">Prévu</span>':''}</span></span>${I.chev}</button>
+      <div class="bd" style="padding-top:0;display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm ${pl?'primary':''}" data-act="sc-plan" data-id="${c.id}">${pl?'✓ Au planning':'Ajouter au planning'}</button>${EMBED?'':`<button class="btn sm" data-act="new-sc-fiche" data-id="${c.id}">Évaluer ce cas</button>`}</div></div>`};
+  return `<div class="stack"><p class="muted small" style="margin:0">Scénarios classés selon la progression de la formation (${esc(jours.join(', '))}). Ajoutez ceux que vous voulez jouer : l’application prépare la liste de matériel et les fiches de briefing à imprimer.</p>
+    <div class="chips">${[['all','Tous'],...jours.map(j=>[j,j]),['plan','Au planning ('+scPlan(s).length+')']].map(([k,l])=>`<button class="chip ${f===k?'on':''}" data-act="scj" data-v="${k}">${esc(l)}</button>`).join('')}</div>
+    ${L.length?`<div class="cards">${L.map(card).join('')}</div>`:'<div class="empty">Aucun scénario dans ce filtre.</div>'}</div>`}
+function viewScenario(){const s=curSess(),c=scById(S.scid);if(!s||!c)return viewSessions();const pl=scPlanned(s,c.id);const got=(pl&&pl.got)||{};
+  const sec=(t,body,open)=>`<details class="panel" ${open?'open':''}><summary class="hd" style="cursor:pointer;list-style:none"><h3>${t}</h3></summary><div class="bd stack" style="gap:8px">${body}</div></details>`;
+  const ul=a=>`<ul style="margin:0;padding-left:20px;display:grid;gap:4px">${a.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+  const role=r=>`<div class="panel" style="border-left:4px solid var(--brand)"><div class="bd stack" style="gap:6px"><div class="row"><span class="pill ${r.t==='Victime'?'ko':r.t==='Tiers'?'wait':'ex'}">${esc(r.t)}</span><b class="grow">${esc(r.nom)}</b></div>
+     <div><b class="small">Briefing</b><div>${esc(r.brief)}</div></div>${r.jeu?`<div><b class="small">Jeu et évolution</b><div>${esc(r.jeu)}</div></div>`:''}
+     ${(r.param||[]).length?`<div><b class="small">Paramètres à donner</b>${ul(r.param)}</div>`:''}${r.maq?`<div><b class="small">Maquillage</b><div>${esc(r.maq)}</div></div>`:''}</div></div>`;
+  const mat=scMat([c]);
+  return `<div class="stack">
+   <div class="panel"><div class="bd stack" style="gap:8px"><div class="row">${badge(c.cur)}<span class="pill neutral">${esc(c.jour)}</span><span class="pill neutral">${esc(NIV[c.niveau]||'')}</span><span class="small muted grow">${esc(c.duree)}</span></div>
+     <div style="font-weight:700;color:var(--brand)">${esc(c.theme)}</div><div class="small muted">Étape de la formation : ${esc(c.etape)}</div>
+     <div class="small"><b>Lieu :</b> ${esc(c.lieu)}<br><b>Équipe :</b> ${esc(c.equipe)}</div>
+     <div class="row"><button class="btn sm ${pl?'primary':''}" data-act="sc-plan" data-id="${c.id}">${pl?'✓ Au planning':'Ajouter au planning'}</button>${EMBED?'':`<button class="btn sm red" data-act="new-sc-fiche" data-id="${c.id}">Évaluer ce cas</button><button class="btn sm" data-act="pdf-sc-brief">${I.pdf}Briefings</button>`}</div></div></div>
+   ${sec('Objectifs',ul(c.objectifs),true)}
+   ${sec('Message d’alerte et contexte',`<div><b class="small">Message d’alerte (aux secouristes)</b><div>${esc(c.message)}</div></div><div><b class="small">Contexte (animateur)</b><div>${esc(c.contexte)}</div></div>`,true)}
+   ${sec('Briefings : victime, tiers',c.roles.map(role).join(''),true)}
+   ${sec('Briefing des secouristes',`<div>${esc(c.secouristes)}</div>`,false)}
+   ${sec('Évolution de la situation',`<div style="display:grid;gap:6px">${c.evolution.map(([a,b])=>`<div class="line" style="min-height:0;padding:8px 0;align-items:flex-start"><span style="flex:1"><b class="small">Si</b> ${esc(a)}</span><span style="flex:1"><b class="small">Alors</b> ${esc(b)}</span></div>`).join('')}</div>`,false)}
+   ${sec('Gestes et attitudes attendus',ul(c.attendus),true)}
+   ${sec('Ce qui sera observé (fiche d’évaluation)',`<div style="display:grid;gap:6px">${Object.entries(c.observe).map(([k,v])=>`<div><span class="code">${esc(scObsLabel(c.cur,k).split(' · ')[0])}</span><b class="small">${esc(scObsLabel(c.cur,k).split(' · ').slice(1).join(' · '))}</b><div>${esc(v)}</div></div>`).join('')}</div>`,true)}
+   ${sec('Matériel à préparer',Object.keys(MATLAB).filter(k=>mat[k].length).map(k=>`<div><b class="small">${MATLAB[k]}</b>${mat[k].map(x=>`<label class="cb" style="font-weight:500;min-height:34px"><input type="checkbox" data-act="sc-got" data-id="${c.id}" data-k="${esc(x.t)}" ${got[x.t]?'checked':''}>${esc(x.t)}</label>`).join('')}</div>`).join(''),true)}
+   ${sec('Sécurité',`<div>${esc(c.securite)}</div>`,true)}
+   ${sec('Questions pour le débriefing',ul(c.debrief),false)}
+  </div>`}
+function viewScLink(e){const c=scById(e.scenarioId);return `<section class="panel"><div class="hd"><h3>Scénario : ${esc(c.titre)}</h3><button class="btn sm" data-act="open-sc" data-id="${c.id}" data-from="formative">Voir</button></div>
+  <div class="bd small"><b>Observer :</b><ul style="margin:4px 0 0;padding-left:20px;display:grid;gap:3px">${Object.entries(c.observe).map(([k,v])=>`<li><b>${esc(scObsLabel(c.cur,k).split(' · ')[0])}</b> ${esc(v)}</li>`).join('')}</ul></div></section>`}
+/* PDF : fiche animateur, briefings à remettre, liste de matériel */
+function scWriter(doc,P,title){const M=14,W=182;let y=0;
+  const top=()=>{doc.setFillColor(0,43,107);doc.rect(0,0,210,13,'F');P.font(true,10,WHITE);doc.text(PT(title),M,8.2);P.font(false,7.5,[200,210,230]);doc.text('Eval UDPS 28',196,8.2,{align:'right'});y=20};
+  const need=h=>{if(y+h>285){doc.addPage('a4','p');top()}};
+  const w={top,need,get y(){return y},set y(v){y=v},
+   h(t){need(14);doc.setFillColor(...F_SHADE);doc.rect(M,y,W,6.2,'F');P.font(true,9.5,[0,43,107]);doc.text(PT(t),M+2,y+4.4);y+=9},
+   p(t,o={}){const sz=o.s||9;P.font(o.b,sz,o.c);const ls=doc.splitTextToSize(PT(t),W-(o.x||0));ls.forEach(l=>{need(sz*.45);doc.text(l,M+(o.x||0),y+sz*.33);y+=sz*.45});y+=o.gap??1.2},
+   li(t,o={}){const sz=o.s||9;P.font(false,sz);const ls=doc.splitTextToSize(PT(t),W-6);ls.forEach((l,i)=>{need(sz*.45);if(i===0){if(o.box){doc.setLineWidth(.25);doc.rect(M+.5,y-.2,3,3)}else doc.text('-',M+1.2,y+sz*.33)}doc.text(l,M+6,y+sz*.33);y+=sz*.45});y+=.8},
+   lab(a,b){P.font(true,9);const aw=doc.getTextWidth(PT(a))+2;need(5);doc.text(PT(a),M,y+3);P.font(false,9);const ls=doc.splitTextToSize(PT(b),W-aw);ls.forEach((l,i)=>{if(i)need(4.2);doc.text(l,M+aw,y+3);y+=4.2});y+=.8}};
+  top();return w}
+function scHead(w,c){w.p(c.titre,{b:true,s:15,c:[0,43,107],gap:1});w.p(`${c.cur} · ${c.jour} · ${NIV[c.niveau]||''} · ${c.duree}`,{s:8.5,c:GREY});w.lab('Thème : ',c.theme);w.lab('Lieu : ',c.lieu);w.lab('Équipe : ',c.equipe);w.y+=1.5}
+function scBriefPages(c){return [{orient:'p',draw:doc=>{const P=pen(doc);let first=true;
+  const w=scWriter(doc,P,`${c.cur} · Briefing · ${c.titre}`);
+  const page=(who,body)=>{if(!first){doc.addPage('a4','p');w.top()}first=false;scHead(w,c);w.h(who);body()};
+  c.roles.forEach(r=>page(`${r.t.toUpperCase()} : ${r.nom}`,()=>{w.h('Votre rôle');w.p(r.brief,{s:10.5,gap:3});if(r.jeu){w.h('Votre jeu');w.p(r.jeu,{s:10.5,gap:3})}
+    if((r.param||[]).length){w.h('Constantes à donner si on vous les demande');r.param.forEach(x=>w.li(x,{s:10}))}if(r.maq){w.h('Maquillage');w.p(r.maq,{s:10})}}));
+  page('SECOURISTES (à lire aux apprenants)',()=>{w.h('Message d’alerte');w.p(c.message,{s:11,gap:3});w.h('Votre mission');w.p(c.secouristes,{s:10.5,gap:3});w.h('Matériel à votre disposition');(c.mat.sec||[]).forEach(x=>w.li(x,{s:10}))});}}]}
+function scFichePages(c){return [{orient:'p',draw:doc=>{const P=pen(doc);const w=scWriter(doc,P,`${c.cur} · Fiche scénario n°${c.n}`);scHead(w,c);
+  w.h('Objectifs');c.objectifs.forEach(x=>w.li(x));w.h('Message d’alerte et contexte');w.lab('Message : ',c.message);w.lab('Contexte : ',c.contexte);
+  w.h('Rôles et briefings');c.roles.forEach(r=>{w.p(`${r.t} : ${r.nom}`,{b:true,gap:.4});w.p(r.brief,{x:3,s:8.5,gap:.6});if(r.jeu)w.p('Jeu : '+r.jeu,{x:3,s:8.5,gap:.6});(r.param||[]).forEach(x=>w.li('Paramètres : '+x,{s:8.5}));if(r.maq)w.p('Maquillage : '+r.maq,{x:3,s:8.5});w.y+=1});
+  w.h('Briefing des secouristes');w.p(c.secouristes);
+  w.h('Évolution de la situation');c.evolution.forEach(([a,b])=>w.li(`Si ${a} : ${b}`));
+  w.h('Gestes et attitudes attendus');c.attendus.forEach(x=>w.li(x));
+  w.h('Ce qui sera observé');Object.entries(c.observe).forEach(([k,v])=>w.li(`${scObsLabel(c.cur,k).split(' · ')[0]} - ${v}`));
+  w.h('Matériel');const m=scMat([c]);Object.keys(MATLAB).forEach(k=>{if(m[k].length){w.p(MATLAB[k],{b:true,gap:.4});m[k].forEach(x=>w.li(x.t,{box:true}))}});
+  w.h('Sécurité');w.p(c.securite);w.h('Débriefing');c.debrief.forEach(x=>w.li(x));
+  w.y+=3;P.font(false,6.5,GREY);doc.text(PT(stamp()),14,292)}}]}
+function scMatPages(s){const L=scPlan(s).map(p=>scById(p.id)).filter(Boolean).sort((a,b)=>a.n-b.n);
+  return [{orient:'p',draw:doc=>{const P=pen(doc);const w=scWriter(doc,P,`${s.cursus} · Matériel des scénarios prévus`);
+    w.p(s.title||s.cursus,{b:true,s:14,c:[0,43,107],gap:1});w.p(L.length?`${L.length} scénario${L.length>1?'s':''} : `+L.map(c=>`n°${c.n} ${c.titre}`).join(' · '):'Aucun scénario au planning',{s:8.5,c:GREY});w.y+=2;
+    const m=scMat(L);Object.keys(MATLAB).forEach(k=>{if(!m[k].length)return;w.h(MATLAB[k]);m[k].forEach(x=>w.li(`${x.t}  (scénario${x.n.length>1?'s':''} ${x.n.join(', ')})`,{box:true,s:8.5}))});
+    P.font(false,6.5,GREY);doc.text(PT(stamp()),14,292)}}]}
+Object.assign(A,{
+  scj:d=>{S.scj=d.v;render()},
+  'open-sc':d=>{S.scFrom=d.from||'';go('scenario',{scid:d.id})},
+  'sc-plan':d=>{const s=curSess(),P=scPlan(s),i=P.findIndex(x=>x.id===d.id);if(i>=0)P.splice(i,1);else P.push({id:d.id,got:{}});s.updatedAt=Date.now();save(true);render()},
+  'sc-got':(d,ev,el)=>{const s=curSess();let p=scPlanned(s,d.id);if(!p){scPlan(s).push(p={id:d.id,got:{}})}p.got=p.got||{};if(el.checked)p.got[d.k]=true;else delete p.got[d.k];s.updatedAt=Date.now();save();},
+  'new-sc-fiche':d=>{const s=curSess(),c=scById(d.id);const T=formTpls(s.cursus).find(t=>!t.fiche);if(!T){toast('Aucune grille formative');return}
+    if(!scPlanned(s,c.id))scPlan(s).push({id:c.id,got:{}});
+    newFormative(s,T,S.pid,e=>{e.theme=c.titre+' - '+c.theme;e.scenarioId=c.id;e.cases={};c.cases.forEach(k=>e.cases[k]=true);c.checks.forEach(k=>e.situations[k]=true)})},
+  'pdf-sc':()=>{const c=scById(S.scid);runExport('Création du PDF…',()=>({files:[pdfFile(`${c.cur}_scenario_${String(c.n).padStart(2,'0')}_${slug(c.titre)}`,scFichePages(c))],title:'Scénario'}))},
+  'pdf-sc-brief':()=>{const c=scById(S.scid);runExport('Création du PDF…',()=>({files:[pdfFile(`${c.cur}_briefings_${String(c.n).padStart(2,'0')}_${slug(c.titre)}`,scBriefPages(c))],title:'Briefings'}))},
+  'pdf-sc-mat':()=>{const s=curSess();if(!scPlan(s).length){toast('Ajoutez d’abord des scénarios au planning');return}runExport('Création du PDF…',()=>({files:[pdfFile(`${s.cursus}_${slug(s.title||'formation')}_materiel-scenarios`,scMatPages(s))],title:'Matériel'}))}
+});
 document.addEventListener('input',ev=>{
   const el=ev.target;
   if(el.dataset&&el.dataset.svWhy!==undefined&&S.surveyDraft){S.surveyDraft.why[el.dataset.svWhy]=el.value;return}
@@ -2073,7 +2179,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)save(true)}
 /* Bouton retour Android */
 if(NATIVE&&window.Capacitor.Plugins.App){window.Capacitor.Plugins.App.addListener('backButton',()=>{
   if($('#overlay').innerHTML){closeModal();return}
-  const m={session:'sessions',person:'session',sessionEdit:S.draftNew?'sessions':'session',formative:S.pid?'person':'session',cert:'person',tech:'person',suivi:'person',techs:'session',qcm:'cert',satis:'session',survey:'session',tpl:'tpls'};
+  const m={session:'sessions',person:'session',sessionEdit:S.draftNew?'sessions':'session',formative:S.pid?'person':'session',cert:'person',tech:'person',suivi:'person',techs:'session',qcm:'cert',satis:'session',survey:'session',tpl:'tpls',scenarios:'session',scenario:S.scFrom==='formative'?'formative':'scenarios'};
   if(m[S.view])go(m[S.view]);else if(S.view!=='sessions'){S.tab='sessions';go('sessions')}else window.Capacitor.Plugins.App.exitApp();
 })}
 window.__loadForms=loadForms;

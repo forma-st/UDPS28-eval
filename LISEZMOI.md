@@ -1,4 +1,4 @@
-# Eval · UDPS 28 (version 2.5)
+# Eval · UDPS 28 (version 2.6)
 
 Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d'équipe (CE). Elle fonctionne **entièrement sans réseau**.
 
@@ -27,6 +27,14 @@ Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d
 - **C** : OUI quand le participant est pointé présent à toutes les journées (feuille de présence).
 - **D** : OUI à partir de 12/20 au questionnaire. Entre 10 et 11 : entretien de rattrapage avec le responsable pédagogique. Sous 10 : NON.
 - **Dossier** par participant, dans l'ordre du référentiel : technicité, fiches d'évaluation, certification.
+
+## Version 2.6 : scénarios de cas concrets
+- **32 scénarios** prêts à jouer (17 PSE1, 15 PSE2), classés selon la progression de la formation (J1 à J5 en PSE1, J1 à J4 en PSE2) et du plus simple au plus complet.
+- Chaque fiche donne : thème, objectifs, lieu, équipe, message d’alerte, contexte, briefings de la victime et des témoins (jeu, constantes à donner, maquillage), briefing des secouristes, évolution selon les actions, gestes attendus, points observés sur la fiche d’évaluation, matériel (décor, maquillage, accessoires, matériel de secours), sécurité de l’exercice et questions de débriefing.
+- Dans une formation : bouton **« Choisir et préparer les scénarios »**, filtre par jour, ajout au planning, cases à cocher du matériel prêt.
+- **« Évaluer ce cas »** crée la fiche d’évaluation avec le thème, les situations travaillées déjà cochées et le rappel de ce qu’il faut observer.
+- PDF : fiche scénario pour le formateur, **briefings à remettre** (une page par victime, témoin et pour les secouristes) et **liste de matériel** de tous les scénarios prévus.
+- Contenu modifiable dans `tools/scenarios_pse1.py` et `tools/scenarios_pse2.py`, puis `python3 tools/scenarios.py`.
 
 ## Version 2.5 : PIC F, PAE FPSE, Chef d'équipe
 - L'application s'appelle désormais **Eval** (l'APK devient `Eval.apk` ; la mise à jour s'installe par-dessus la 2.4 et garde les données).

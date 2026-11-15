@@ -13,7 +13,7 @@ LOGO = 'data:image/jpeg;base64,' + b64('brand/logo-480.jpg')
 MARK = 'data:image/png;base64,' + b64('brand/symbole-96.png')
 import json
 QCM = json.dumps({'PSE1': json.load(open('data/qcm-pse1.json', encoding='utf-8')), 'PSE2': json.load(open('data/qcm-pse2.json', encoding='utf-8'))}, ensure_ascii=False)
-src = src.replace('__LOGO__', LOGO).replace('__MARK__', MARK).replace('const QCM=__QCM__;', 'const QCM=' + QCM + ';').replace('const FORM_FILES=__FORM_FILES__;', 'const FORM_FILES=' + json.dumps(sorted(f[:-4] for f in os.listdir('docs/app/forms') if f.endswith('.png'))) + ';').replace('const FICHES=__FICHES__;', 'const FICHES=' + json.dumps(json.load(open('data/fiches-pedagogiques.json', encoding='utf-8')), ensure_ascii=False, separators=(',', ':')) + ';')
+src = src.replace('__LOGO__', LOGO).replace('__MARK__', MARK).replace('const QCM=__QCM__;', 'const QCM=' + QCM + ';').replace('const FORM_FILES=__FORM_FILES__;', 'const FORM_FILES=' + json.dumps(sorted(f[:-4] for f in os.listdir('docs/app/forms') if f.endswith('.png'))) + ';').replace('const SCENARIOS=__SCENARIOS__;', 'const SCENARIOS=' + open('data/scenarios.json', encoding='utf-8').read() + ';').replace('const FICHES=__FICHES__;', 'const FICHES=' + json.dumps(json.load(open('data/fiches-pedagogiques.json', encoding='utf-8')), ensure_ascii=False, separators=(',', ':')) + ';')
 
 WEIGHTS = (400, 500, 600, 700, 800)
 FONT_FILES = [f'montserrat-latin-{w}-normal.woff2' for w in WEIGHTS]
