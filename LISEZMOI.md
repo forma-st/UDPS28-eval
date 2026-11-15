@@ -1,4 +1,4 @@
-# Eval · UDPS 28 (version 2.7)
+# Eval · UDPS 28 (version 2.8)
 
 Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d'équipe (CE). Elle fonctionne **entièrement sans réseau**.
 
@@ -27,6 +27,11 @@ Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d
 - **C** : OUI quand le participant est pointé présent à toutes les journées (feuille de présence).
 - **D** : OUI à partir de 12/20 au questionnaire. Entre 10 et 11 : entretien de rattrapage avec le responsable pédagogique. Sous 10 : NON.
 - **Dossier** par participant, dans l'ordre du référentiel : technicité, fiches d'évaluation, certification.
+
+## Version 2.8 : 60 scénarios et onglet Scénarios
+- **30 scénarios PSE1 et 30 scénarios PSE2**, répartis sur les jours de formation.
+- Nouvel onglet **Scénarios** dans la barre du bas : consulter, imprimer, créer ou modifier les scénarios sans ouvrir de formation, avec un choix PSE1 / PSE2.
+- Depuis une formation, le planning, la liste de matériel et « Évaluer ce cas » restent disponibles pour les scénarios du même niveau.
 
 ## Version 2.7 : éditeur de scénarios
 - **Créer un scénario** depuis la liste des scénarios : identification, situations travaillées (cochées d’office sur la fiche d’évaluation), objectifs, message d’alerte, rôles (autant de victimes et de tiers que nécessaire), évolution « si… alors… », attendus, observation critère par critère, matériel, sécurité, débriefing.
