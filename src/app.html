@@ -236,7 +236,7 @@ input[type=color]{width:52px;height:40px;border:1px solid var(--line);border-rad
    Constantes et utilitaires
    ========================================================= */
 const KEY='evaluations-pse-v2';
-const APP_VERSION='2.6.0';
+const APP_VERSION='2.7.0';
 const LOGO='__LOGO__', MARK='__MARK__';
 const EMBED=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -620,7 +620,7 @@ function go(view,opts={}){Object.assign(S,opts);S.view=view;render();window.scro
 function render(){
   renderTop();renderNav();
   const v=S.view,m=$('#main');
-  const views={sessions:viewSessions,session:viewSession,person:viewPerson,sessionEdit:viewSessionEdit,formative:viewFormative,cert:viewCert,tech:viewTech,techs:viewTechs,suivi:viewSuivi,scenarios:viewScenarios,scenario:viewScenario,qcm:viewQcm,survey:viewSurvey,satis:viewSatis,tpls:viewTpls,tpl:viewTplEdit,settings:viewSettings};
+  const views={sessions:viewSessions,session:viewSession,person:viewPerson,sessionEdit:viewSessionEdit,formative:viewFormative,cert:viewCert,tech:viewTech,techs:viewTechs,suivi:viewSuivi,scenarios:viewScenarios,scenario:viewScenario,scEdit:viewScEdit,qcm:viewQcm,survey:viewSurvey,satis:viewSatis,tpls:viewTpls,tpl:viewTplEdit,settings:viewSettings};
   m.innerHTML=(views[v]||viewSessions)();
   $('#fabslot').innerHTML=v==='sessions'?`<button class="fab" data-act="new-session">${I.plus}Nouvelle formation</button>`:v==='tpls'?`<button class="fab" data-act="new-tpl">${I.plus}Nouvelle grille</button>`:'';
 }
@@ -641,7 +641,8 @@ function renderTop(){
   else if(v==='tech'){const x=curEval();left=back('person');title=`Technicité · ${esc(pName(s,x.pid))}<small>${esc(x.tpl.name)}</small>`;right=pdfBtn('pdf-tech')}
   else if(v==='suivi'){const x=curEval();left=back('person');title=`Suivi · ${esc(pName(s,x.pid))}<small>${esc(x.tpl.name)}</small>`;right=pdfBtn('pdf-suivi')}
   else if(v==='scenarios'){left=back('session');title=`Scénarios de cas concrets<small>${esc(s.cursus)} · ${scList(s.cursus).length} fiches</small>`;right=pdfBtn('pdf-sc-mat','Matériel')}
-  else if(v==='scenario'){const c=scById(S.scid);left=back(S.scFrom==='formative'?'formative':'scenarios');title=`${c?esc(c.titre):'Scénario'}<small>${c?esc(c.cur+' · '+c.jour+' · '+c.etape):''}</small>`;right=pdfBtn('pdf-sc','Fiche')}
+  else if(v==='scenario'){const c=scById(S.scid);left=back(S.scFrom==='formative'?'formative':'scenarios');title=`${c?esc(c.titre):'Scénario'}<small>${c?esc([c.cur,c.jour,c.etape].filter(Boolean).join(' · ')):''}</small>`;right=pdfBtn('pdf-sc','Fiche')}
+  else if(v==='scEdit'){left=`<button class="ibtn" data-act="sc-cancel" aria-label="Annuler">${I.x}</button>`;title=`${S.scNew?'Nouveau scénario':'Modifier le scénario'}<small>${esc(S.scdraft.cur)}</small>`;right=`<button class="ibtn solid" data-act="sc-save">Enregistrer</button>`}
   else if(v==='techs'){left=back('session');title=`Fiches de technicité<small>${esc(s.title||s.cursus)}</small>`}
   else if(v==='qcm'){const c=curEval();left=back('cert');const st=qcmState(c,s);title=`QCM ${esc(s.cursus)} · ${esc(pName(s,c.pid))}<small>${st.done}/${st.tot} corrigées · ${String(st.score).replace('.',',')}/20</small>`;right=pdfBtn('pdf-qcm')}
   else if(v==='survey'){left=`<button class="ibtn" data-act="survey-exit" aria-label="Quitter le questionnaire">${I.x}</button>`;title=`Évaluation de la formation<small>${esc(s.title||s.cursus)}</small>`}
@@ -1811,7 +1812,7 @@ function sessionExport(kind){
 function backupJSON(sids){
   const S_=sids?DB.sessions.filter(s=>sids.includes(s.id)):DB.sessions;const ids=S_.map(s=>s.id);const curs=[...new Set(S_.map(s=>s.cursus))];
   return JSON.stringify({app:'evaluations-pse',version:2,exportedAt:new Date().toISOString(),
-    templates:sids?DB.templates.filter(t=>curs.includes(t.cursus)):DB.templates,sessions:S_,evals:DB.evals.filter(e=>ids.includes(e.sessionId)),trainers:DB.settings.trainers},null,1);
+    templates:sids?DB.templates.filter(t=>curs.includes(t.cursus)):DB.templates,sessions:S_,evals:DB.evals.filter(e=>ids.includes(e.sessionId)),trainers:DB.settings.trainers,scenarios:DB.scenarios||[]},null,1);
 }
 function csv(sids){
   const q=v=>{v=String(v??'');return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
@@ -1840,6 +1841,8 @@ function importData(txt){
   (d.trainers||[]).forEach(t=>nf+=up(DB.settings.trainers,t,t=>t.id));
   (d.sessions||[]).forEach(s=>ns+=up(DB.sessions,s,s=>Array.isArray(s.participants)));
   (d.evals||[]).forEach(e=>ne+=up(DB.evals,e,e=>e.tpl&&e.kind&&e.sessionId));
+  let nsc=0;(d.scenarios||[]).forEach(x=>nsc+=up(scUser(),x,x=>x.id&&x.titre&&x.cur));
+  if(nsc&&!nt&&!ns&&!ne&&!nf){save(true);toast(nsc+' scénario(s) importé(s)');render();return}
   if(!nt&&!ns&&!ne&&!nf){toast('Rien de reconnu dans ce fichier');return}
   save(true);toast(`Importé : ${ns} formation(s), ${ne} fiche(s), ${nf} formateur(s), ${nt} grille(s)`);render();
 }
@@ -2055,6 +2058,7 @@ function applyBind(el){
   if(sc==='theory'){const se=curSess(),c=ensureCert(se,el.dataset.pid);if(c){c.theory=c.theory||{};c.theory.score=v;if(c.theory.src==='qcm')delete c.theory.src;touch(c)}return 'theory'}
   if(sc==='part'){const se=curSess(),pp=participant(se,S.pid);if(pp){setPath(pp,p,v);se.updatedAt=Date.now();save()}return}
   if(sc==='sess'){const se=curSess();if(se){if(p.startsWith('fc.'))se.fc=se.fc||{};setPath(se,p,v);se.updatedAt=Date.now();save()}return}
+  if(sc==='scdraft'){if(el.dataset.lines!==undefined)v=v.split('\n');setPath(S.scdraft,p,v);if(p==='cur')render();return}
   if(sc==='tdraft'){if(el.type==='number')v=v===''?'':Number(v);setPath(S.tdraft,p,v);return}
   const e=curEval();if(!e)return;if(p.startsWith('theory.'))e.theory=e.theory||{};setPath(e,p,v);touch(e);
 }
@@ -2062,8 +2066,11 @@ function applyBind(el){
 /* =========================================================
    Scénarios de cas concrets : bibliothèque, planning, matériel, fiches à imprimer
    ========================================================= */
-const scList=cur=>SCENARIOS.filter(x=>x.cur===cur);
-const scById=id=>SCENARIOS.find(x=>x.id===id);
+const scUser=()=>DB.scenarios=DB.scenarios||[];
+const scAll=()=>{const o=scUser();return [...SCENARIOS.map(x=>o.find(y=>y.id===x.id)||x),...o.filter(y=>!SCENARIOS.some(x=>x.id===y.id))]};
+const scList=cur=>scAll().filter(x=>x.cur===cur).sort((a,b)=>(a.jour||'').localeCompare(b.jour||'')||(+a.n||0)-(+b.n||0));
+const scById=id=>scAll().find(x=>x.id===id);
+const scKind=c=>SCENARIOS.some(x=>x.id===c.id)?(scUser().some(y=>y.id===c.id)?'modifie':'fourni'):'perso';
 const scPlan=s=>{s.plan=s.plan||[];return s.plan};
 const scPlanned=(s,id)=>scPlan(s).find(p=>p.id===id);
 const scDone=(s,id)=>DB.evals.some(e=>e.sessionId===s.id&&e.scenarioId===id);
@@ -2084,9 +2091,10 @@ function viewScenarios(){const s=curSess();if(!s)return viewSessions();const all
     return `<div class="panel"><button class="line" style="align-items:flex-start" data-act="open-sc" data-id="${c.id}"><span class="av">${c.n}</span><span class="grow"><b>${esc(c.titre)}</b>
       <span class="small muted" style="display:block">${esc(c.theme)}</span>
       <span class="small muted" style="display:block">${esc(c.jour)} · ${esc(c.etape)} · ${esc(NIV[c.niveau]||'')} · ${esc(c.duree.split('+')[0].trim())}</span>
-      <span class="chips" style="margin-top:6px">${[...c.cases,...c.checks.filter(k=>/^d/.test(k))].map(k=>SCTAG[k]?`<span class="pill neutral">${SCTAG[k]}</span>`:'').join('')}${dn?'<span class="pill ok">Réalisé</span>':pl?'<span class="pill wait">Prévu</span>':''}</span></span>${I.chev}</button>
+      <span class="chips" style="margin-top:6px">${[...c.cases,...c.checks.filter(k=>/^d/.test(k))].map(k=>SCTAG[k]?`<span class="pill neutral">${SCTAG[k]}</span>`:'').join('')}${scKind(c)==='perso'?'<span class="pill ex">Personnel</span>':scKind(c)==='modifie'?'<span class="pill ex">Modifié</span>':''}${dn?'<span class="pill ok">Réalisé</span>':pl?'<span class="pill wait">Prévu</span>':''}</span></span>${I.chev}</button>
       <div class="bd" style="padding-top:0;display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm ${pl?'primary':''}" data-act="sc-plan" data-id="${c.id}">${pl?'✓ Au planning':'Ajouter au planning'}</button>${EMBED?'':`<button class="btn sm" data-act="new-sc-fiche" data-id="${c.id}">Évaluer ce cas</button>`}</div></div>`};
   return `<div class="stack"><p class="muted small" style="margin:0">Scénarios classés selon la progression de la formation (${esc(jours.join(', '))}). Ajoutez ceux que vous voulez jouer : l’application prépare la liste de matériel et les fiches de briefing à imprimer.</p>
+    <div class="row"><button class="btn red" data-act="sc-new">${I.plus}Créer un scénario</button>${scUser().length&&!EMBED?`<button class="btn" data-act="sc-share">${I.share}Partager mes scénarios (${scUser().length})</button>`:''}</div>
     <div class="chips">${[['all','Tous'],...jours.map(j=>[j,j]),['plan','Au planning ('+scPlan(s).length+')']].map(([k,l])=>`<button class="chip ${f===k?'on':''}" data-act="scj" data-v="${k}">${esc(l)}</button>`).join('')}</div>
     ${L.length?`<div class="cards">${L.map(card).join('')}</div>`:'<div class="empty">Aucun scénario dans ce filtre.</div>'}</div>`}
 function viewScenario(){const s=curSess(),c=scById(S.scid);if(!s||!c)return viewSessions();const pl=scPlanned(s,c.id);const got=(pl&&pl.got)||{};
@@ -2100,8 +2108,9 @@ function viewScenario(){const s=curSess(),c=scById(S.scid);if(!s||!c)return view
    <div class="panel"><div class="bd stack" style="gap:8px"><div class="row">${badge(c.cur)}<span class="pill neutral">${esc(c.jour)}</span><span class="pill neutral">${esc(NIV[c.niveau]||'')}</span><span class="small muted grow">${esc(c.duree)}</span></div>
      <div style="font-weight:700;color:var(--brand)">${esc(c.theme)}</div><div class="small muted">Étape de la formation : ${esc(c.etape)}</div>
      <div class="small"><b>Lieu :</b> ${esc(c.lieu)}<br><b>Équipe :</b> ${esc(c.equipe)}</div>
-     <div class="row"><button class="btn sm ${pl?'primary':''}" data-act="sc-plan" data-id="${c.id}">${pl?'✓ Au planning':'Ajouter au planning'}</button>${EMBED?'':`<button class="btn sm red" data-act="new-sc-fiche" data-id="${c.id}">Évaluer ce cas</button><button class="btn sm" data-act="pdf-sc-brief">${I.pdf}Briefings</button>`}</div></div></div>
-   ${sec('Objectifs',ul(c.objectifs),true)}
+     <div class="row"><button class="btn sm ${pl?'primary':''}" data-act="sc-plan" data-id="${c.id}">${pl?'✓ Au planning':'Ajouter au planning'}</button>${EMBED?'':`<button class="btn sm red" data-act="new-sc-fiche" data-id="${c.id}">Évaluer ce cas</button><button class="btn sm" data-act="pdf-sc-brief">${I.pdf}Briefings</button>`}</div>
+     <div class="row"><button class="btn sm" data-act="sc-edit">${I.edit}Modifier</button><button class="btn sm" data-act="sc-dup">${I.copy}Dupliquer</button>${scKind(c)==='perso'?`<button class="btn sm danger" data-act="sc-del">${I.trash}Supprimer</button>`:scKind(c)==='modifie'?`<button class="btn sm danger" data-act="sc-del">Rétablir l’original</button>`:''}</div></div></div>
+   ${(c.objectifs||[]).length?sec('Objectifs',ul(c.objectifs),true):''}
    ${sec('Message d’alerte et contexte',`<div><b class="small">Message d’alerte (aux secouristes)</b><div>${esc(c.message)}</div></div><div><b class="small">Contexte (animateur)</b><div>${esc(c.contexte)}</div></div>`,true)}
    ${sec('Briefings : victime, tiers',c.roles.map(role).join(''),true)}
    ${sec('Briefing des secouristes',`<div>${esc(c.secouristes)}</div>`,false)}
@@ -2158,6 +2167,67 @@ Object.assign(A,{
   'pdf-sc-brief':()=>{const c=scById(S.scid);runExport('Création du PDF…',()=>({files:[pdfFile(`${c.cur}_briefings_${String(c.n).padStart(2,'0')}_${slug(c.titre)}`,scBriefPages(c))],title:'Briefings'}))},
   'pdf-sc-mat':()=>{const s=curSess();if(!scPlan(s).length){toast('Ajoutez d’abord des scénarios au planning');return}runExport('Création du PDF…',()=>({files:[pdfFile(`${s.cursus}_${slug(s.title||'formation')}_materiel-scenarios`,scMatPages(s))],title:'Matériel'}))}
 });
+
+/* ---- éditeur de scénarios ---- */
+const SC_BLANK=cur=>({id:'u'+uid(),cur,n:'',titre:'',theme:'',jour:'J1',etape:'',niveau:1,duree:'10 min + 10 min de débriefing',lieu:'',equipe:cur==='PSE2'?'Équipe de 3 secouristes PSE2':'Binôme de secouristes PSE1',
+  cases:[],checks:[],objectifs:[],message:'',contexte:'',roles:[{t:'Victime',nom:'',brief:'',jeu:'',param:[],maq:''}],secouristes:'',evolution:[['','']],attendus:[],observe:{},
+  mat:{lieu:[],maq:[],acc:[],sec:[]},securite:'',debrief:[]});
+const scClean=d=>{const L=a=>(a||[]).map(x=>String(x).trim()).filter(Boolean);
+  ['objectifs','attendus','debrief'].forEach(k=>d[k]=L(d[k]));Object.keys(d.mat).forEach(k=>d.mat[k]=L(d.mat[k]));
+  d.roles=d.roles.filter(r=>r.nom.trim()||r.brief.trim()).map(r=>({...r,param:L(r.param)}));d.evolution=d.evolution.filter(x=>(x[0]||'').trim()||(x[1]||'').trim());
+  Object.keys(d.observe).forEach(k=>{if(!String(d.observe[k]).trim())delete d.observe[k]});d.niveau=+d.niveau||1;
+  const crit=new Set((formTpls(d.cur).find(t=>!t.fiche)||{criteria:[]}).criteria.map(c=>c.id));Object.keys(d.observe).forEach(k=>{if(!crit.has(k))delete d.observe[k]});
+  const ok=new Set(scSits(d.cur).map(x=>x.id));d.cases=d.cases.filter(k=>ok.has(k));d.checks=d.checks.filter(k=>ok.has(k));return d};
+const scSits=cur=>{const T=formTpls(cur).find(t=>!t.fiche);if(!T)return [];
+  return [...(T.situations||[]).map(x=>({id:x.id,label:x.label,f:'cases'})),...T.criteria.filter(c=>c.subMode==='check').flatMap(c=>c.children.map(ch=>({id:ch.id,label:(c.code||'')+' · '+ch.label,f:'checks'})))]};
+function viewScEdit(){const d=S.scdraft;if(!d)return viewScenarios();const B=p=>`data-bind="${p}" data-scope="scdraft"`;
+  const inp=(l,p,v,ph='')=>`<label class="f">${l}<input type="text" value="${esc(v||'')}" placeholder="${esc(ph)}" ${B(p)}></label>`;
+  const ta=(l,p,v,ph='',rows=3)=>`<label class="f">${l}<textarea rows="${rows}" placeholder="${esc(ph)}" ${B(p)}>${esc(v||'')}</textarea></label>`;
+  const tl=(l,p,a,ph='')=>`<label class="f">${l} <span class="small muted">(une ligne par élément)</span><textarea rows="${Math.max(3,(a||[]).length+1)}" placeholder="${esc(ph)}" data-lines ${B(p)}>${esc((a||[]).join('\n'))}</textarea></label>`;
+  const panel=(t,body)=>`<section class="panel"><div class="hd"><h3>${t}</h3></div><div class="bd stack">${body}</div></section>`;
+  const T=formTpls(d.cur).find(t=>!t.fiche);const crit=T?T.criteria:[];
+  return `<div class="stack">
+   ${panel('Identification',`<div class="fields">
+     <label class="f">Formation<select ${B('cur')}>${['PSE1','PSE2'].map(c=>`<option ${d.cur===c?'selected':''}>${c}</option>`).join('')}</select></label>
+     ${inp('N°','n',d.n,'ex. 18')}
+     <label class="f">Jour de formation<select ${B('jour')}>${['J1','J2','J3','J4','J5','J6'].map(j=>`<option ${d.jour===j?'selected':''}>${j}</option>`).join('')}</select></label>
+     <label class="f">Niveau<select ${B('niveau')}>${[1,2,3].map(n=>`<option value="${n}" ${+d.niveau===n?'selected':''}>${NIV[n]}</option>`).join('')}</select></label></div>
+     ${inp('Titre du scénario','titre',d.titre,'ex. Malaise au gymnase')}${inp('Thème (repris sur la fiche d’évaluation)','theme',d.theme,'ex. Malaise hypoglycémique')}
+     ${inp('Étape de la progression','etape',d.etape,'ex. Malaises et affections spécifiques')}
+     <div class="fields">${inp('Durée','duree',d.duree)}${inp('Lieu et décor','lieu',d.lieu)}</div>${inp('Équipe','equipe',d.equipe)}`)}
+   ${panel('Situations travaillées',`<p class="small muted" style="margin:0">Cochées d’office sur la fiche d’évaluation créée depuis ce scénario.</p><div style="display:grid;gap:2px;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))">${scSits(d.cur).map(x=>`<label class="cb" style="font-weight:500"><input type="checkbox" data-act="sc-sit" data-f="${x.f}" data-k="${x.id}" ${(d[x.f]||[]).includes(x.id)?'checked':''}>${esc(x.label)}</label>`).join('')}</div>`)}
+   ${panel('Objectifs et situation de départ',`${tl('Objectifs pédagogiques','objectifs',d.objectifs)}${ta('Message d’alerte (lu aux secouristes)','message',d.message)}${ta('Contexte (pour l’animateur)','contexte',d.contexte)}`)}
+   <section class="panel"><div class="hd"><h3>Rôles : victimes et tiers</h3><button class="btn sm" data-act="sc-role-add">${I.plus}Ajouter un rôle</button></div><div class="bd stack">
+     ${d.roles.map((r,i)=>`<div class="panel" style="border-left:4px solid var(--brand)"><div class="bd stack">
+       <div class="row"><label class="f" style="width:140px">Rôle<select ${B('roles.'+i+'.t')}>${['Victime','Tiers','Témoin','Autre'].map(x=>`<option ${r.t===x?'selected':''}>${x}</option>`).join('')}</select></label><span class="grow">${inp('Nom, âge','roles.'+i+'.nom',r.nom)}</span><button class="btn danger" data-act="sc-role-rm" data-i="${i}" aria-label="Retirer le rôle">${I.trash}</button></div>
+       ${ta('Briefing','roles.'+i+'.brief',r.brief,'Ce que la personne sait, ressent, dit')}${ta('Jeu et évolution','roles.'+i+'.jeu',r.jeu,'Comment réagir selon les actions des secouristes',2)}
+       ${tl('Paramètres à donner','roles.'+i+'.param',r.param,'ex. FR 24/min · FC 110/min · SpO2 94 %')}${inp('Maquillage','roles.'+i+'.maq',r.maq)}</div></div>`).join('')}</div></section>
+   ${panel('Secouristes et évolution',`${ta('Briefing des secouristes','secouristes',d.secouristes)}
+     <div class="stack" style="gap:6px"><div class="row"><b class="small grow">Évolution : si… alors…</b><button class="btn sm" data-act="sc-evo-add">${I.plus}Ajouter</button></div>
+     ${d.evolution.map((x,i)=>`<div class="row" style="align-items:flex-end"><span class="grow">${inp('Si','evolution.'+i+'.0',x[0])}</span><span class="grow">${inp('Alors','evolution.'+i+'.1',x[1])}</span><button class="btn danger" data-act="sc-evo-rm" data-i="${i}" aria-label="Retirer">${I.trash}</button></div>`).join('')}</div>`)}
+   ${panel('Attendus et observation',`${tl('Gestes et attitudes attendus','attendus',d.attendus)}
+     <p class="small muted" style="margin:0">Ce qui sera observé, critère par critère (laisser vide si non observé) :</p>
+     ${crit.map(c=>ta(`<span><span class="code">${esc(c.code)}</span>${esc(c.label)}</span>`,'observe.'+c.id,d.observe[c.id],'',2)).join('')}`)}
+   ${panel('Matériel à préparer',Object.keys(MATLAB).map(k=>tl(MATLAB[k],'mat.'+k,d.mat[k])).join(''))}
+   ${panel('Sécurité et débriefing',`${ta('Sécurité de l’exercice','securite',d.securite)}${tl('Questions de débriefing','debrief',d.debrief)}`)}
+   <div class="row"><button class="btn primary grow" data-act="sc-save">Enregistrer le scénario</button><button class="btn" data-act="sc-cancel">Annuler</button></div>
+  </div>`}
+Object.assign(A,{
+  'sc-new':()=>{const s=curSess();const d=SC_BLANK(s&&['PSE1','PSE2'].includes(s.cursus)?s.cursus:'PSE1');d.n=String(Math.max(0,...scList(d.cur).map(x=>+x.n||0))+1);S.scdraft=d;S.scNew=true;go('scEdit')},
+  'sc-edit':()=>{const c=scById(S.scid);S.scdraft=clone(c);['roles','evolution','objectifs','attendus','debrief','cases','checks'].forEach(k=>S.scdraft[k]=S.scdraft[k]||[]);S.scdraft.mat=Object.assign({lieu:[],maq:[],acc:[],sec:[]},S.scdraft.mat);S.scdraft.observe=S.scdraft.observe||{};S.scNew=false;go('scEdit')},
+  'sc-dup':()=>{const c=clone(scById(S.scid));c.id='u'+uid();c.titre+=' (copie)';c.n=String(Math.max(0,...scList(c.cur).map(x=>+x.n||0))+1);S.scdraft=c;S.scNew=true;go('scEdit')},
+  'sc-cancel':()=>{const n=S.scNew;S.scdraft=null;go(n?'scenarios':'scenario')},
+  'sc-save':()=>{const d=S.scdraft;if(!d.titre.trim()){toast('Donnez un titre au scénario');return}scClean(d);d.n=d.n===''?'':(+d.n||d.n);
+    const U=scUser(),i=U.findIndex(x=>x.id===d.id);d.updatedAt=Date.now();if(i>=0)U[i]=d;else U.push(d);save(true);S.scdraft=null;S.scFrom='';toast('Scénario enregistré');go('scenario',{scid:d.id})},
+  'sc-del':()=>{const c=scById(S.scid),k=scKind(c);confirmBox(k==='perso'?`Supprimer le scénario « ${c.titre} » ?`:`Revenir à la version d’origine de « ${c.titre} » ? Vos modifications seront perdues.`,k==='perso'?'Supprimer':'Rétablir',()=>{
+    DB.scenarios=scUser().filter(x=>x.id!==c.id);if(k==='perso'){DB.sessions.forEach(s=>{if(s.plan)s.plan=s.plan.filter(p=>p.id!==c.id)});save(true);go('scenarios')}else{save(true);render()}toast(k==='perso'?'Scénario supprimé':'Version d’origine rétablie')})},
+  'sc-sit':(d,ev,el)=>{const L=S.scdraft[d.f]=S.scdraft[d.f]||[];const i=L.indexOf(d.k);if(el.checked&&i<0)L.push(d.k);if(!el.checked&&i>=0)L.splice(i,1)},
+  'sc-role-add':()=>{S.scdraft.roles.push({t:'Tiers',nom:'',brief:'',jeu:'',param:[],maq:''});render()},
+  'sc-role-rm':d=>{S.scdraft.roles.splice(+d.i,1);render()},
+  'sc-evo-add':()=>{S.scdraft.evolution.push(['','']);render()},
+  'sc-evo-rm':d=>{S.scdraft.evolution.splice(+d.i,1);render()},
+  'sc-share':()=>{runExport('Préparation…',()=>({files:[{name:'scenarios_'+today()+'.json',mime:'application/json',data:JSON.stringify({app:'evaluations-pse',kind:'scenarios',scenarios:scUser()},null,1)}],title:'Scénarios'}))}
+});
 document.addEventListener('input',ev=>{
   const el=ev.target;
   if(el.dataset&&el.dataset.svWhy!==undefined&&S.surveyDraft){S.surveyDraft.why[el.dataset.svWhy]=el.value;return}
@@ -2170,7 +2240,7 @@ document.addEventListener('change',ev=>{
   if(el.dataset.act&&el.type==='checkbox'){const f=A[el.dataset.act];if(f)f(el.dataset,ev,el);return}
   if(!el.dataset.bind)return;
   if(el.id==='c-score'||el.dataset.scope==='theory'){render();return}
-  if(el.tagName==='SELECT'||el.type==='checkbox'){applyBind(el);if(el.dataset.scope==='eval'||el.dataset.scope==='ui'||(el.dataset.scope==='tdraft'&&/subMode|auto/.test(el.dataset.bind)))render()}
+  if(el.tagName==='SELECT'||el.type==='checkbox'){applyBind(el);if(el.dataset.scope==='scdraft'){}else if(el.dataset.scope==='eval'||el.dataset.scope==='ui'||(el.dataset.scope==='tdraft'&&/subMode|auto/.test(el.dataset.bind)))render()}
   else if(el.dataset.scope==='tdraft'&&el.dataset.bind==='cursus')render();
 });
 document.addEventListener('toggle',ev=>{const el=ev.target;if(el.dataset&&el.dataset.panel)S.open[el.dataset.panel]=el.open},true);
@@ -2179,7 +2249,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)save(true)}
 /* Bouton retour Android */
 if(NATIVE&&window.Capacitor.Plugins.App){window.Capacitor.Plugins.App.addListener('backButton',()=>{
   if($('#overlay').innerHTML){closeModal();return}
-  const m={session:'sessions',person:'session',sessionEdit:S.draftNew?'sessions':'session',formative:S.pid?'person':'session',cert:'person',tech:'person',suivi:'person',techs:'session',qcm:'cert',satis:'session',survey:'session',tpl:'tpls',scenarios:'session',scenario:S.scFrom==='formative'?'formative':'scenarios'};
+  const m={session:'sessions',person:'session',sessionEdit:S.draftNew?'sessions':'session',formative:S.pid?'person':'session',cert:'person',tech:'person',suivi:'person',techs:'session',qcm:'cert',satis:'session',survey:'session',tpl:'tpls',scenarios:'session',scEdit:S.scNew?'scenarios':'scenario',scenario:S.scFrom==='formative'?'formative':'scenarios'};
   if(m[S.view])go(m[S.view]);else if(S.view!=='sessions'){S.tab='sessions';go('sessions')}else window.Capacitor.Plugins.App.exitApp();
 })}
 window.__loadForms=loadForms;
