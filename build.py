@@ -32,19 +32,21 @@ def page(body, extra_head='', extra_body=''):
     return HEAD + extra_head + '</head>\n<body>\n' + body + extra_body + '\n</body>\n</html>\n'
 
 jspdf = open('vendor/jspdf.umd.min.js', encoding='utf-8').read()
+sdk = open('vendor/anthropic-sdk.min.js', encoding='utf-8').read()  # SDK officiel Anthropic (tools/sdk-bundle)
 
 # 1) Fichier unique
 FORMS = {os.path.splitext(f)[0]: 'data:image/png;base64,' + b64('docs/app/forms/' + f) for f in sorted(os.listdir('docs/app/forms')) if f.endswith('.png')}
 embed = '<script>window.__FORMS_EMBED__=' + json.dumps(FORMS) + ';window.__TECH_LAYOUT__=' + open('docs/app/forms/layout-tech.json', encoding='utf-8').read() + ';</script>'
 single = src.replace('<!--FONTS-->', '<style>' + font_css(lambda f: 'data:font/woff2;base64,' + b64('docs/app/fonts/' + f)) + '</style>') \
-            .replace('<!--JSPDF-->', embed + '<script>' + jspdf + '</script>')
+            .replace('<!--JSPDF-->', embed + '<script>' + jspdf + '</script><script>' + sdk + '</script>')
 open('fichier-unique.html', 'w', encoding='utf-8').write(page(single))
 
 # 2) PWA / Android
 os.makedirs('docs/app/vendor', exist_ok=True)
 open('docs/app/vendor/jspdf.umd.min.js', 'w', encoding='utf-8').write(jspdf)
+open('docs/app/vendor/anthropic-sdk.min.js', 'w', encoding='utf-8').write(sdk)
 body = src.replace('<!--FONTS-->', '<style>' + font_css(lambda f: 'fonts/' + f) + '</style>') \
-          .replace('<!--JSPDF-->', '<script src="vendor/jspdf.umd.min.js"></script>')
+          .replace('<!--JSPDF-->', '<script src="vendor/jspdf.umd.min.js"></script><script src="vendor/anthropic-sdk.min.js"></script>')
 head = '''<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -64,9 +66,9 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http') && !(win
 html = page(body, head, sw_reg)
 open('docs/app/index.html', 'w', encoding='utf-8').write(html)
 
-assets = ['./', 'index.html', 'manifest.webmanifest', 'vendor/jspdf.umd.min.js'] + [f'fonts/{f}' for f in FONT_FILES] + \
+assets = ['./', 'index.html', 'manifest.webmanifest', 'vendor/jspdf.umd.min.js', 'vendor/anthropic-sdk.min.js'] + [f'fonts/{f}' for f in FONT_FILES] + \
          [f'forms/{f}' for f in sorted(os.listdir('docs/app/forms'))] + ['icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png']
-version = hashlib.sha1((html + jspdf).encode()).hexdigest()[:10]
+version = hashlib.sha1((html + jspdf + sdk).encode()).hexdigest()[:10]
 open('docs/app/sw.js', 'w', encoding='utf-8').write(f'''// Service worker : met l'application en cache pour un fonctionnement hors ligne.
 const CACHE='eval-pse-{version}';
 const ASSETS={assets!r};

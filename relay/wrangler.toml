@@ -1,0 +1,10 @@
+name = "eval-relais"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+
+# Secrets à créer (jamais dans ce fichier) :
+#   npx wrangler secret put ANTHROPIC_API_KEY
+#   npx wrangler secret put ACCESS_CODE
+# Facultatif : limiter l'accès à l'application publiée
+# [vars]
+# ALLOWED_ORIGIN = "https://forma-st.github.io"

@@ -1,4 +1,4 @@
-# Eval · UDPS 28 (version 2.8)
+# Eval · UDPS 28 (version 2.9)
 
 Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d'équipe (CE). Elle fonctionne **entièrement sans réseau**.
 
@@ -27,6 +27,14 @@ Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d
 - **C** : OUI quand le participant est pointé présent à toutes les journées (feuille de présence).
 - **D** : OUI à partir de 12/20 au questionnaire. Entre 10 et 11 : entretien de rattrapage avec le responsable pédagogique. Sous 10 : NON.
 - **Dossier** par participant, dans l'ordre du référentiel : technicité, fiches d'évaluation, certification.
+
+## Version 2.9 : appel au 15 avec un régulateur simulé par l'IA
+- Sur chaque scénario (et sur la fiche d'évaluation créée depuis un scénario) : **« Appeler le 15 »**. L'apprenant parle au micro de la tablette ou du téléphone (ou écrit) ; un régulateur simulé par l'IA Claude décroche, pose les questions d'un vrai régulateur et donne une décision cohérente avec le scénario. Le scénario sert à l'IA pour savoir ce qu'un bon bilan doit contenir ; elle ne le révèle pas.
+- Trois niveaux : débutant (guide l'apprenant), standard, certification (exigeant). Bouton « Rappel : bilan de surveillance ».
+- **« Raccrocher et corriger le bilan »** : note sur 10, 11 critères (présentation, adresse, motif, victimes, bilan vital, paramètres, bilan complémentaire, gestes, demande, clarté, prise en compte des consignes), points forts, points à améliorer, exemple de bilan bien transmis et proposition A / B / C pour la fiche d'évaluation (le formateur décide). PDF disponible ; les appels restent listés sur le scénario.
+- **Accès à l'IA** (Réglages › Régulation SAMU simulée) : soit une clé API Anthropic enregistrée sur l'appareil, soit le **serveur relais** de l'organisme (dossier `relay/`, voir son LISEZMOI) qui garde la clé et ne donne aux tablettes qu'un code d'accès. Il faut du réseau pendant l'appel ; le reste de l'application reste hors ligne.
+- Confidentialité : seuls le scénario et ce qui est dit pendant l'appel sont envoyés. Le nom de l'apprenant reste sur l'appareil.
+- Coût indicatif : quelques centimes à une vingtaine de centimes par appel corrigé (modèle Claude Opus 5.5).
 
 ## Version 2.8 : 60 scénarios et onglet Scénarios
 - **30 scénarios PSE1 et 30 scénarios PSE2**, répartis sur les jours de formation.

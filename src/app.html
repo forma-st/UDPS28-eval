@@ -132,6 +132,9 @@ button.line:hover{background:var(--surface-2)}
 .crit.sub .cl::before{content:"";position:absolute;left:4px;top:.6em;width:7px;height:7px;border-radius:50%;background:var(--muted)}
 .cl{font-weight:600;min-width:0}
 .code{display:inline-block;font-weight:800;font-size:.75rem;color:var(--brand);background:var(--brand-soft);border-radius:5px;padding:1px 6px;margin-right:6px;vertical-align:1px}
+.calllog{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;padding:4px 2px}
+.bub{align-self:flex-start;max-width:85%;background:var(--surface);border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:8px 12px;display:grid;gap:2px}
+.bub.me{align-self:flex-end;background:var(--brand-soft);border-color:var(--brand);border-radius:14px 14px 4px 14px}
 .feeds{font-size:.72rem;color:var(--muted);font-weight:500;display:block;margin-top:2px}
 .sits{display:grid;gap:2px;margin-top:6px}
 .sits .cb{min-height:36px;font-weight:500;font-size:.86rem}
@@ -236,7 +239,7 @@ input[type=color]{width:52px;height:40px;border:1px solid var(--line);border-rad
    Constantes et utilitaires
    ========================================================= */
 const KEY='evaluations-pse-v2';
-const APP_VERSION='2.8.0';
+const APP_VERSION='2.9.0';
 const LOGO='__LOGO__', MARK='__MARK__';
 const EMBED=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -265,6 +268,8 @@ const I={
   copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>',
   edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
   scen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg>',
+  phone:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>',
+  mic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
   x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'
 };
 
@@ -621,7 +626,7 @@ function go(view,opts={}){Object.assign(S,opts);S.view=view;render();window.scro
 function render(){
   renderTop();renderNav();
   const v=S.view,m=$('#main');
-  const views={sessions:viewSessions,session:viewSession,person:viewPerson,sessionEdit:viewSessionEdit,formative:viewFormative,cert:viewCert,tech:viewTech,techs:viewTechs,suivi:viewSuivi,scenarios:viewScenarios,scenario:viewScenario,scEdit:viewScEdit,qcm:viewQcm,survey:viewSurvey,satis:viewSatis,tpls:viewTpls,tpl:viewTplEdit,settings:viewSettings};
+  const views={sessions:viewSessions,session:viewSession,person:viewPerson,sessionEdit:viewSessionEdit,formative:viewFormative,cert:viewCert,tech:viewTech,techs:viewTechs,suivi:viewSuivi,scenarios:viewScenarios,scenario:viewScenario,scEdit:viewScEdit,call:viewCall,qcm:viewQcm,survey:viewSurvey,satis:viewSatis,tpls:viewTpls,tpl:viewTplEdit,settings:viewSettings};
   m.innerHTML=(views[v]||viewSessions)();
   $('#fabslot').innerHTML=v==='sessions'?`<button class="fab" data-act="new-session">${I.plus}Nouvelle formation</button>`:v==='tpls'?`<button class="fab" data-act="new-tpl">${I.plus}Nouvelle grille</button>`:'';
 }
@@ -643,6 +648,7 @@ function renderTop(){
   else if(v==='suivi'){const x=curEval();left=back('person');title=`Suivi · ${esc(pName(s,x.pid))}<small>${esc(x.tpl.name)}</small>`;right=pdfBtn('pdf-suivi')}
   else if(v==='scenarios'){const cu=scCur(),lk=scS()&&scS().cursus===cu;left=S.scNoSess?markImg():back('session');title=`Scénarios de cas concrets<small>${esc(cu)} · ${scList(cu).length} fiches${S.scNoSess?'':' · '+esc(s.title||s.cursus)}</small>`;right=lk?pdfBtn('pdf-sc-mat','Matériel'):''}
   else if(v==='scenario'){const c=scById(S.scid);left=back(S.scFrom==='formative'?'formative':'scenarios');title=`${c?esc(c.titre):'Scénario'}<small>${c?esc([c.cur,c.jour,c.etape].filter(Boolean).join(' · ')):''}</small>`;right=pdfBtn('pdf-sc','Fiche')}
+  else if(v==='call'){const c=scById(S.call&&S.call.scId);left=`<button class="ibtn" data-act="call-exit" aria-label="Quitter">${I.back}</button>`;title=`Appel au 15${S.call&&S.call.debrief?' · correction':''}<small>${c?esc(c.cur+' n°'+c.n+' · '+c.titre):''}</small>`;right=S.call&&S.call.debrief&&!EMBED?pdfBtn('pdf-call','PDF'):''}
   else if(v==='scEdit'){left=`<button class="ibtn" data-act="sc-cancel" aria-label="Annuler">${I.x}</button>`;title=`${S.scNew?'Nouveau scénario':'Modifier le scénario'}<small>${esc(S.scdraft.cur)}</small>`;right=`<button class="ibtn solid" data-act="sc-save">Enregistrer</button>`}
   else if(v==='techs'){left=back('session');title=`Fiches de technicité<small>${esc(s.title||s.cursus)}</small>`}
   else if(v==='qcm'){const c=curEval();left=back('cert');const st=qcmState(c,s);title=`QCM ${esc(s.cursus)} · ${esc(pName(s,c.pid))}<small>${st.done}/${st.tot} corrigées · ${String(st.score).replace('.',',')}/20</small>`;right=pdfBtn('pdf-qcm')}
@@ -1194,6 +1200,7 @@ function viewSettings(){
       <label class="f">Formation initiale<textarea id="txt-fi" style="min-height:180px" ${bind('texts.notifFI','settings')}>${esc(DB.settings.texts.notifFI)}</textarea></label>
       <label class="f">Formation continue (annexe du référentiel)<textarea id="txt-fc" style="min-height:220px" ${bind('texts.notifFC','settings')}>${esc(DB.settings.texts.notifFC)}</textarea></label>
       <div><button class="btn sm" data-act="texts-reset">Rétablir les textes d’origine</button></div></div></details>
+    ${viewAiSettings()}
     <section class="panel"><div class="hd"><h3>Sauvegarde et transfert</h3></div><div class="bd stack">
       <p class="small muted" style="margin:0">${nS} formation${nS>1?'s':''} et ${nE} fiche${nE>1?'s':''} enregistrées sur cet appareil, sans réseau. Envoyez une sauvegarde pour l’archiver ou pour passer les données sur une autre tablette (mail, Bluetooth, Quick Share, clé USB…), puis importez-la sur l’autre appareil.</p>
       <div class="row">
@@ -2055,13 +2062,14 @@ document.addEventListener('click',ev=>{
 function applyBind(el){
   const p=el.dataset.bind,sc=el.dataset.scope;let v=el.type==='checkbox'?el.checked:el.value;
   if(sc==='ui'){S[p]=v;return 'ui'}
-  if(sc==='settings'){setPath(DB.settings,p,v);save();if(p==='extraSkills')render();return}
+  if(sc==='settings'){setPath(DB.settings,p,v);save();if(p==='extraSkills'||p==='ai.mode')render();return}
   if(sc==='sdraft'){if(p.startsWith('fc.'))S.draft.fc=S.draft.fc||{};if(/^days\.\d+\.h$/.test(p))v=v===''?'':Number(v);setPath(S.draft,p,v);
     if(p==='type'||p==='cursus'||p==='start'){if(!S.draft.daysTouched){S.draft.days=defaultDays(S.draft)}render()}else if(p.startsWith('days.')){S.draft.daysTouched=true}return}
   if(sc==='theory'){const se=curSess(),c=ensureCert(se,el.dataset.pid);if(c){c.theory=c.theory||{};c.theory.score=v;if(c.theory.src==='qcm')delete c.theory.src;touch(c)}return 'theory'}
   if(sc==='part'){const se=curSess(),pp=participant(se,S.pid);if(pp){setPath(pp,p,v);se.updatedAt=Date.now();save()}return}
   if(sc==='sess'){const se=curSess();if(se){if(p.startsWith('fc.'))se.fc=se.fc||{};setPath(se,p,v);se.updatedAt=Date.now();save()}return}
   if(sc==='scdraft'){if(el.dataset.lines!==undefined)v=v.split('\n');setPath(S.scdraft,p,v);if(p==='cur')render();return}
+  if(sc==='call'){if(S.call)S.call[p]=v;return}
   if(sc==='tdraft'){if(el.type==='number')v=v===''?'':Number(v);setPath(S.tdraft,p,v);return}
   const e=curEval();if(!e)return;if(p.startsWith('theory.'))e.theory=e.theory||{};setPath(e,p,v);touch(e);
 }
@@ -2116,7 +2124,8 @@ function viewScenario(){const c=scById(S.scid);if(!c)return viewScenarios();cons
    <div class="panel"><div class="bd stack" style="gap:8px"><div class="row">${badge(c.cur)}<span class="pill neutral">${esc(c.jour)}</span><span class="pill neutral">${esc(NIV[c.niveau]||'')}</span><span class="small muted grow">${esc(c.duree)}</span></div>
      <div style="font-weight:700;color:var(--brand)">${esc(c.theme)}</div><div class="small muted">Étape de la formation : ${esc(c.etape)}</div>
      <div class="small"><b>Lieu :</b> ${esc(c.lieu)}<br><b>Équipe :</b> ${esc(c.equipe)}</div>
-     <div class="row">${s?`<button class="btn sm ${pl?'primary':''}" data-act="sc-plan" data-id="${c.id}">${pl?'✓ Au planning':'Ajouter au planning'}</button>`:''}${EMBED?'':`${s?`<button class="btn sm red" data-act="new-sc-fiche" data-id="${c.id}">Évaluer ce cas</button>`:''}<button class="btn sm" data-act="pdf-sc-brief">${I.pdf}Briefings</button>`}</div>
+     <div class="row">${s?`<button class="btn sm ${pl?'primary':''}" data-act="sc-plan" data-id="${c.id}">${pl?'✓ Au planning':'Ajouter au planning'}</button>`:''}${EMBED?'':`${s?`<button class="btn sm red" data-act="new-sc-fiche" data-id="${c.id}">Évaluer ce cas</button>`:''}<button class="btn sm" data-act="pdf-sc-brief">${I.pdf}Briefings</button>`}<button class="btn sm primary" data-act="call-start">${I.phone}Appeler le 15</button></div>
+     ${viewCallList(c)}
      <div class="row"><button class="btn sm" data-act="sc-edit">${I.edit}Modifier</button><button class="btn sm" data-act="sc-dup">${I.copy}Dupliquer</button>${scKind(c)==='perso'?`<button class="btn sm danger" data-act="sc-del">${I.trash}Supprimer</button>`:scKind(c)==='modifie'?`<button class="btn sm danger" data-act="sc-del">Rétablir l’original</button>`:''}</div></div></div>
    ${(c.objectifs||[]).length?sec('Objectifs',ul(c.objectifs),true):''}
    ${sec('Message d’alerte et contexte',`<div><b class="small">Message d’alerte (aux secouristes)</b><div>${esc(c.message)}</div></div><div><b class="small">Contexte (animateur)</b><div>${esc(c.contexte)}</div></div>`,true)}
@@ -2129,7 +2138,7 @@ function viewScenario(){const c=scById(S.scid);if(!c)return viewScenarios();cons
    ${sec('Sécurité',`<div>${esc(c.securite)}</div>`,true)}
    ${sec('Questions pour le débriefing',ul(c.debrief),false)}
   </div>`}
-function viewScLink(e){const c=scById(e.scenarioId);return `<section class="panel"><div class="hd"><h3>Scénario : ${esc(c.titre)}</h3><button class="btn sm" data-act="open-sc" data-id="${c.id}" data-from="formative">Voir</button></div>
+function viewScLink(e){const c=scById(e.scenarioId);return `<section class="panel"><div class="hd"><h3>Scénario : ${esc(c.titre)}</h3><span class="row"><button class="btn sm primary" data-act="call-start" data-id="${c.id}" data-from="formative">${I.phone}Appeler le 15</button><button class="btn sm" data-act="open-sc" data-id="${c.id}" data-from="formative">Voir</button></span></div>
   <div class="bd small"><b>Observer :</b><ul style="margin:4px 0 0;padding-left:20px;display:grid;gap:3px">${Object.entries(c.observe).map(([k,v])=>`<li><b>${esc(scObsLabel(c.cur,k).split(' · ')[0])}</b> ${esc(v)}</li>`).join('')}</ul></div></section>`}
 /* PDF : fiche animateur, briefings à remettre, liste de matériel */
 function scWriter(doc,P,title){const M=14,W=182;let y=0;
@@ -2236,7 +2245,191 @@ Object.assign(A,{
   'sc-evo-rm':d=>{S.scdraft.evolution.splice(+d.i,1);render()},
   'sc-share':()=>{runExport('Préparation…',()=>({files:[{name:'scenarios_'+today()+'.json',mime:'application/json',data:JSON.stringify({app:'evaluations-pse',kind:'scenarios',scenarios:scUser()},null,1)}],title:'Scénarios'}))}
 });
+
+/* =========================================================
+   Régulation SAMU simulée par l'IA (Claude) : appel au 15 depuis un scénario, puis correction du bilan.
+   Accès : clé API sur l'appareil, ou serveur relais (relay/) qui garde la clé. Rien n'est envoyé hors appel.
+   Aucun nom de participant n'est transmis : seulement le scénario et ce qui est dit pendant l'appel.
+   ========================================================= */
+const AI_MODEL='claude-opus-5-5';
+const AI_GREETING='SAMU, centre 15, j’écoute.';
+const CALL_LEVELS={debutant:'Débutant (régulateur patient qui guide)',standard:'Standard',certif:'Certification (régulateur exigeant)'};
+function aiCfg(){return DB.settings.ai=Object.assign({mode:'key',key:'',relay:'',code:'',voice:true},DB.settings.ai||{})}
+const aiReady=()=>{const a=aiCfg();return a.mode==='relay'?!!(a.relay.trim()&&a.code.trim()):!!a.key.trim()};
+function aiClient(){const a=aiCfg(),AN=window.Anthropic;if(!AN)throw new Error('module IA indisponible');
+  return a.mode==='relay'?new AN({apiKey:a.code.trim(),baseURL:a.relay.trim().replace(/\/+$/,''),dangerouslyAllowBrowser:true,maxRetries:1,timeout:90000})
+    :new AN({apiKey:a.key.trim(),dangerouslyAllowBrowser:true,maxRetries:1,timeout:90000})}
+function aiErr(e){const AN=window.Anthropic||{};
+  if(AN.AuthenticationError&&e instanceof AN.AuthenticationError)return aiCfg().mode==='relay'?'Code d’accès refusé par le serveur relais':'Clé API refusée : vérifiez-la dans Réglages';
+  if(AN.PermissionDeniedError&&e instanceof AN.PermissionDeniedError)return 'Accès refusé : vérifiez la clé ou le code d’accès';
+  if(AN.RateLimitError&&e instanceof AN.RateLimitError)return 'Trop de demandes en même temps : réessayez dans une minute';
+  if(AN.APIConnectionError&&e instanceof AN.APIConnectionError)return 'Pas de connexion : l’appel simulé a besoin du réseau';
+  if(AN.APIStatusError&&e instanceof AN.APIStatusError)return 'Le service IA a répondu une erreur ('+e.status+')';
+  return (e&&e.message)||String(e)}
+/* une requête au modèle ; fallbacks serveur activés en cas de refus de sécurité (scénarios sensibles) */
+async function aiAsk({system,messages,effort='low',max_tokens=4000,format}){
+  const r=await aiClient().beta.messages.create({model:AI_MODEL,max_tokens,betas:['server-side-fallback-2026-07-01'],fallbacks:'default',
+    system:[{type:'text',text:system,cache_control:{type:'ephemeral'}}],messages,output_config:format?{effort,format}:{effort}});
+  if(r.stop_reason==='refusal')throw new Error('L’IA n’a pas pu répondre à cette demande');
+  return r.content.filter(b=>b.type==='text').map(b=>b.text).join('').trim()}
+
+function scPromptData(c){
+  const L=[`Formation : ${c.cur}`,`Titre : ${c.titre}`,`Thème : ${c.theme}`,`Lieu : ${c.lieu}`,`Équipe : ${c.equipe}`,`Message d’alerte reçu par l’équipe : ${c.message}`,`Ce qui s’est passé : ${c.contexte}`];
+  (c.roles||[]).forEach(r=>{L.push(`${r.t} - ${r.nom} : ${r.brief}${r.jeu?' Évolution jouée : '+r.jeu:''}${(r.param||[]).length?' Paramètres : '+r.param.join(' ; '):''}`)});
+  if((c.evolution||[]).length)L.push('Évolution selon les actions : '+c.evolution.map(([a,b])=>`si ${a}, alors ${b}`).join(' ; '));
+  if((c.attendus||[]).length)L.push('Gestes attendus des secouristes : '+c.attendus.join(' ; '));
+  return L.join('\n')}
+function callSystem(c,level){
+  const lv={debutant:'Niveau débutant : sois patient et bienveillant, aide l’appelant à structurer son bilan par des questions simples et guidées.',
+    standard:'Niveau standard : comporte-toi comme un régulateur réel, efficace et courtois ; pose les questions qui manquent.',
+    certif:'Niveau certification : sois exigeant et bref. Dis seulement « Je vous écoute » et attends un bilan structuré ; ne pose que les questions indispensables, interromps poliment un message désordonné.'}[level]||'';
+  return `Tu joues le rôle du centre de réception et de régulation des appels du SAMU (le « 15 ») dans un exercice de formation aux premiers secours en équipe (PSE1 / PSE2), organisé par une association agréée de sécurité civile. Les personnes qui t’appellent sont des apprenants secouristes qui s’entraînent à transmettre un bilan. Tout est fictif.
+
+Tu as décroché en disant « ${AI_GREETING} ». Tu es d’abord l’assistant de régulation médicale qui prend l’appel (identité de l’appelant, adresse, motif), puis tu passes l’appel au médecin régulateur pour le bilan, en une phrase (« Je vous passe le médecin régulateur. » puis « Médecin régulateur, je vous écoute. »).
+
+Ce que tu réponds est lu à voix haute : une à trois phrases courtes, à l’oral, le plus souvent une seule question à la fois. Jamais de liste, de titre, de mise en forme ni d’émoji.
+
+Tu ne connais de la situation que ce que l’appelant te dit. Le scénario ci-dessous est confidentiel : ne le révèle jamais et n’invente pas d’informations à la place de l’appelant. Il te sert à savoir ce qu’un bon bilan devrait contenir, à poser les bonnes questions et à prendre une décision cohérente.
+
+Laisse l’appelant dérouler son bilan. S’il manque des éléments, demande-les comme un vrai régulateur : qualité de l’appelant et numéro de rappel, adresse précise et accès, nature de la situation, nombre de victimes, âge et sexe, conscience, ventilation, circulation, hémorragie, paramètres chiffrés, plaintes, antécédents, traitements, allergies, gestes réalisés et leur effet. Si l’appelant se perd, recentre-le poliment.
+
+Quand le bilan est suffisant, annonce une décision réaliste et cohérente avec le scénario (par exemple envoi d’une ambulance ou d’une équipe médicale, consignes de surveillance, demande de rappel pour le bilan de surveillance). Tes consignes restent dans le cadre des gestes des secouristes PSE et des recommandations françaises de premiers secours. Si l’appelant annonce une aggravation (perte de connaissance, arrêt cardiaque…), réagis aussitôt et brièvement.
+
+Pendant l’appel, ne donne aucune note ni aucun conseil pédagogique : la correction est faite après. Si l’appelant sort de l’exercice, rappelle en une phrase que tu es le 15 dans l’exercice. Si l’appelant met fin à l’appel, conclus en une phrase.
+
+${lv}
+
+Scénario confidentiel :
+${scPromptData(c)}`}
+const DEBRIEF_FORMAT={type:'json_schema',schema:{type:'object',additionalProperties:false,
+  required:['note','appreciation','suggestion_fiche','justification','criteres','points_forts','a_ameliorer','bilan_modele'],
+  properties:{note:{type:'integer',description:'Note sur 10'},appreciation:{type:'string'},suggestion_fiche:{type:'string',enum:['A','B','C']},justification:{type:'string'},
+    criteres:{type:'array',items:{type:'object',additionalProperties:false,required:['critere','niveau','commentaire'],properties:{critere:{type:'string'},niveau:{type:'string',enum:['acquis','partiel','absent','sans objet']},commentaire:{type:'string'}}}},
+    points_forts:{type:'array',items:{type:'string'}},a_ameliorer:{type:'array',items:{type:'string'}},bilan_modele:{type:'string'}}}};
+const DEBRIEF_CRIT=['Présentation de l’appelant (qui appelle, en quelle qualité, numéro de rappel)','Localisation précise et accès','Motif et circonstances','Nombre de victimes, âge et sexe','Bilan d’urgence vitale (hémorragie, conscience, ventilation, circulation)','Paramètres chiffrés','Bilan complémentaire (plaintes, examen, antécédents, traitements, allergies)','Gestes réalisés et leur effet','Demande et besoins exprimés','Clarté, ordre et concision du message','Prise en compte des questions et consignes du régulateur'];
+function debriefSystem(c){return `Tu es formateur de formateurs en premiers secours (PSE1 / PSE2) en France. Tu corriges la transmission d’un bilan au 15 réalisée par un apprenant secouriste pendant un exercice, à partir de la transcription de l’appel et du scénario joué.
+
+Évalue chacun de ces critères, dans cet ordre, avec le niveau acquis, partiel, absent ou sans objet, et un commentaire court qui cite si possible les mots de l’apprenant :
+${DEBRIEF_CRIT.map((x,i)=>`${i+1}. ${x}`).join('\n')}
+
+Donne une note sur 10, une appréciation globale de deux ou trois phrases, les points forts et les points à améliorer (concrets, trois au plus chacun), et un exemple de bilan oral bien construit pour ce scénario (six à dix phrases, prêt à être dit au téléphone).
+
+Propose aussi un niveau pour la fiche d’évaluation, critère « rend compte » / « assure la transmission du bilan » : A maîtrise particulièrement affirmée, B niveau attendu atteint, C maîtrise fragile ; justifie-le en une phrase. Cette proposition aide le formateur, qui reste seul à décider.
+
+Sois bienveillant, précis et juste : un bilan imparfait mais sûr n’est pas un échec. La transcription vient d’une reconnaissance vocale : ignore les fautes de transcription évidentes. Tout en français.
+
+Scénario joué :
+${scPromptData(c)}`}
+const callTranscript=m=>m.map(x=>(x.r==='u'?'Secouriste : ':'Régulateur : ')+x.t).join('\n');
+
+/* ---- voix : reconnaissance et synthèse (plugins Capacitor sur Android, API du navigateur sinon) ---- */
+const capPlug=n=>NATIVE&&window.Capacitor.Plugins&&window.Capacitor.Plugins[n];
+const voiceIn=()=>!!(capPlug('SpeechRecognition')||window.SpeechRecognition||window.webkitSpeechRecognition);
+let recog=null;
+async function listenOnce(onPartial){
+  const P=capPlug('SpeechRecognition');
+  if(P){try{await P.requestPermissions()}catch(e){}const r=await P.start({language:'fr-FR',maxResults:1,partialResults:false,popup:false});return ((r&&r.matches)||[])[0]||''}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)throw new Error('reconnaissance vocale indisponible');
+  return new Promise((res,rej)=>{const r=recog=new SR();r.lang='fr-FR';r.interimResults=true;r.continuous=false;let fin='';
+    r.onresult=ev=>{let tmp='';for(const x of ev.results){if(x.isFinal)fin=x[0].transcript;else tmp+=x[0].transcript}onPartial&&onPartial(fin||tmp)};
+    r.onerror=ev=>{recog=null;ev.error==='no-speech'?res(''):rej(new Error('micro : '+ev.error))};r.onend=()=>{recog=null;res(fin)};r.start()})}
+async function stopListen(){const P=capPlug('SpeechRecognition');if(P){try{await P.stop()}catch(e){}}if(recog){try{recog.stop()}catch(e){}}}
+async function speak(t){if(!aiCfg().voice||!t)return;const P=capPlug('TextToSpeech');
+  if(P){try{await P.speak({text:t,lang:'fr-FR',rate:1.0})}catch(e){}return}
+  if(window.speechSynthesis){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='fr-FR';const v=speechSynthesis.getVoices().find(x=>/^fr/i.test(x.lang));if(v)u.voice=v;speechSynthesis.speak(u)}}
+function hush(){const P=capPlug('TextToSpeech');if(P){try{P.stop()}catch(e){}}if(window.speechSynthesis)speechSynthesis.cancel()}
+
+/* ---- écrans ---- */
+function viewAiSettings(){const a=aiCfg();
+  return `<section class="panel"><div class="hd"><h3>Régulation SAMU simulée (IA)</h3><span class="pill ${aiReady()?'ok':'neutral'}">${aiReady()?'Prête':'À configurer'}</span></div><div class="bd stack">
+    <p class="small muted" style="margin:0">Depuis un scénario, « Appeler le 15 » met l’apprenant en ligne avec un régulateur simulé par l’IA Claude, puis corrige son bilan. Il faut du réseau pendant l’appel. Seuls le scénario et ce qui est dit pendant l’appel sont envoyés, jamais les noms des participants.</p>
+    <label class="f">Accès à l’IA<select id="ai-mode" ${bind('ai.mode','settings')}><option value="key" ${a.mode==='key'?'selected':''}>Clé API Anthropic enregistrée sur cet appareil</option><option value="relay" ${a.mode==='relay'?'selected':''}>Serveur relais de l’organisme</option></select></label>
+    ${a.mode==='key'?`<label class="f">Clé API (créée sur console.anthropic.com)<input type="password" id="ai-key" autocomplete="off" value="${esc(a.key)}" placeholder="sk-ant-…" ${bind('ai.key','settings')}></label>
+      <p class="small muted" style="margin:0">La clé reste sur cet appareil et n’est pas incluse dans les sauvegardes. Coût indicatif : quelques centimes par appel simulé.</p>`
+     :`<label class="f">Adresse du serveur relais<input type="url" id="ai-relay" value="${esc(a.relay)}" placeholder="https://eval-relais.exemple.workers.dev" ${bind('ai.relay','settings')}></label>
+      <label class="f">Code d’accès<input type="password" id="ai-code" autocomplete="off" value="${esc(a.code)}" ${bind('ai.code','settings')}></label>
+      <p class="small muted" style="margin:0">Le serveur relais garde la clé API ; les tablettes n’ont que le code d’accès (voir le dossier relay du projet).</p>`}
+    <label class="cb"><input type="checkbox" id="ai-voice" ${a.voice?'checked':''} ${bind('ai.voice','settings')}>Le régulateur répond à voix haute</label>
+    ${EMBED?'':`<div><button class="btn sm" data-act="ai-test">Tester la connexion</button></div>`}</div></section>`}
+function viewCallList(c){const L=(DB.calls||[]).filter(x=>x.scId===c.id&&x.debrief).slice(-5).reverse();if(!L.length)return '';
+  return `<div class="small"><b>Appels d’entraînement :</b> ${L.map(x=>`<button class="chip" style="min-height:32px" data-act="call-open" data-id="${x.id}">${esc(fmtDate(x.date))}${x.who?' · '+esc(x.who):''} · ${x.debrief.note}/10</button>`).join(' ')}</div>`}
+function viewCall(){const K=S.call;if(!K)return viewScenarios();const c=scById(K.scId);if(!c)return viewScenarios();
+  const s=K.sid?DB.sessions.find(x=>x.id===K.sid):null;const parts=s?s.participants.filter(p=>!p.archived):[];
+  const bubbles=[{r:'a',t:AI_GREETING},...K.msgs].filter(m=>!m.hidden).map(m=>`<div class="bub ${m.r==='u'?'me':''}"><span class="small muted">${m.r==='u'?'Secouriste':'Régulateur'}</span>${esc(m.t.replace(/^\[[^\]]*\]\s*/,''))}</div>`).join('');
+  if(K.debrief)return viewDebrief(K,c);
+  if(!K.started)return `<div class="stack">
+    <section class="panel"><div class="hd"><h3>Avant l’appel</h3></div><div class="bd stack">
+      <p style="margin:0">L’apprenant appelle le 15 pour transmettre son bilan, comme sur le terrain. À la fin, touchez « Raccrocher » : l’IA corrige la transmission.</p>
+      ${parts.length?`<label class="f">Apprenant qui appelle (reste sur cet appareil)<select id="call-who" ${bind('who','call')}><option value="">—</option>${parts.map(p=>`<option value="${esc(fullName(p))}" ${K.who===fullName(p)?'selected':''}>${esc(fullName(p))}</option>`).join('')}</select></label>`:''}
+      <label class="f">Niveau du régulateur<select id="call-level" ${bind('level','call')}>${Object.entries(CALL_LEVELS).map(([k,l])=>`<option value="${k}" ${K.level===k?'selected':''}>${l}</option>`).join('')}</select></label>
+      ${aiReady()?'':`<div class="small" style="color:var(--t-orange)">L’IA n’est pas configurée : renseignez l’accès dans Réglages › Régulation SAMU simulée.</div>`}
+      <button class="btn red" data-act="call-go" ${aiReady()?'':'disabled'}>${I.phone}Composer le 15</button></div></section></div>`;
+  const sec=Math.floor((Date.now()-K.t0)/1000);
+  return `<div class="stack">
+    <div class="panel"><div class="bd row"><span class="pill ok">En ligne</span><span class="small muted grow num">${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')} · ${esc(CALL_LEVELS[K.level])}</span><button class="btn sm" data-act="call-recall">Rappel : bilan de surveillance</button></div></div>
+    <div class="calllog" id="calllog">${bubbles}${K.busy?'<div class="bub"><span class="small muted">Régulateur</span>…</div>':''}</div>
+    ${K.err?`<div class="small" style="color:var(--t-rouge)">${esc(K.err)}</div>`:''}
+    <div class="row" style="align-items:stretch">
+      ${voiceIn()?`<button class="btn ${K.listening?'red':'primary'}" style="min-width:150px" data-act="call-mic" ${K.busy?'disabled':''}>${I.mic}${K.listening?'J’écoute… (toucher pour envoyer)':'Parler'}</button>`:''}
+      <input type="text" id="call-in" class="grow" style="min-height:48px" placeholder="${voiceIn()?'…ou écrire le message':'Écrire le message au régulateur'}" value="${esc(K.draft||'')}" ${K.busy?'disabled':''}>
+      <button class="btn" data-act="call-send" ${K.busy?'disabled':''}>Envoyer</button></div>
+    <button class="btn danger" data-act="call-end" ${K.busy||!K.msgs.length?'disabled':''}>Raccrocher et corriger le bilan</button>
+    ${voiceIn()?'':'<p class="small muted" style="margin:0">La reconnaissance vocale n’est pas disponible sur ce navigateur : utilisez la dictée du clavier ou écrivez.</p>'}</div>`}
+function viewDebrief(K,c){const D=K.debrief;const col={acquis:'ok',partiel:'wait',absent:'ko','sans objet':'neutral'};
+  const ul=a=>`<ul style="margin:0;padding-left:20px;display:grid;gap:4px">${(a||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+  return `<div class="stack">
+    <div class="tiles"><div class="tile"><span class="eyebrow">Note de la transmission</span><span class="big">${D.note}/10</span><span class="small muted">${esc(D.appreciation)}</span></div>
+      <div class="tile"><span class="eyebrow">Proposition pour la fiche d’évaluation</span><span class="big">${esc(D.suggestion_fiche)}</span><span class="small muted">${esc(D.justification)} Le formateur décide.</span></div></div>
+    <section class="panel"><div class="hd"><h3>Critères</h3></div><div class="lines">${(D.criteres||[]).map(x=>`<div class="line" style="min-height:0;align-items:flex-start"><span class="grow small"><b>${esc(x.critere)}</b><span style="display:block">${esc(x.commentaire)}</span></span><span class="pill ${col[x.niveau]||'neutral'}">${esc(x.niveau)}</span></div>`).join('')}</div></section>
+    <div class="tiles"><section class="panel"><div class="hd"><h3>Points forts</h3></div><div class="bd">${ul(D.points_forts)}</div></section>
+      <section class="panel"><div class="hd"><h3>À améliorer</h3></div><div class="bd">${ul(D.a_ameliorer)}</div></section></div>
+    <section class="panel"><div class="hd"><h3>Exemple de bilan bien transmis</h3></div><div class="bd">${esc(D.bilan_modele)}</div></section>
+    <details class="panel"><summary class="hd" style="cursor:pointer;list-style:none"><h3>Transcription de l’appel</h3></summary><div class="bd calllog">${[{r:'a',t:AI_GREETING},...K.msgs].filter(m=>!m.hidden).map(m=>`<div class="bub ${m.r==='u'?'me':''}"><span class="small muted">${m.r==='u'?'Secouriste':'Régulateur'}</span>${esc(m.t.replace(/^\[[^\]]*\]\s*/,''))}</div>`).join('')}</div></details>
+    <div class="row"><button class="btn primary" data-act="call-again">${I.phone}Nouvel appel sur ce scénario</button><button class="btn" data-act="call-exit">Retour au scénario</button></div></div>`}
+
+/* ---- déroulement de l'appel ---- */
+function callSave(K){DB.calls=DB.calls||[];const i=DB.calls.findIndex(x=>x.id===K.id);const rec={id:K.id,scId:K.scId,sid:K.sid||'',eid:K.eid||'',who:K.who||'',level:K.level,date:K.date,msgs:K.msgs,debrief:K.debrief||null};
+  if(i>=0)DB.calls[i]=rec;else DB.calls.push(rec);save()}
+const callScroll=()=>{const n=$('#calllog');if(n)n.scrollTop=n.scrollHeight;window.scrollTo(0,document.body.scrollHeight)};
+async function callTurn(text,hidden){const K=S.call;const c=scById(K.scId);text=String(text||'').trim();if(!text||K.busy)return;
+  K.msgs.push({r:'u',t:text,hidden:!!hidden});K.draft='';K.busy=true;K.err='';render();callScroll();
+  try{const reply=await aiAsk({system:callSystem(c,K.level),messages:K.msgs.map(m=>({role:m.r==='u'?'user':'assistant',content:m.t})),effort:'low'});
+    if(S.call!==K)return;K.msgs.push({r:'a',t:reply||'…'});K.busy=false;callSave(K);render();callScroll();speak(reply)}
+  catch(e){if(S.call!==K)return;K.msgs.pop();K.draft=text;K.busy=false;K.err=aiErr(e);render()}}
+let callTimer=null;
+function startCall(c,opts={}){hush();const s=scS();S.call={id:uid(),scId:c.id,sid:s&&s.cursus===c.cur?s.id:'',eid:opts.eid||'',who:opts.who||'',level:opts.level||'standard',date:today(),msgs:[],started:false,t0:0};go('call')}
+Object.assign(A,{
+  'ai-test':async()=>{if(!aiReady()){toast('Renseignez d’abord la clé ou le serveur relais');return}busy(true,'Test de la connexion…');
+    try{const r=await aiAsk({system:'Tu réponds en français, en quelques mots.',messages:[{role:'user',content:'Réponds seulement : connexion établie.'}],max_tokens:500});busy(false);toast('IA disponible : '+r.slice(0,60))}
+    catch(e){busy(false);toast(aiErr(e))}},
+  'call-start':d=>{const c=scById(d.id||S.scid);if(!c)return;if(d.from==='formative'){S.scFrom='formative'}S.scid=c.id;const e=d.from==='formative'?curEval():null;startCall(c,{eid:e?e.id:''})},
+  'call-go':()=>{const K=S.call;K.started=true;K.t0=Date.now();render();speak(AI_GREETING);clearInterval(callTimer);callTimer=setInterval(()=>{if(S.view==='call'&&S.call&&S.call.started&&!S.call.debrief&&!S.call.busy&&!S.call.listening&&document.activeElement!==$('#call-in')){const n=$('.panel .num');if(n){const sec=Math.floor((Date.now()-S.call.t0)/1000);n.textContent=`${String(Math.floor(sec/60)).padStart(2,'0')}:${String(sec%60).padStart(2,'0')} · ${CALL_LEVELS[S.call.level]}`}}},1000)},
+  'call-send':()=>{const n=$('#call-in');callTurn(n?n.value:'')},
+  'call-mic':async()=>{const K=S.call;if(K.listening){K.listening=false;await stopListen();return}
+    hush();K.listening=true;K.err='';render();
+    try{const t=await listenOnce(p=>{const n=$('#call-in');if(n)n.value=p});K.listening=false;if(S.call!==K)return;if(t)callTurn(t);else{render();toast('Je n’ai rien entendu')}}
+    catch(e){K.listening=false;K.err=String(e.message||e);render()}},
+  'call-recall':()=>callTurn('[Quelques minutes plus tard, l’équipe rappelle le 15 pour transmettre le bilan de surveillance.] Allô le 15, c’est l’équipe de secouristes, je vous rappelle pour le bilan de surveillance.'),
+  'call-end':async()=>{const K=S.call,c=scById(K.scId);hush();await stopListen();clearInterval(callTimer);busy(true,'Correction du bilan…');
+    try{const txt=await aiAsk({system:debriefSystem(c),messages:[{role:'user',content:'Transcription de l’appel :\n'+callTranscript([{r:'a',t:AI_GREETING},...K.msgs])}],effort:'medium',max_tokens:16000,format:DEBRIEF_FORMAT});
+      K.debrief=JSON.parse(txt);callSave(K);busy(false);render();window.scrollTo(0,0)}
+    catch(e){busy(false);toast('Correction impossible : '+aiErr(e))}},
+  'call-again':()=>{const K=S.call;startCall(scById(K.scId),{eid:K.eid,who:K.who,level:K.level})},
+  'call-exit':()=>{hush();stopListen();clearInterval(callTimer);const K=S.call;S.call=null;if(K&&K.eid&&S.scFrom==='formative'){go('formative',{eid:K.eid})}else go('scenario',{scid:K?K.scId:S.scid})},
+  'call-open':d=>{const x=(DB.calls||[]).find(y=>y.id===d.id);if(!x)return;S.call=Object.assign({started:true,t0:0},clone(x));go('call')},
+  'pdf-call':()=>{const K=S.call,c=scById(K.scId);runExport('Création du PDF…',()=>({files:[pdfFile(`${c.cur}_appel-15_${String(c.n).padStart(2,'0')}_${slug(K.who||'apprenant')}_${K.date}`,callPages(K,c))],title:'Appel au 15'}))}
+});
+function callPages(K,c){const D=K.debrief;return [{orient:'p',draw:doc=>{const P=pen(doc);const w=scWriter(doc,P,`${c.cur} · Transmission du bilan au 15`);
+  w.p(c.titre,{b:true,s:15,c:[0,43,107],gap:1});w.p(`${c.cur} · scénario n°${c.n} · ${fmtDate(K.date)}${K.who?' · '+K.who:''} · niveau ${CALL_LEVELS[K.level]||''}`,{s:8.5,c:GREY});w.y+=2;
+  w.lab('Note : ',`${D.note}/10 - ${D.appreciation}`);w.lab('Proposition pour la fiche d’évaluation : ',`${D.suggestion_fiche} - ${D.justification} (le formateur décide)`);
+  w.h('Critères');(D.criteres||[]).forEach(x=>w.li(`${x.critere} : ${x.niveau.toUpperCase()} - ${x.commentaire}`,{s:8.5}));
+  w.h('Points forts');(D.points_forts||[]).forEach(x=>w.li(x));w.h('À améliorer');(D.a_ameliorer||[]).forEach(x=>w.li(x));
+  w.h('Exemple de bilan bien transmis');w.p(D.bilan_modele);
+  w.h('Transcription de l’appel');[{r:'a',t:AI_GREETING},...K.msgs].filter(m=>!m.hidden).forEach(m=>w.p((m.r==='u'?'Secouriste : ':'Régulateur : ')+m.t.replace(/^\[[^\]]*\]\s*/,''),{s:8.5,gap:.8}));
+  P.font(false,6.5,GREY);doc.text(PT(stamp()+' - correction proposée par une IA, à valider par le formateur'),14,292)}}]}
+document.addEventListener('keydown',ev=>{if(ev.target&&ev.target.id==='call-in'&&ev.key==='Enter'){ev.preventDefault();A['call-send']()}});
 document.addEventListener('input',ev=>{
+  if(ev.target&&ev.target.id==='call-in'&&S.call){S.call.draft=ev.target.value;return}
   const el=ev.target;
   if(el.dataset&&el.dataset.svWhy!==undefined&&S.surveyDraft){S.surveyDraft.why[el.dataset.svWhy]=el.value;return}
   if(el.dataset&&el.dataset.svComment&&S.surveyDraft){S.surveyDraft.comment=el.value;return}if(!el.dataset||!el.dataset.bind||el.tagName==='SELECT'||el.type==='checkbox')return;
@@ -2257,7 +2450,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)save(true)}
 /* Bouton retour Android */
 if(NATIVE&&window.Capacitor.Plugins.App){window.Capacitor.Plugins.App.addListener('backButton',()=>{
   if($('#overlay').innerHTML){closeModal();return}
-  const m={session:'sessions',person:'session',sessionEdit:S.draftNew?'sessions':'session',formative:S.pid?'person':'session',cert:'person',tech:'person',suivi:'person',techs:'session',qcm:'cert',satis:'session',survey:'session',tpl:'tpls',scenarios:S.scNoSess?null:'session',scEdit:S.scNew?'scenarios':'scenario',scenario:S.scFrom==='formative'?'formative':'scenarios'};
+  const m={session:'sessions',person:'session',sessionEdit:S.draftNew?'sessions':'session',formative:S.pid?'person':'session',cert:'person',tech:'person',suivi:'person',techs:'session',qcm:'cert',satis:'session',survey:'session',tpl:'tpls',scenarios:S.scNoSess?null:'session',call:'scenario',scEdit:S.scNew?'scenarios':'scenario',scenario:S.scFrom==='formative'?'formative':'scenarios'};
   if(m[S.view])go(m[S.view]);else if(S.view!=='sessions'){S.tab='sessions';go('sessions')}else window.Capacitor.Plugins.App.exitApp();
 })}
 window.__loadForms=loadForms;

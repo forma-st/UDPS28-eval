@@ -1,0 +1,1 @@
+{"name":"eval-sdk-bundle","private":true,"version":"1.0.0","dependencies":{"@anthropic-ai/sdk":"^1.8.0","esbuild":"^0.28.2"}}
