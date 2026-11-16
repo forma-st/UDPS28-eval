@@ -3,7 +3,16 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "scripts": { "deploy": "wrangler deploy", "dev": "wrangler dev" },
-  "dependencies": { "@anthropic-ai/sdk": "^1.8.0" },
-  "devDependencies": { "wrangler": "^4.0.0" }
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "creer-agent": "node creer-agent.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "@elevenlabs/elevenlabs-js": "^2.79.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
 }

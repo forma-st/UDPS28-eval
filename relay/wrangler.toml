@@ -1,10 +1,13 @@
 name = "eval-relais"
 main = "src/index.js"
 compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"]
 
 # Secrets à créer (jamais dans ce fichier) :
 #   npx wrangler secret put ANTHROPIC_API_KEY
 #   npx wrangler secret put ACCESS_CODE
+#   npx wrangler secret put ELEVENLABS_API_KEY     (appel vocal ElevenLabs)
+#   npx wrangler secret put ELEVENLABS_AGENT_ID    (donné par : npm run creer-agent)
 # Facultatif : limiter l'accès à l'application publiée
 # [vars]
 # ALLOWED_ORIGIN = "https://forma-st.github.io"

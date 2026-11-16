@@ -1,4 +1,4 @@
-# Eval · UDPS 28 (version 2.12)
+# Eval · UDPS 28 (version 2.13)
 
 Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d'équipe (CE). Elle fonctionne **entièrement sans réseau**.
 
@@ -27,6 +27,12 @@ Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d
 - **C** : OUI quand le participant est pointé présent à toutes les journées (feuille de présence).
 - **D** : OUI à partir de 12/20 au questionnaire. Entre 10 et 11 : entretien de rattrapage avec le responsable pédagogique. Sous 10 : NON.
 - **Dossier** par participant, dans l'ordre du référentiel : technicité, fiches d'évaluation, certification.
+
+## Version 2.13 : appel au 15 avec une voix naturelle (ElevenLabs)
+- Nouveau moteur d'appel **ElevenLabs** : voix française naturelle, réponse en moins d'une seconde, tours de parole gérés par l'agent (il attend pendant les hésitations), et on peut couper la parole au régulateur comme au téléphone. Le cerveau reste Claude (Sonnet 5.5), avec le même rôle d'assistant de régulation puis de médecin régulateur, le scénario et le niveau choisis.
+- Plus de reconnaissance vocale du téléphone, donc plus de bip, et l'enregistrement pour la réécoute fonctionne sur tous les appareils.
+- Correction du bilan inchangée (Claude Opus 5.5) ; sans accès à Claude, l'appel garde sa transcription et son enregistrement.
+- Réglages › Régulation SAMU simulée › « Voix de l'appel » : ElevenLabs (par le serveur relais, ou agent public pour un essai) ou voix du téléphone (sans compte). Mise en place : `relay/LISEZMOI.md`.
 
 ## Version 2.12 : réécouter l'appel
 - L'appel à la voix est **enregistré** (voix de l'apprenant et du régulateur sur le haut-parleur) et se **réécoute** dans l'écran de correction.

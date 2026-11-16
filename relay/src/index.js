@@ -2,6 +2,7 @@
 // Les tablettes n'ont qu'un code d'accès ; le relais vérifie ce code, limite le modèle et la taille
 // des réponses, puis transmet la demande à l'API Claude avec le SDK officiel.
 import Anthropic from "@anthropic-ai/sdk";
+import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
 const ALLOWED_MODELS = ["claude-opus-5-5", "claude-sonnet-5-5"];
 const ALLOWED_BETAS = ["server-side-fallback-2026-07-01"];
@@ -28,10 +29,25 @@ export default {
 
     if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
     const url = new URL(request.url);
-    if (request.method !== "POST" || url.pathname !== "/v1/messages") return fail(404, "not_found_error", "Relais Eval : seul POST /v1/messages est accepté.");
+    const routes = ["/v1/messages", "/eleven/session"];
+    if (request.method !== "POST" || !routes.includes(url.pathname)) return fail(404, "not_found_error", "Relais Eval : route inconnue.");
 
     const code = (request.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
     if (!env.ACCESS_CODE || !sameCode(code, env.ACCESS_CODE)) return fail(401, "authentication_error", "Code d'accès invalide.");
+
+    // Appel vocal ElevenLabs : la clé reste ici ; la tablette reçoit un laissez-passer à usage unique.
+    if (url.pathname === "/eleven/session") {
+      if (!env.ELEVENLABS_API_KEY || !env.ELEVENLABS_AGENT_ID) return fail(501, "not_configured", "ElevenLabs n'est pas configuré sur le relais.");
+      const el = new ElevenLabsClient({ apiKey: env.ELEVENLABS_API_KEY, ...(env.ELEVENLABS_BASE_URL ? { baseUrl: env.ELEVENLABS_BASE_URL } : {}) });
+      const agentId = env.ELEVENLABS_AGENT_ID;
+      const out = {};
+      await Promise.allSettled([
+        el.conversationalAi.conversations.getWebrtcToken({ agentId }).then((r) => { out.token = r.token; }),
+        el.conversationalAi.conversations.getSignedUrl({ agentId }).then((r) => { out.signedUrl = r.signedUrl; }),
+      ]);
+      if (!out.token && !out.signedUrl) return fail(502, "api_error", "ElevenLabs n'a pas ouvert la session (clé ou identifiant d'agent ?).");
+      return reply(out, 200);
+    }
 
     let body;
     try {

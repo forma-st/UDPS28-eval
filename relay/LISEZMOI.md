@@ -36,5 +36,34 @@ La dernière commande affiche l'adresse du relais (par exemple `https://eval-rel
 
 Pour changer le code (formateur parti, code diffusé) : relancer `npx wrangler secret put ACCESS_CODE` ; l'ancien code ne fonctionne plus aussitôt.
 
+## Appel au 15 avec ElevenLabs (voix naturelle)
+Le relais ouvre aussi les appels vocaux ElevenLabs : la clé ElevenLabs reste sur le relais, la tablette ne reçoit qu'un laissez-passer à usage unique.
+
+1. Sur elevenlabs.io : Profil › API Keys › créer une clé (droits « ElevenAgents » au minimum).
+2. Dans ce dossier `relay`, créer l'agent avec les bons réglages (Claude Sonnet 5.5, français, tours de parole « patients », réglages par appel autorisés) :
+
+```bash
+ELEVENLABS_API_KEY=votre_cle npm run creer-agent
+```
+
+3. Enregistrer la clé et l'identifiant d'agent affiché sur le relais, puis redéployer :
+
+```bash
+npx wrangler secret put ELEVENLABS_API_KEY
+```
+
+```bash
+npx wrangler secret put ELEVENLABS_AGENT_ID
+```
+
+```bash
+npx wrangler deploy
+```
+
+4. Dans le tableau de bord ElevenLabs (Agents › Eval UDPS 28 - Régulation 15 › Voice), choisir une **voix française**.
+5. Dans Eval : Réglages › Régulation SAMU simulée › Voix de l'appel : « ElevenLabs », Accès : « Par le serveur relais ».
+
+Essai rapide sans relais : `npm run creer-agent -- --public` crée un agent public ; collez son identifiant dans Eval (« Agent public »). Limitez-le alors à votre adresse (Security › Allowlist) et fixez un plafond de dépense, car quiconque connaît l'identifiant peut l'utiliser.
+
 ## Étape suivante : un vrai numéro de téléphone
-Le relais est la base du futur numéro dédié : il suffira d'y ajouter un point d'entrée pour un opérateur téléphonique (par exemple Twilio : numéro français, reconnaissance et synthèse vocales), qui reprendra les mêmes consignes de régulateur et les mêmes scénarios qu'Eval.
+Le relais est la base du futur numéro dédié : l'agent ElevenLabs peut être relié à un numéro de téléphone (Twilio ou SIP) depuis son tableau de bord ; il restera à lui transmettre le scénario choisi pour chaque appel.
