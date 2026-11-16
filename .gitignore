@@ -7,3 +7,5 @@ mobile/android/app/src/main/assets/public/
 mobile/android/capacitor-cordova-android-plugins/
 mobile/keystore/
 *.keystore
+# Local secrets written by `elevenlabs onboard`
+/.env.local
