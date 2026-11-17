@@ -247,7 +247,7 @@ input[type=color]{width:52px;height:40px;border:1px solid var(--line);border-rad
    Constantes et utilitaires
    ========================================================= */
 const KEY='evaluations-pse-v2';
-const APP_VERSION='2.13.1';
+const APP_VERSION='2.14.0';
 const LOGO='__LOGO__', MARK='__MARK__';
 const EMBED=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2263,7 +2263,7 @@ Object.assign(A,{
 const AI_MODEL='claude-opus-5-5';        // correction du bilan : le plus fiable
 const AI_CALL_MODEL='claude-sonnet-5-5';  // conversation : réponse la plus rapide, sans réflexion préalable
 const AI_GREETING='SAMU, centre 15, j’écoute.';
-const CALL_LEVELS={debutant:'Débutant (régulateur patient qui guide)',standard:'Standard (médecin régulateur réaliste)',certif:'Certification (médecin régulateur exigeant)'};
+const CALL_LEVELS={debutant:'Débutant : secouriste en formation (régulateur qui guide)',standard:'Standard : secouriste (médecin régulateur réaliste)',certif:'Avancé : chef d’équipe / chef d’agrès (médecin régulateur exigeant)'};
 /* agent vocal ElevenLabs de l'UDPS 28 (public, limité à l'adresse de l'application et à l'application Android) */
 const EL_AGENT_UDPS='agent_9001m7mj3wrgfhprwkd3mrkxc4rv';
 function aiCfg(){const a=DB.settings.ai=Object.assign({mode:'key',key:'',relay:'',code:'',voice:true,engine:'eleven',elMode:'public',elAgent:''},DB.settings.ai||{});
@@ -2295,10 +2295,10 @@ function scPromptData(c){
   if((c.attendus||[]).length)L.push('Gestes attendus des secouristes : '+c.attendus.join(' ; '));
   return L.join('\n')}
 function callSystem(c,level){
-  const lv={debutant:`Niveau débutant. Tu es bienveillant et pédagogue dans ta façon de questionner : tu guides l’appelant pas à pas (« Commencez par la conscience. », « Et sa respiration ? »), tu reformules ce qu’il dit pour l’aider à structurer, tu ne relèves que les oublis importants.`,
-    standard:`Niveau standard. Tu te comportes exactement comme un médecin régulateur réel : courtois, efficace, précis. Tu laisses l’appelant donner son bilan, puis tu relances sur tout ce qui manque ou reste flou, tu fais préciser les chiffres, tu demandes les mesures qui manquent.`,
-    certif:`Niveau certification. Tu es exigeant. Tu dis « Je vous écoute » et tu attends un bilan complet et ordonné sans aide. Tu ne guides pas, tu poses tes questions de manière ouverte (« Autre chose ? », « Et sur le plan circulatoire ? »), tu relèves les incohérences, tu exiges des chiffres précis, et à la fin tu demandes à l’appelant de te répéter tes consignes (collationnement).`}[level]||'';
-  return `Tu joues la régulation médicale du SAMU (le « 15 ») dans un exercice de formation aux premiers secours en équipe (PSE1 / PSE2), organisé par une association agréée de sécurité civile. L’appelant est un apprenant secouriste qui s’entraîne à transmettre un bilan et à travailler avec la régulation. Tout est fictif, mais tu dois être aussi crédible qu’une vraie régulation française.
+  const lv={debutant:`Niveau débutant. L’appelant est un secouriste en formation, débutant. Tu restes un vrai régulateur mais bienveillant et pédagogue dans ta façon de questionner : tu le guides pas à pas dans l’ordre XABCDE (« Y a-t-il une hémorragie ? », « Il respire comment ? »), tu reformules brièvement pour l’aider à structurer, tu ne relèves que les oublis importants et tu ne le déstabilises pas.`,
+    standard:`Niveau standard. L’appelant est un secouriste, encore en formation. Tu te comportes comme un médecin régulateur réel : courtois, efficace, précis. Tu le laisses donner son bilan, puis tu relances sur ce qui manque ou reste flou en suivant l’ordre XABCDE, tu fais préciser les chiffres et tu demandes les mesures qui manquent, sans le brusquer.`,
+    certif:`Niveau avancé. L’appelant est le chef d’équipe ou le chef d’agrès de l’équipe de secours : il dirige les équipiers et c’est lui qui fait le lien avec la régulation. Tu es exigeant, comme avec un chef d’agrès expérimenté. Tu dis « Je vous écoute » et tu attends un bilan complet et hiérarchisé sans aide : présentation, adresse, bilan circonstanciel (mécanisme, nombre de victimes, risques, moyens déjà sur place), bilan d’urgence vitale XABCDE, bilan complémentaire, gestes réalisés, puis ses demandes (moyens, renforts, évacuation). Tu ne guides pas ; tu poses des questions ouvertes (« Autre chose ? », « Vos besoins ? »), tu relèves les incohérences, tu exiges des chiffres précis. Tu lui demandes des décisions de chef : moyens supplémentaires nécessaires, répartition de ses équipiers s’il y a plusieurs victimes, préparation de l’évacuation, point de rendez-vous des secours, délai de son prochain bilan. À la fin, tu lui demandes de te répéter tes consignes (collationnement).`}[level]||'';
+  return `Tu joues la régulation médicale du SAMU (le « 15 ») dans un exercice de formation aux premiers secours en équipe (PSE1 / PSE2), organisé par une association agréée de sécurité civile. L’appelant est un apprenant secouriste qui s’entraîne à transmettre un bilan et à travailler avec la régulation. Les secouristes appliquent le bilan XABCDE : X pour hémorragie eXsanguinante, A pour voies aériennes (Airway), B pour respiration (Breathing), C pour circulation, D pour neurologique (Disability), E pour exposition et environnement. Tout est fictif, mais tu dois être aussi crédible qu’une vraie régulation française.
 
 LA CONVERSATION
 C’est un appel téléphonique en direct : tout ce que tu écris est lu à voix haute aussitôt. Parle comme au téléphone : une à deux phrases courtes, sans liste, sans titre, sans mise en forme, sans émoji. Pose une question à la fois, ou deux questions liées (« Quelle est sa fréquence respiratoire et sa saturation ? »). Ne répète pas ce que l’appelant vient de dire, n’annonce pas ce que tu vas faire : avance. Ce que dit l’appelant arrive par reconnaissance vocale : il peut y avoir des erreurs de transcription ; interprète au mieux et ne fais répéter que ce qui est essentiel et incompréhensible (adresse, chiffre, nom de médicament). Si son message semble coupé au milieu d’une phrase, dis seulement « Oui ? » ou « Je vous écoute. ».
@@ -2307,9 +2307,14 @@ TU AS DEUX RÔLES SUCCESSIFS
 1. L’assistant de régulation médicale (ARM). Tu as décroché en disant « ${AI_GREETING} ». En quelques échanges rapides, tu obtiens : qui appelle et en quelle qualité (équipe de secouristes, organisme), un numéro de rappel, l’adresse exacte (commune, rue, numéro, étage, code, accès, point de rendez-vous pour les secours), le motif en une phrase et le nombre de victimes. Puis tu dis : « Je vous passe le médecin régulateur, ne quittez pas. »
 2. Le médecin régulateur. Tu te présentes en une phrase (« Docteur Martin, médecin régulateur, je vous écoute. ») et tu mènes un véritable interrogatoire médical, thème par thème, en t’adaptant à chaque réponse :
 - circonstances et mécanisme : ce qui s’est passé, heure de début, cinétique ou hauteur de chute, témoin, perte de connaissance initiale ;
-- urgence vitale : conscience (réponse, orientation, agitation), ventilation (fréquence, amplitude, bruits, saturation, cyanose, sueurs), circulation (pouls radial, fréquence, tension, coloration, temps de recoloration), hémorragie et ce qui a été fait ;
+- urgence vitale dans l’ordre XABCDE :
+  X, hémorragie externe grave et ce qui a été fait (compression, pansement, garrot et son heure) ;
+  A, voies aériennes : libres, obstruées, encombrées, position de la victime ;
+  B, respiration : fréquence, amplitude, régularité, bruits, saturation, cyanose, sueurs, signes de lutte ;
+  C, circulation : pouls (fréquence, régularité, pouls radial perçu), tension, coloration, temps de recoloration cutanée, marbrures ;
+  D, neurologique : conscience, orientation, perte de connaissance initiale, pupilles, motricité et sensibilité des membres, glycémie ;
+  E, exposition : lésions de la tête aux pieds, température, environnement, protection contre le froid ;
 - plaintes : douleur (siège, type, intensité sur 10, irradiation, depuis quand), autres signes ;
-- examen : lésions de la tête aux pieds, sensibilité et motricité si traumatisme ;
 - antécédents, traitements (en particulier anticoagulants, insuline, traitements du cœur), allergies, grossesse si c’est une femme en âge de l’être, dernier repas, prise d’alcool ou de toxiques si pertinent ;
 - gestes réalisés et leur effet : position, oxygène et débit, pansement ou garrot (avec l’heure), immobilisations, RCP et nombre de chocs ;
 - évolution depuis l’arrivée de l’équipe.
@@ -2333,8 +2338,13 @@ const DEBRIEF_FORMAT={type:'json_schema',schema:{type:'object',additionalPropert
   properties:{note:{type:'integer',description:'Note sur 10'},appreciation:{type:'string'},suggestion_fiche:{type:'string',enum:['A','B','C']},justification:{type:'string'},
     criteres:{type:'array',items:{type:'object',additionalProperties:false,required:['critere','niveau','commentaire'],properties:{critere:{type:'string'},niveau:{type:'string',enum:['acquis','partiel','absent','sans objet']},commentaire:{type:'string'}}}},
     points_forts:{type:'array',items:{type:'string'}},a_ameliorer:{type:'array',items:{type:'string'}},bilan_modele:{type:'string'}}}};
-const DEBRIEF_CRIT=['Présentation de l’appelant (qui appelle, en quelle qualité, numéro de rappel)','Localisation précise et accès','Motif et circonstances','Nombre de victimes, âge et sexe','Bilan d’urgence vitale (hémorragie, conscience, ventilation, circulation)','Paramètres chiffrés','Bilan complémentaire (plaintes, examen, antécédents, traitements, allergies)','Gestes réalisés et leur effet','Demande et besoins exprimés','Clarté, ordre et concision du message','Réponses aux questions du médecin régulateur et collationnement des consignes reçues'];
-function debriefSystem(c){return `Tu es formateur de formateurs en premiers secours (PSE1 / PSE2) en France. Tu corriges la transmission d’un bilan au 15 réalisée par un apprenant secouriste pendant un exercice, à partir de la transcription de l’appel et du scénario joué.
+const DEBRIEF_CRIT=['Présentation de l’appelant (qui appelle, en quelle qualité, numéro de rappel)','Localisation précise et accès','Motif et circonstances','Nombre de victimes, âge et sexe','Bilan d’urgence vitale dans l’ordre XABCDE (hémorragie, voies aériennes, respiration, circulation, neurologique, exposition)','Paramètres chiffrés','Bilan complémentaire (plaintes, examen, antécédents, traitements, allergies)','Gestes réalisés et leur effet','Demande et besoins exprimés (pour un chef d’agrès : moyens, renforts, évacuation, organisation de l’équipe)','Clarté, ordre et concision du message','Réponses aux questions du médecin régulateur et collationnement des consignes reçues'];
+function debriefSystem(c,level){const lvl={debutant:'Niveau de l’exercice : débutant. L’apprenant est un secouriste en formation, débutant : sois encourageant, valorise ce qui est acquis et concentre-toi sur deux ou trois priorités ; un bilan incomplet mais sûr et dans le bon ordre mérite une note correcte.',
+    standard:'Niveau de l’exercice : standard. L’apprenant est un secouriste encore en formation : attends un bilan complet dans l’ordre XABCDE, avec des chiffres, en restant bienveillant.',
+    certif:'Niveau de l’exercice : avancé. L’apprenant joue le chef d’équipe ou chef d’agrès : attends un bilan complet et hiérarchisé, une demande de moyens adaptée, des décisions de chef (organisation de l’équipe, évacuation) et le collationnement des consignes ; sois aussi exigeant qu’avec un chef d’agrès.'}[level]||'';
+  return `Tu es formateur de formateurs en premiers secours (PSE1 / PSE2) en France. Tu corriges la transmission d’un bilan au 15 réalisée par un apprenant secouriste pendant un exercice, à partir de la transcription de l’appel et du scénario joué. Les secouristes appliquent le bilan XABCDE (hémorragie eXsanguinante, voies aériennes, respiration, circulation, neurologique, exposition) : vérifie que l’ordre est respecté.
+
+${lvl}
 
 Évalue chacun de ces critères, dans cet ordre, avec le niveau acquis, partiel, absent ou sans objet, et un commentaire court qui cite si possible les mots de l’apprenant :
 ${DEBRIEF_CRIT.map((x,i)=>`${i+1}. ${x}`).join('\n')}
@@ -2576,7 +2586,7 @@ Object.assign(A,{
   'call-recall':()=>{const K=S.call;if(K.engine==='eleven'){if(K.el){K.msgs.push({r:'u',t:'(L’équipe rappelle pour le bilan de surveillance.)'});K.el.sendUserMessage('[Quelques minutes plus tard, l’équipe rappelle le 15 pour transmettre le bilan de surveillance.] Allô, c’est l’équipe de secouristes, je vous rappelle pour le bilan de surveillance.')}return}stopListen();callTurn('[Quelques minutes plus tard, l’équipe rappelle le 15 pour transmettre le bilan de surveillance.] Allô le 15, c’est l’équipe de secouristes, je vous rappelle pour le bilan de surveillance.').then(()=>{if(K.mode==='voice'&&!K.muted)callLoop(K)})},
   'call-end':async()=>{const K=S.call,c=scById(K.scId);const rs=recStop(K);endCallMedia(K);await rs;callSave(K);
     if(!aiReady()){K.closed=true;render();window.scrollTo(0,0);return}busy(true,'Correction du bilan…');
-    try{const txt=await aiAsk({system:debriefSystem(c),messages:[{role:'user',content:'Transcription de l’appel :\n'+callTranscript(callLines(K))}],effort:'medium',max_tokens:16000,format:DEBRIEF_FORMAT});
+    try{const txt=await aiAsk({system:debriefSystem(c,K.level),messages:[{role:'user',content:'Transcription de l’appel :\n'+callTranscript(callLines(K))}],effort:'medium',max_tokens:16000,format:DEBRIEF_FORMAT});
       K.debrief=JSON.parse(txt);callSave(K);busy(false);render();window.scrollTo(0,0)}
     catch(e){busy(false);K.closed=true;render();toast('Correction impossible : '+aiErr(e))}},
   'call-redebrief':()=>{const K=S.call;K.closed=false;A['call-end']()},

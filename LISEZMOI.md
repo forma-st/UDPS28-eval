@@ -1,4 +1,4 @@
-# Eval · UDPS 28 (version 2.13.1)
+# Eval · UDPS 28 (version 2.14)
 
 Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d'équipe (CE). Elle fonctionne **entièrement sans réseau**.
 
@@ -27,6 +27,11 @@ Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d
 - **C** : OUI quand le participant est pointé présent à toutes les journées (feuille de présence).
 - **D** : OUI à partir de 12/20 au questionnaire. Entre 10 et 11 : entretien de rattrapage avec le responsable pédagogique. Sous 10 : NON.
 - **Dossier** par participant, dans l'ordre du référentiel : technicité, fiches d'évaluation, certification.
+
+## Version 2.14 : régulation adaptée au bilan XABCDE et aux chefs d'agrès
+- Le médecin régulateur suit l'ordre **XABCDE** (hémorragie eXsanguinante, voies aériennes, respiration, circulation, neurologique, exposition) puis le bilan complémentaire.
+- Niveaux : **débutant** (secouriste en formation, régulateur qui guide), **standard** (secouriste, régulateur réaliste), **avancé : chef d'équipe / chef d'agrès** (bilan complet et hiérarchisé, demande de moyens, décisions de chef, collationnement).
+- La correction est calibrée sur le niveau choisi et vérifie l'ordre XABCDE.
 
 ## Version 2.13.1 : agent vocal de l'UDPS 28 branché par défaut
 - L'agent ElevenLabs « Eval UDPS 28 - Régulation 15 » est créé (Claude Sonnet 5.5, français, tours de parole patients) et utilisé par défaut sur tous les appareils, sans réglage.
