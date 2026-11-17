@@ -25,7 +25,8 @@ const agent = await client.conversationalAi.agents.create({
         llm: "claude-sonnet-5-5",
       },
     },
-    tts: { modelId: "eleven_flash_v2_5", ...(process.env.ELEVENLABS_VOICE_ID ? { voiceId: process.env.ELEVENLABS_VOICE_ID } : {}) },
+    // Voix par défaut : « Hugo - Warm and Grounded » (français standard), à ajouter d'abord à « My Voices » ; ELEVENLABS_VOICE_ID pour une autre voix.
+    tts: { modelId: "eleven_flash_v2_5", voiceId: process.env.ELEVENLABS_VOICE_ID || "IbbR6Av0dWuQJS0b8JVT" },
     // « patient » : l'agent laisse le temps d'hésiter avant de répondre ; relance après 8 s de silence.
     turn: { turnEagerness: "patient", turnTimeout: 8 },
     // Garde-fou de coût : un appel d'exercice ne dépasse pas 10 minutes.
@@ -47,4 +48,4 @@ console.log("\nAgent créé. Identifiant :", agent.agentId);
 console.log(isPublic
   ? "Mode public : collez cet identifiant dans Eval (Réglages > Régulation SAMU simulée > Voix de l'appel)."
   : "Enregistrez-le sur le relais :  npx wrangler secret put ELEVENLABS_AGENT_ID");
-console.log("Puis choisissez une voix française dans le tableau de bord ElevenLabs (Agents > Eval UDPS 28 > Voice).\n");
+console.log("Voix : Hugo (français). Pour en changer : tableau de bord ElevenLabs > Agents > Eval UDPS 28 > Voice.\n");
