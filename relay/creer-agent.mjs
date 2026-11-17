@@ -1,7 +1,8 @@
 // Crée l'agent vocal « régulation 15 » d'Eval chez ElevenLabs, avec les bons réglages.
 // Usage :  ELEVENLABS_API_KEY=... npm run creer-agent            (agent privé, via le relais : recommandé)
 //          ELEVENLABS_API_KEY=... npm run creer-agent -- --public (agent public, pour un essai rapide sans relais)
-// Variable facultative : ELEVENLABS_VOICE_ID (voix française choisie dans la bibliothèque de voix ElevenLabs).
+// Variables facultatives : ELEVENLABS_VOICE_ID (voix française choisie dans la bibliothèque de voix ElevenLabs),
+// ELEVENLABS_ALLOWLIST (agent public : adresses autorisées, séparées par des virgules).
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
 const apiKey = process.env.ELEVENLABS_API_KEY;
@@ -27,11 +28,18 @@ const agent = await client.conversationalAi.agents.create({
     tts: { modelId: "eleven_flash_v2_5", ...(process.env.ELEVENLABS_VOICE_ID ? { voiceId: process.env.ELEVENLABS_VOICE_ID } : {}) },
     // « patient » : l'agent laisse le temps d'hésiter avant de répondre ; relance après 8 s de silence.
     turn: { turnEagerness: "patient", turnTimeout: 8 },
+    // Garde-fou de coût : un appel d'exercice ne dépasse pas 10 minutes.
+    conversation: { maxDurationSeconds: 600 },
   },
   platformSettings: {
     // Eval envoie à chaque appel le rôle, le scénario, le niveau et la première phrase.
     overrides: { conversationConfigOverride: { agent: { firstMessage: true, language: true, prompt: { prompt: true } }, tts: { voiceId: true } } },
-    auth: { enableAuth: !isPublic },
+    // Agent public : seules l'application publiée et l'application Android (origine « localhost ») peuvent l'appeler.
+    auth: isPublic
+      ? { enableAuth: false, allowlist: (process.env.ELEVENLABS_ALLOWLIST || "forma-st.github.io,localhost").split(",").map((h) => ({ hostname: h.trim() })) }
+      : { enableAuth: true },
+    // Garde-fous de coût : 3 appels simultanés au plus, 40 appels par jour au plus.
+    callLimits: { agentConcurrencyLimit: 3, dailyLimit: 40, burstingEnabled: false },
   },
 });
 

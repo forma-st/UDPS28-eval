@@ -1,4 +1,4 @@
-# Eval · UDPS 28 (version 2.13)
+# Eval · UDPS 28 (version 2.13.1)
 
 Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d'équipe (CE). Elle fonctionne **entièrement sans réseau**.
 
@@ -27,6 +27,11 @@ Application de terrain pour les formations PSE1, PSE2, PIC F, PAE FPSE et Chef d
 - **C** : OUI quand le participant est pointé présent à toutes les journées (feuille de présence).
 - **D** : OUI à partir de 12/20 au questionnaire. Entre 10 et 11 : entretien de rattrapage avec le responsable pédagogique. Sous 10 : NON.
 - **Dossier** par participant, dans l'ordre du référentiel : technicité, fiches d'évaluation, certification.
+
+## Version 2.13.1 : agent vocal de l'UDPS 28 branché par défaut
+- L'agent ElevenLabs « Eval UDPS 28 - Régulation 15 » est créé (Claude Sonnet 5.5, français, tours de parole patients) et utilisé par défaut sur tous les appareils, sans réglage.
+- Agent public protégé : seules l'application publiée (forma-st.github.io) et l'application Android peuvent l'appeler ; 3 appels simultanés et 40 appels par jour au maximum ; 10 minutes au maximum par appel.
+- Quand le serveur relais sera en ligne, passer l'agent en privé et l'accès d'Eval en « Par le serveur relais ».
 
 ## Version 2.13 : appel au 15 avec une voix naturelle (ElevenLabs)
 - Nouveau moteur d'appel **ElevenLabs** : voix française naturelle, réponse en moins d'une seconde, tours de parole gérés par l'agent (il attend pendant les hésitations), et on peut couper la parole au régulateur comme au téléphone. Le cerveau reste Claude (Sonnet 5.5), avec le même rôle d'assistant de régulation puis de médecin régulateur, le scénario et le niveau choisis.

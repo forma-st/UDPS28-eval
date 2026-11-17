@@ -247,7 +247,7 @@ input[type=color]{width:52px;height:40px;border:1px solid var(--line);border-rad
    Constantes et utilitaires
    ========================================================= */
 const KEY='evaluations-pse-v2';
-const APP_VERSION='2.13.0';
+const APP_VERSION='2.13.1';
 const LOGO='__LOGO__', MARK='__MARK__';
 const EMBED=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 const NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -2264,7 +2264,12 @@ const AI_MODEL='claude-opus-5-5';        // correction du bilan : le plus fiable
 const AI_CALL_MODEL='claude-sonnet-5-5';  // conversation : réponse la plus rapide, sans réflexion préalable
 const AI_GREETING='SAMU, centre 15, j’écoute.';
 const CALL_LEVELS={debutant:'Débutant (régulateur patient qui guide)',standard:'Standard (médecin régulateur réaliste)',certif:'Certification (médecin régulateur exigeant)'};
-function aiCfg(){return DB.settings.ai=Object.assign({mode:'key',key:'',relay:'',code:'',voice:true,engine:'eleven',elMode:'relay',elAgent:''},DB.settings.ai||{})}
+/* agent vocal ElevenLabs de l'UDPS 28 (public, limité à l'adresse de l'application et à l'application Android) */
+const EL_AGENT_UDPS='agent_9001m7mj3wrgfhprwkd3mrkxc4rv';
+function aiCfg(){const a=DB.settings.ai=Object.assign({mode:'key',key:'',relay:'',code:'',voice:true,engine:'eleven',elMode:'public',elAgent:''},DB.settings.ai||{});
+  /* une seule fois : brancher l'agent de l'UDPS 28 sur les appareils qui n'ont pas de relais configuré */
+  if(!a.elDefaulted){a.elDefaulted=true;if(!a.relay.trim())a.elMode='public';if(!a.elAgent)a.elAgent=EL_AGENT_UDPS}
+  return a}
 const aiReady=()=>{const a=aiCfg();return a.mode==='relay'?!!(a.relay.trim()&&a.code.trim()):!!a.key.trim()};
 function aiClient(){const a=aiCfg(),AN=window.Anthropic;if(!AN)throw new Error('module IA indisponible');
   return a.mode==='relay'?new AN({apiKey:a.code.trim(),baseURL:a.relay.trim().replace(/\/+$/,''),dangerouslyAllowBrowser:true,maxRetries:1,timeout:90000})
