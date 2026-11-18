@@ -35,9 +35,9 @@ const agent = await client.conversationalAi.agents.create({
   platformSettings: {
     // Eval envoie à chaque appel le rôle, le scénario, le niveau et la première phrase.
     overrides: { conversationConfigOverride: { agent: { firstMessage: true, language: true, prompt: { prompt: true } }, tts: { voiceId: true } } },
-    // Agent public : seules l'application publiée et l'application Android (origine « localhost ») peuvent l'appeler.
+    // Agent public : seules l'application publiée (GitHub Pages, udpilot.udps28.fr) et l'application Android (origine « localhost ») peuvent l'appeler.
     auth: isPublic
-      ? { enableAuth: false, allowlist: (process.env.ELEVENLABS_ALLOWLIST || "forma-st.github.io,localhost").split(",").map((h) => ({ hostname: h.trim() })) }
+      ? { enableAuth: false, allowlist: (process.env.ELEVENLABS_ALLOWLIST || "forma-st.github.io,udpilot.udps28.fr,localhost").split(",").map((h) => ({ hostname: h.trim() })) }
       : { enableAuth: true },
     // Garde-fous de coût : 3 appels simultanés au plus, 40 appels par jour au plus.
     callLimits: { agentConcurrencyLimit: 3, dailyLimit: 40, burstingEnabled: false },
